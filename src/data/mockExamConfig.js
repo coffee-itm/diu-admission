@@ -1,0 +1,30 @@
+export const mockExamConfig = {
+  id: 'exam_spring_2026',
+  title: 'DIU Admission — Spring 2026',
+  sections: [
+    { id: 'MATH', name: 'Mathematical Reasoning', questionCount: 10, timeMinutes: 12 },
+    { id: 'LOGIC', name: 'Logical & Analytical Thinking', questionCount: 10, timeMinutes: 12 },
+    { id: 'IT', name: 'Basic IT Literacy', questionCount: 10, timeMinutes: 10 },
+    { id: 'ENGLISH', name: 'English Proficiency', questionCount: 10, timeMinutes: 10 },
+    { id: 'BUSINESS', name: 'Business & Management Aptitude', questionCount: 10, timeMinutes: 10 },
+  ],
+  totalTimeMinutes: 54,
+  passingThresholds: {
+    overallMinPercent: 50,
+    sectionMinPercent: 40,
+  },
+  negativeMarking: false,
+  maxAttempts: 1,
+  startDate: '2026-06-15T00:00:00+06:00',
+  endDate: '2026-07-15T23:59:59+06:00',
+  instructions: [
+    'The test consists of 50 questions across 5 sections.',
+    'Total duration is 54 minutes. The exam will auto-submit when time expires.',
+    'You can navigate freely between sections and questions.',
+    'There is NO negative marking for wrong answers.',
+    'Each correct answer carries 1 mark.',
+    'Do not refresh or close the browser during the exam.',
+    'Your progress is auto-saved every 5 seconds.',
+    'You may flag questions for review and return to them later.',
+  ],
+};
