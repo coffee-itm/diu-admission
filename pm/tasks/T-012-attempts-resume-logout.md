@@ -1,6 +1,6 @@
 # T-012 · Enforce single attempt, add Resume, clear test state on logout
 
-Status: 👀 Review
+Status: ✔️ Done
 Sprint: S1 · Role: frontend-dev · Model: sonnet · Size: M
 Depends on: T-011
 Implements: FR-TEST-07, FR-TEST-12, FR-AUTH-04, D-12, D-13, D-15
@@ -45,3 +45,12 @@ pnpm test -- useTestEngine useAuth && pnpm lint && pnpm build
 - Note: the Instructions route has no guard; a user with a result is redirected on start via toast.
 
 ## Review
+
+**APPROVED** (reviewer).
+- AC1: useTestEngine.js startTest order resume -> block (maxAttempts from examConfigStore) -> new; testService.countAttempts dedups by result id and filters per candidateId. Test: "blocks a second attempt".
+- AC2: resume path returns before loadTest, answers kept (test). Dashboard `dashboard-resume-test` shows time left from deadline.
+- AC3: logout resets both stores; persist rewrites `itm-test-session` / `itm-anti-cheat` with empty state (reset covers every anti-cheat field). Test in useAuth.test.js.
+- AC4: `candidateId === user.id` check in startTest and dashboard; test with cand-2 session.
+- Expired-session resume traced: TestPage -> useTimer check() runs immediately, syncTime -> timeRemaining 0 -> onExpire once (firedRef) -> engine submitTest, guarded by fresh isSubmitted + submittingRef, so a single result. No hang or duplicate. Accepted.
+- Note (non-blocking): Instructions route is unguarded; a user with a result gets a toast and redirect on start (acceptable, per builder note).
+- Gate: eslint clean on changed files, pnpm test 141 passed, pnpm build ok. No compiler violations.

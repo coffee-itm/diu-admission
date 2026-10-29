@@ -25,7 +25,7 @@
 | [T-009](./tasks/T-009-question-navigation.md) | Visited tracking + cross-section Next/Prev | A | frontend-dev | free-ok | T-008 | ✔️ Done |
 | [T-010](./tasks/T-010-engine-uses-config.md) | Engine uses admin config + bank + sampling | A | frontend-dev | sonnet | T-009 | ✔️ Done |
 | [T-011](./tasks/T-011-config-driven-copy.md) | Config-driven copy + PDF title | A | frontend-dev | free-ok | T-010 | ✔️ Done |
-| [T-012](./tasks/T-012-attempts-resume-logout.md) | Single attempt, Resume, logout reset | A | frontend-dev | sonnet | T-011 | ✅ Ready |
+| [T-012](./tasks/T-012-attempts-resume-logout.md) | Single attempt, Resume, logout reset | A | frontend-dev | sonnet | T-011 | ✔️ Done |
 | [T-013](./tasks/T-013-admin-candidate-data.md) | Candidate detail fix + all candidates | B | frontend-dev | free-ok | T-022 | ✔️ Done |
 | [T-014](./tasks/T-014-admin-analytics-fixes.md) | Analytics counts, names, labels, real trend | B | frontend-dev | free-ok | T-013 | ✔️ Done |
 | [T-015](./tasks/T-015-csv-export.md) | Merit-list CSV export | B | frontend-dev | free-ok | T-014 | ✔️ Done |
