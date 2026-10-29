@@ -1,6 +1,6 @@
 # T-011 · Replace hard-coded exam numbers and titles with config values
 
-Status: 👀 Review
+Status: ✔️ Done
 Sprint: S1 · Role: frontend-dev · Model: free-ok · Size: S
 Depends on: T-010
 Implements: FR-CFG-04, FR-RES-02 (title part), D-17
@@ -42,3 +42,5 @@ pnpm lint && pnpm build && pnpm test
 1. AC1 fails: `src/pages/public/LandingPage.jsx:10` ("54 Minutes") and `:35` ("Spring 2026"), `src/pages/admin/DashboardPage.jsx:43` ("Spring 2026") are still hard-coded. Take them from `useExamConfigStore` (title, `totalTimeMinutes`) or `mockExamConfig`; add these files to the card.
 2. `src/pages/candidate/InstructionsPage.jsx:60`: `config.instructions ?? []` is unsafe. The store persists under `itm-exam-config` with zustand's default shallow merge, so a persisted `config` from before this change replaces the default whole and has no `instructions`. The candidate then sees an empty rules list. Fall back to `mockExamConfig.instructions` (import it), or add a `merge`/`version` to examConfigStore that spreads the defaults under the persisted config.
 Verified OK: totals (Σ questionCount, totalTimeMinutes), PDF title fallback chain (result.examTitle ?? examTitle ?? 'Admission Assessment'), ResultPage/CandidateDetailPage edits are one-line PDF title callers (in scope). Toast `err.message` is safe: errors come from testService (e.g. "Not enough questions in section X: need N, have M"), no stacks; it does leak internal section IDs/counts, which is acceptable for the prototype.
+
+**APPROVED** (re-review by Opus): ad0025f — no "54 Minutes"/"50 Questions"/"Spring 2026" left outside src/data; examConfigStore one-level deep merge + rehydrate test (defaults filled, admin title kept); persist name unchanged. eslint clean, 137 tests pass.
