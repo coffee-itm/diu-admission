@@ -121,6 +121,7 @@ export const SECURITY_EVENT_TYPES = {
   AUTO_SUBMIT_CHEAT: 'auto_submit_cheat',
   INTEGRITY_AGREED: 'integrity_agreed',
   FULLSCREEN_ENTERED: 'fullscreen_entered',
+  CUT_ATTEMPT: 'cut_attempt',
 };
 
 // Mock credentials

@@ -1,6 +1,6 @@
 # T-004 · Fix stale anti-cheat counters so warnings and auto-submit fire
 
-Status: ✅ Ready
+Status: 👀 Review
 Sprint: S1 · Role: frontend-dev · Model: sonnet · Size: M
 Depends on: T-022
 Implements: FR-AC-02, FR-AC-03, D-02, D-03 (callback part)
@@ -45,5 +45,10 @@ pnpm test -- useAntiCheat && pnpm lint && pnpm build
 - Submitting the latest answers (T-005), fullscreen gesture (T-006), persistence (T-007).
 
 ## Agent log
+- useAntiCheat: all listener store calls use `useAntiCheatStore.getState()`; counts read fresh after increment.
+- Latest `onAutoSubmit` kept in ref (updated in effect); `submittedRef` guards single-shot auto-submit.
+- Cut now logged (`cut_attempt`, added to SECURITY_EVENT_TYPES) and counted; paste counted too.
+- New useAntiCheat.test.js (5 tests). Note: tests call `cleanup()` explicitly (no RTL auto-cleanup, listeners leaked across tests).
+- Gate: eslint 0 errors (2 pre-existing warnings in other file), full test 80 passed, build ok.
 
 ## Review

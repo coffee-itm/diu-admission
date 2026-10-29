@@ -17,7 +17,7 @@
 | [T-022](./tasks/T-022-lint-baseline.md) | Lint baseline to zero (no behavior change) | 0 | frontend-dev | sonnet | T-001 | ✔️ Done |
 | [T-002](./tasks/T-002-fix-answer-key.md) | Fix q_logic_010 key + bank data test | C | frontend-dev | free-ok | T-022 | ✔️ Done |
 | [T-003](./tasks/T-003-scoring-thresholds.md) | Configurable thresholds, unrounded compare, boundary tests | C | frontend-dev | sonnet | T-022 | 👀 Review |
-| [T-004](./tasks/T-004-anticheat-counters.md) | Fix stale anti-cheat counters | A | frontend-dev | sonnet | T-022 | 🔨 In Progress |
+| [T-004](./tasks/T-004-anticheat-counters.md) | Fix stale anti-cheat counters | A | frontend-dev | sonnet | T-022 | 👀 Review |
 | [T-005](./tasks/T-005-submit-latest-state.md) | Submit latest answers, single-shot | A | frontend-dev | sonnet | T-004 | ✅ Ready |
 | [T-006](./tasks/T-006-fullscreen-gesture.md) | Fullscreen on Start click, iOS fallback | A | frontend-dev | free-ok | T-004 | ✅ Ready |
 | [T-007](./tasks/T-007-persist-anticheat-summary.md) | Persist anti-cheat summary with result | A | frontend-dev | free-ok | T-005 | ✅ Ready |
