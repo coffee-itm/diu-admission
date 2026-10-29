@@ -16,6 +16,9 @@ const storeCandidates = (candidates) => {
 
 const stripPassword = (u) => Object.fromEntries(Object.entries(u).filter(([k]) => k !== 'password'));
 
+export const getAllCandidates = () =>
+  getStoredCandidates().filter((c) => c.role === 'candidate').map(stripPassword);
+
 export const authService = {
   async login(email, password) {
     await sleep(600);

@@ -1,5 +1,5 @@
 import { mockResults } from '../data/mockResults.js';
-import { mockCandidates } from '../data/mockCandidates.js';
+import { getAllCandidates } from './authService.js';
 import { sleep } from '../lib/utils.js';
 
 const getAllResults = () => {
@@ -28,10 +28,7 @@ export const resultService = {
   async getMeritList() {
     await sleep(400);
     const results = getAllResults();
-    const candidates = [
-      ...mockCandidates,
-      ...JSON.parse(localStorage.getItem('diu-candidates') || '[]'),
-    ];
+    const candidates = getAllCandidates();
     const seen = new Set();
     return results
       .map((r) => {

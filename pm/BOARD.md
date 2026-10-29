@@ -26,7 +26,7 @@
 | [T-010](./tasks/T-010-engine-uses-config.md) | Engine uses admin config + bank + sampling | A | frontend-dev | sonnet | T-009 | ✅ Ready |
 | [T-011](./tasks/T-011-config-driven-copy.md) | Config-driven copy + PDF title | A | frontend-dev | free-ok | T-010 | ✅ Ready |
 | [T-012](./tasks/T-012-attempts-resume-logout.md) | Single attempt, Resume, logout reset | A | frontend-dev | sonnet | T-011 | ✅ Ready |
-| [T-013](./tasks/T-013-admin-candidate-data.md) | Candidate detail fix + all candidates | B | frontend-dev | free-ok | T-022 | ✅ Ready |
+| [T-013](./tasks/T-013-admin-candidate-data.md) | Candidate detail fix + all candidates | B | frontend-dev | free-ok | T-022 | 👀 Review |
 | [T-014](./tasks/T-014-admin-analytics-fixes.md) | Analytics counts, names, labels, real trend | B | frontend-dev | free-ok | T-013 | ✅ Ready |
 | [T-015](./tasks/T-015-csv-export.md) | Merit-list CSV export | B | frontend-dev | free-ok | T-014 | ✅ Ready |
 | [T-016](./tasks/T-016-csv-import.md) | Question CSV import + error report | B | frontend-dev | sonnet | T-010, T-015, T-017 | ✅ Ready |

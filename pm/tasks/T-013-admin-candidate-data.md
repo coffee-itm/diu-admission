@@ -1,6 +1,6 @@
 # T-013 · Fix candidate detail page and show all registered candidates
 
-Status: ✅ Ready
+Status: 👀 Review
 Sprint: S1 · Role: frontend-dev · Model: free-ok · Size: M
 Depends on: T-022
 Implements: FR-RES-03, FR-RES-04, D-10, D-16
@@ -35,5 +35,9 @@ pnpm test -- authService && pnpm lint && pnpm build
 - Analytics/dashboard fixes (T-014), CSV (T-015).
 
 ## Agent log
+- Added `getAllCandidates()` (authService); Candidates, Detail, Merit pages use it; resultService.getMeritList now joins via it too.
+- Detail: uses `getForCandidate`, shows 'Candidate not found' / 'No test result yet' / error message instead of spinner.
+- Merit page uses candidateName/candidateEmail from getMeritList.
+- Tests: authService.test.js 2 passed; eslint clean on touched dirs; build ok. Full `pnpm test` had 5 failures in another agent's file (not mine).
 
 ## Review

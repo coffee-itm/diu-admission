@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Download, Award } from 'lucide-react';
 import { resultService } from '../../services/resultService.js';
-import { mockCandidates } from '../../data/mockCandidates.js';
 import { Button } from '../../components/ui/Button.jsx';
 import { Badge } from '../../components/ui/Badge.jsx';
 import { PageSpinner } from '../../components/ui/Spinner.jsx';
@@ -14,15 +13,7 @@ export function MeritListPage() {
   useEffect(() => {
     const fetchMeritList = async () => {
       try {
-        const list = await resultService.getMeritList();
-        
-        // Merge candidate details
-        const enriched = list.map(r => {
-          const candidate = mockCandidates.find(c => c.id === r.candidateId);
-          return { ...r, candidate };
-        }).filter(r => r.candidate); // ensure candidate exists
-        
-        setMeritList(enriched);
+        setMeritList(await resultService.getMeritList());
       } finally {
         setLoading(false);
       }
@@ -75,10 +66,10 @@ export function MeritListPage() {
                   </td>
                   <td className="px-6 py-4">
                     <p className="font-bold text-slate-900 flex items-center gap-2">
-                      {item.candidate.name}
+                      {item.candidateName}
                       {index < 3 && <Award size={16} className={index === 0 ? 'text-yellow-500' : index === 1 ? 'text-slate-400' : 'text-orange-400'} />}
                     </p>
-                    <p className="text-xs text-slate-500 mt-0.5">{item.candidate.email}</p>
+                    <p className="text-xs text-slate-500 mt-0.5">{item.candidateEmail}</p>
                   </td>
                   <td className="px-6 py-4 text-center">
                     <span className="text-lg font-black text-blue-700">{item.percentage}%</span>

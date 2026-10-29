@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router';
 import { Search, Eye } from 'lucide-react';
 import { ROUTES } from '../../lib/constants.js';
 import { resultService } from '../../services/resultService.js';
-import { mockCandidates } from '../../data/mockCandidates.js';
+import { getAllCandidates } from '../../services/authService.js';
 import { Input } from '../../components/ui/Input.jsx';
 import { Badge } from '../../components/ui/Badge.jsx';
 import { PageSpinner } from '../../components/ui/Spinner.jsx';
@@ -23,9 +23,7 @@ export function CandidatesPage() {
         allResults.forEach(r => { rMap[r.candidateId] = r; });
         setResultsMap(rMap);
         
-        // Filter out admins from candidates list
-        const cands = mockCandidates.filter(c => c.role === 'candidate');
-        setCandidates(cands);
+        setCandidates(getAllCandidates());
       } finally {
         setLoading(false);
       }
