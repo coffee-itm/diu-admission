@@ -1,14 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Button } from './Button.jsx';
 import { Languages } from 'lucide-react';
 
 export function LanguageToggle() {
-  const [lang, setLang] = useState('en');
-
-  useEffect(() => {
-    const saved = localStorage.getItem('itm-lang') || 'en';
-    setLang(saved);
-  }, []);
+  const [lang, setLang] = useState(() => localStorage.getItem('itm-lang') || 'en');
 
   const toggle = () => {
     const next = lang === 'en' ? 'bn' : 'en';

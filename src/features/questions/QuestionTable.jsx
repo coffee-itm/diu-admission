@@ -1,14 +1,9 @@
-import { useState } from 'react';
 import { Edit, Trash2, Eye } from 'lucide-react';
 import { Badge } from '../../components/ui/Badge.jsx';
-import { Button } from '../../components/ui/Button.jsx';
 import { SECTIONS, DIFFICULTY } from '../../lib/constants.js';
 import { truncate } from '../../lib/utils.js';
 
 export function QuestionTable({ questions, onEdit, onDelete, onView }) {
-  const [sortField, setSortField] = useState('section');
-  const [sortOrder, setSortOrder] = useState('asc');
-
   if (!questions?.length) {
     return (
       <div className="text-center py-12 bg-white rounded-xl border border-slate-200">

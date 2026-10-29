@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { Mail, Lock, User, Phone } from 'lucide-react';
 import { ROUTES, PROGRAMS } from '../../lib/constants.js';
@@ -31,7 +30,7 @@ export function RegisterPage() {
     try {
       await registerAction(data);
       navigate(ROUTES.CANDIDATE_DASHBOARD, { replace: true });
-    } catch (err) {
+    } catch {
       // Error handled by hook
     }
   };

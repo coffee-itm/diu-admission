@@ -3,7 +3,7 @@ import { useTestStore } from '../../store/testStore.js';
 import { QUESTION_STATUS } from '../../lib/constants.js';
 import { cn } from '../../lib/utils.js';
 
-export function QuestionNav({ sectionId, questions, currentIndex, onSelect }) {
+export function QuestionNav({ questions, currentIndex, onSelect }) {
   const { questionStatus } = useTestStore();
 
   const getStatusColor = (status, isCurrent) => {

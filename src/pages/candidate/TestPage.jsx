@@ -66,7 +66,6 @@ export function CandidateTestPage() {
   });
 
   // Request fullscreen on mount (empty deps — run once only)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     requestFullscreen();
   }, []);

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router';
+import { Link } from 'react-router';
 import { PlayCircle, CheckCircle, Clock, Calendar } from 'lucide-react';
 import { ROUTES } from '../../lib/constants.js';
 import { useAuthStore } from '../../store/authStore.js';
@@ -13,7 +13,6 @@ export function CandidateDashboardPage() {
   const { user } = useAuthStore();
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchResult = async () => {

@@ -14,18 +14,20 @@ const storeCandidates = (candidates) => {
   localStorage.setItem('diu-candidates', JSON.stringify(candidates));
 };
 
+const stripPassword = (u) => Object.fromEntries(Object.entries(u).filter(([k]) => k !== 'password'));
+
 export const authService = {
   async login(email, password) {
     await sleep(600);
     const admin = mockAdmins.find((a) => a.email === email && a.password === password);
     if (admin) {
-      const { password: _, ...safe } = admin;
+      const safe = stripPassword(admin);
       return { user: safe };
     }
     const candidates = getStoredCandidates();
     const candidate = candidates.find((c) => c.email === email && c.password === password);
     if (candidate) {
-      const { password: _, ...safe } = candidate;
+      const safe = stripPassword(candidate);
       return { user: safe };
     }
     throw new Error('Invalid email or password.');
@@ -46,7 +48,7 @@ export const authService = {
     };
     candidates.push(newCandidate);
     storeCandidates(candidates);
-    const { password: _, ...safe } = newCandidate;
+    const safe = stripPassword(newCandidate);
     return { user: safe };
   },
 };

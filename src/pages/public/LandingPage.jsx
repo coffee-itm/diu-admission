@@ -1,5 +1,5 @@
 import { Link } from 'react-router';
-import { ArrowRight, CheckCircle2, MonitorPlay, BrainCircuit, Target, Clock } from 'lucide-react';
+import { ArrowRight, MonitorPlay, BrainCircuit, Target, Clock } from 'lucide-react';
 import { ROUTES } from '../../lib/constants.js';
 import { Button } from '../../components/ui/Button.jsx';
 import { useAuthStore } from '../../store/authStore.js';

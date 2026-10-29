@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useTestStore } from '../../store/testStore.js';
 import { useAntiCheatStore } from '../../store/antiCheatStore.js';
 import { testService } from '../../services/testService.js';
@@ -24,7 +24,7 @@ export function useTestEngine() {
         questions: session.questions,
       });
       navigate(ROUTES.CANDIDATE_TEST);
-    } catch (error) {
+    } catch {
       toast.error('Failed to load test session');
     } finally {
       setLoading(false);
@@ -48,7 +48,7 @@ export function useTestEngine() {
       const enrichedResult = { ...result, antiCheat: antiCheatSummary };
       store.submitTest(enrichedResult);
       navigate(ROUTES.CANDIDATE_RESULT);
-    } catch (error) {
+    } catch {
       toast.error('Failed to submit test');
     } finally {
       setLoading(false);

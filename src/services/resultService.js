@@ -4,7 +4,6 @@ import { sleep } from '../lib/utils.js';
 
 const getAllResults = () => {
   const stored = JSON.parse(localStorage.getItem('itm-results') || '[]');
-  const mockIds = new Set(mockResults.map((r) => r.candidateId));
   const storedIds = new Set(stored.map((r) => r.candidateId));
   const filtered = mockResults.filter((r) => !storedIds.has(r.candidateId));
   return [...filtered, ...stored];

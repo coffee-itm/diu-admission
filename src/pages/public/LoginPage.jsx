@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 import { Mail, Lock, LogIn } from 'lucide-react';
 import { ROUTES } from '../../lib/constants.js';
 import { useAuth } from '../../features/auth/useAuth.js';
@@ -13,16 +13,13 @@ export function LoginPage() {
   const [password, setPassword] = useState('');
   const { login, loading } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
-
-  const from = location.state?.from?.pathname || '/';
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       const user = await login(email, password);
       navigate(user.role === 'admin' ? ROUTES.ADMIN_DASHBOARD : ROUTES.CANDIDATE_DASHBOARD, { replace: true });
-    } catch (err) {
+    } catch {
       // Error handled by hook
     }
   };

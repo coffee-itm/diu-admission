@@ -6,7 +6,7 @@ import { calculateScore } from '../lib/scoring.js';
 import { SECTION_ORDER } from '../lib/constants.js';
 
 export const testService = {
-  async loadTest(candidateId) {
+  async loadTest() {
     await sleep(500);
     // Shuffle questions and their options per section
     const shuffled = SECTION_ORDER.flatMap((sectionId) => {
