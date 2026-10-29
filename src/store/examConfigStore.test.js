@@ -9,7 +9,7 @@ describe('examConfigStore persist merge', () => {
     const old = { ...mockExamConfig };
     delete old.instructions;
     localStorage.setItem(
-      'itm-exam-config',
+      'diu-exam-config',
       JSON.stringify({ state: { config: { ...old, title: 'Custom Title' } }, version: 0 })
     );
     await useExamConfigStore.persist.rehydrate();

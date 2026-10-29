@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { mockQuestions } from '../data/mockQuestions.js';
 import { generateId } from '../lib/utils.js';
+import { STORAGE_KEYS } from '../lib/constants.js';
 
 export const useQuestionStore = create(
   persist(
@@ -30,6 +31,6 @@ export const useQuestionStore = create(
           questions: state.questions.filter((q) => q.id !== id),
         })),
     }),
-    { name: 'diu-questions' }
+    { name: STORAGE_KEYS.QUESTIONS }
   )
 );

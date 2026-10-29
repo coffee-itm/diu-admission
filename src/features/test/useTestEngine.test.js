@@ -118,7 +118,7 @@ describe('useTestEngine.startTest', () => {
   });
 
   it('blocks a second attempt', async () => {
-    localStorage.setItem('itm-results', JSON.stringify([{ id: 'r1', candidateId: 'cand-1' }]));
+    localStorage.setItem('diu-results', JSON.stringify([{ id: 'r1', candidateId: 'cand-1' }]));
     const { result } = renderHook(() => useTestEngine(), { wrapper });
     await act(async () => { await result.current.startTest(); });
     expect(loadSpy).not.toHaveBeenCalled();

@@ -3,6 +3,7 @@ import { useQuestionStore } from '../store/questionStore.js';
 import { mockResults } from '../data/mockResults.js';
 import { shuffleArray, sleep, generateId } from '../lib/utils.js';
 import { calculateScore } from '../lib/scoring.js';
+import { STORAGE_KEYS } from '../lib/constants.js';
 
 export const testService = {
   async loadTest() {
@@ -41,14 +42,14 @@ export const testService = {
       antiCheat: antiCheat ?? null,
     };
     // Persist to localStorage
-    const stored = JSON.parse(localStorage.getItem('itm-results') || '[]');
+    const stored = JSON.parse(localStorage.getItem(STORAGE_KEYS.RESULTS) || '[]');
     stored.push(resultRecord);
-    localStorage.setItem('itm-results', JSON.stringify(stored));
+    localStorage.setItem(STORAGE_KEYS.RESULTS, JSON.stringify(stored));
     return resultRecord;
   },
 
   async countAttempts(candidateId) {
-    const stored = JSON.parse(localStorage.getItem('itm-results') || '[]');
+    const stored = JSON.parse(localStorage.getItem(STORAGE_KEYS.RESULTS) || '[]');
     const ids = new Set(
       [...stored, ...mockResults].filter((r) => r.candidateId === candidateId).map((r) => r.id)
     );
@@ -58,7 +59,7 @@ export const testService = {
   async getResultForCandidate(candidateId) {
     await sleep(300);
     // Check localStorage first
-    const stored = JSON.parse(localStorage.getItem('itm-results') || '[]');
+    const stored = JSON.parse(localStorage.getItem(STORAGE_KEYS.RESULTS) || '[]');
     const found = stored.find((r) => r.candidateId === candidateId);
     if (found) return found;
     // Fallback to mock

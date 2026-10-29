@@ -1,9 +1,10 @@
 import { mockCandidates, mockAdmins } from '../data/mockCandidates.js';
 import { sleep, generateId } from '../lib/utils.js';
+import { STORAGE_KEYS } from '../lib/constants.js';
 
 const getStoredCandidates = () => {
   try {
-    const stored = localStorage.getItem('diu-candidates');
+    const stored = localStorage.getItem(STORAGE_KEYS.CANDIDATES);
     return stored ? JSON.parse(stored) : [...mockCandidates];
   } catch {
     return [...mockCandidates];
@@ -11,7 +12,7 @@ const getStoredCandidates = () => {
 };
 
 const storeCandidates = (candidates) => {
-  localStorage.setItem('diu-candidates', JSON.stringify(candidates));
+  localStorage.setItem(STORAGE_KEYS.CANDIDATES, JSON.stringify(candidates));
 };
 
 const stripPassword = (u) => Object.fromEntries(Object.entries(u).filter(([k]) => k !== 'password'));

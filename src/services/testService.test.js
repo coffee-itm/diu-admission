@@ -19,7 +19,7 @@ describe('testService.submitTest', () => {
 
   it('persists the anti-cheat summary in the stored record', async () => {
     await run();
-    const stored = JSON.parse(localStorage.getItem('itm-results'));
+    const stored = JSON.parse(localStorage.getItem('diu-results'));
     expect(stored).toHaveLength(1);
     expect(stored[0].antiCheat.tabSwitchCount).toBe(3);
   });

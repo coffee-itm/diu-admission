@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { QUESTION_STATUS } from '../lib/constants.js';
+import { QUESTION_STATUS, STORAGE_KEYS } from '../lib/constants.js';
 
 const initialState = {
   sessionId: null,
@@ -100,6 +100,6 @@ export const useTestStore = create(
         return questions.filter((q) => q.section === sectionId);
       },
     }),
-    { name: 'itm-test-session' }
+    { name: STORAGE_KEYS.TEST_SESSION }
   )
 );

@@ -1,9 +1,10 @@
 import { mockResults } from '../data/mockResults.js';
 import { getAllCandidates } from './authService.js';
 import { sleep } from '../lib/utils.js';
+import { STORAGE_KEYS } from '../lib/constants.js';
 
 const getAllResults = () => {
-  const stored = JSON.parse(localStorage.getItem('itm-results') || '[]');
+  const stored = JSON.parse(localStorage.getItem(STORAGE_KEYS.RESULTS) || '[]');
   const storedIds = new Set(stored.map((r) => r.candidateId));
   const filtered = mockResults.filter((r) => !storedIds.has(r.candidateId));
   return [...filtered, ...stored];

@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { STORAGE_KEYS } from '../lib/constants.js';
 
 export const useAntiCheatStore = create(
   persist(
@@ -128,6 +129,6 @@ export const useAntiCheatStore = create(
         questionTimeMap: {}, currentQuestionId: null, currentQuestionEnteredAt: null,
       }),
     }),
-    { name: 'itm-anti-cheat' }
+    { name: STORAGE_KEYS.ANTI_CHEAT }
   )
 );
