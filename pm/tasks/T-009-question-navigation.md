@@ -1,6 +1,6 @@
 # T-009 · Visited tracking and Next/Prev across sections
 
-Status: 👀 Review
+Status: ✔️ Done
 Sprint: S1 · Role: frontend-dev · Model: free-ok · Size: S
 Depends on: T-008
 Implements: FR-TEST-04, D-07
@@ -45,3 +45,5 @@ Verified OK: cross-section goNext/goPrev skip empty sections via `sectionsWithQu
 
 Required change:
 1. TestPage.jsx:72-77 new effect warns exhaustive-deps (missing `currentQuestion`, `visitQuestion`). Fix cleanly: before the effect add `const currentQuestionId = currentQuestion?.id;`, use it in the effect, and set deps to `[currentQuestionId, visitQuestion]`. Store actions are stable and visitQuestion is a no-op unless NOT_VISITED, so no loop. Do not add the warning to the baseline. (The warning at :84 is pre-existing.)
+
+**APPROVED** (re-review by Opus): 93fdb17 uses `currentQuestionId` with deps `[currentQuestionId, visitQuestion]`; the new warning is gone. Only the pre-existing TestPage.jsx:85 warning remains (exhaustive-deps, which T-022 left for T-004 to remove). eslint 0 errors.

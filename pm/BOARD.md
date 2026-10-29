@@ -22,7 +22,7 @@
 | [T-006](./tasks/T-006-fullscreen-gesture.md) | Fullscreen on Start click, iOS fallback | A | frontend-dev | free-ok | T-004 | ✔️ Done |
 | [T-007](./tasks/T-007-persist-anticheat-summary.md) | Persist anti-cheat summary with result | A | frontend-dev | free-ok | T-005 | ✔️ Done |
 | [T-008](./tasks/T-008-wallclock-timer.md) | Wall-clock deadline timer | A | frontend-dev | sonnet | T-005 | ✔️ Done |
-| [T-009](./tasks/T-009-question-navigation.md) | Visited tracking + cross-section Next/Prev | A | frontend-dev | free-ok | T-008 | ✅ Ready |
+| [T-009](./tasks/T-009-question-navigation.md) | Visited tracking + cross-section Next/Prev | A | frontend-dev | free-ok | T-008 | ✔️ Done |
 | [T-010](./tasks/T-010-engine-uses-config.md) | Engine uses admin config + bank + sampling | A | frontend-dev | sonnet | T-009 | ✅ Ready |
 | [T-011](./tasks/T-011-config-driven-copy.md) | Config-driven copy + PDF title | A | frontend-dev | free-ok | T-010 | ✅ Ready |
 | [T-012](./tasks/T-012-attempts-resume-logout.md) | Single attempt, Resume, logout reset | A | frontend-dev | sonnet | T-011 | ✅ Ready |
