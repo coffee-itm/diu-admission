@@ -1,6 +1,6 @@
 # T-015 · Real merit-list CSV export
 
-Status: ✅ Ready
+Status: 👀 Review
 Sprint: S1 · Role: frontend-dev · Model: free-ok · Size: S
 Depends on: T-014
 Implements: FR-RES-06, D-11 (export part)
@@ -31,5 +31,8 @@ pnpm test -- csvExport && pnpm lint && pnpm build
 - Merit PDF changes, per-program merit lists (R2).
 
 ## Agent log
+- Added toCSV/downloadCSV (BOM, RFC 4180, CRLF) + 4 tests; MeritListPage exportCSV builds spec columns, file DIU_Merit_List_<date>.csv, button id merit-export-csv.
+- phone/program read from item.candidatePhone|phone / programCode|program; mock merit list lacks them so they export blank (follow-up for service).
+- Criterion 3 (open in spreadsheet) not verified manually.
 
 ## Review
