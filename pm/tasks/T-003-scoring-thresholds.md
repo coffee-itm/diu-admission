@@ -1,6 +1,6 @@
 # T-003 · Make scoring thresholds configurable and compare unrounded values
 
-Status: 👀 Review
+Status: ✔️ Done
 Sprint: S1 · Role: frontend-dev · Model: sonnet · Size: M
 Depends on: T-022
 Implements: FR-SCORE-03, FR-SCORE-04, D-09
@@ -45,3 +45,5 @@ pnpm test -- scoring && pnpm lint && pnpm build
 - eslint, `pnpm test -- scoring` (80 passed, 2 todo), build green. Manual demo-login UI check not done (headless).
 
 ## Review
+**APPROVED.** eslint clean on scoring files; `pnpm test -- scoring` 80 passed/2 todo; build green. Classification uses unrounded `percentage` (scoring.js:62-69), thresholds from DEFAULT_SCORING_CONFIG merge, output shape unchanged. Only caller is testService.submitTest (via useTestEngine) using store.questions from mockQuestions, which always have `options`. `answeredCount` is not read anywhere in src/ (ResultPage/TestSubmitDialog unaffected).
+Advisory (non-blocking): scoring.js:31 `question.options.some` would throw on options-less input; consider `(question.options ?? DEFAULT a-d)` fallback. No current path triggers it. Manual UI check not done (headless).

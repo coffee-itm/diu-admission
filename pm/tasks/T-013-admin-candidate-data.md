@@ -1,6 +1,6 @@
 # T-013 · Fix candidate detail page and show all registered candidates
 
-Status: 👀 Review
+Status: ✔️ Done
 Sprint: S1 · Role: frontend-dev · Model: free-ok · Size: M
 Depends on: T-022
 Implements: FR-RES-03, FR-RES-04, D-10, D-16
@@ -41,3 +41,4 @@ pnpm test -- authService && pnpm lint && pnpm build
 - Tests: authService.test.js 2 passed; eslint clean on touched dirs; build ok. Full `pnpm test` had 5 failures in another agent's file (not mine).
 
 ## Review
+APPROVED. eslint clean on 6 files, authService tests pass, build ok. getAllCandidates strips passwords (authService.js:19); Detail uses getForCandidate with not-found/no-result/error states (CandidateDetailPage.jsx); Candidates/Merit use stored candidates (merit via getMeritList join).

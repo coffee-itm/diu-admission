@@ -1,6 +1,6 @@
 # T-019 · Remove unused dependencies
 
-Status: ⛔ Blocked (E-019)
+Status: ✅ Ready
 Sprint: S1 · Role: devops · Model: free-ok · Size: S
 Depends on: T-022
 Implements: D-27 (deps part), context/17 §8

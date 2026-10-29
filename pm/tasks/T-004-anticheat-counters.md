@@ -1,6 +1,6 @@
 # T-004 · Fix stale anti-cheat counters so warnings and auto-submit fire
 
-Status: 👀 Review
+Status: ✔️ Done
 Sprint: S1 · Role: frontend-dev · Model: sonnet · Size: M
 Depends on: T-022
 Implements: FR-AC-02, FR-AC-03, D-02, D-03 (callback part)
@@ -52,3 +52,5 @@ pnpm test -- useAntiCheat && pnpm lint && pnpm build
 - Gate: eslint 0 errors (2 pre-existing warnings in other file), full test 80 passed, build ok.
 
 ## Review
+
+APPROVED. Listeners use getState() (useAntiCheat.js:27-60); ref updated in effect (:15-17); submittedRef single-shot (:21-25); cut/paste counted+logged; CUT_ATTEMPT added. Tests cover 2nd/5th switch, 3 fullscreen exits, rerender callback; stale `+1` code could not reach 5. No eslint-disable. eslint clean, 90 tests pass, build ok.

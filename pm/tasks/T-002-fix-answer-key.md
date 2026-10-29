@@ -1,6 +1,6 @@
 # T-002 · Fix the wrong answer key and guard the question bank with a data test
 
-Status: 👀 Review
+Status: ✔️ Done
 Sprint: S1 · Role: frontend-dev · Model: free-ok · Size: S
 Depends on: T-022
 Implements: FR-QB-07, D-01
@@ -38,3 +38,4 @@ pnpm test -- mockQuestions && pnpm lint
 - eslint on changed files clean; 60 tests pass; build ok. Did not re-check other 49 questions.
 
 ## Review
+APPROVED. Key=a at mockQuestions.js:24, explanation cleaned; test file covers unique ids, a-d options, key in options, difficulty, 10/section, explicit logic_010. Eslint clean, tests pass, build ok. Scope clean, single commit with [T-002].
