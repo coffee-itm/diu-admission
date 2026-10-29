@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Users, CheckCircle, Percent, Activity } from 'lucide-react';
 import { analyticsService } from '../../services/analyticsService.js';
+import { getAllCandidates } from '../../services/authService.js';
 import { resultService } from '../../services/resultService.js';
 import { StatCard, Card } from '../../components/ui/Card.jsx';
 import { Badge } from '../../components/ui/Badge.jsx';
@@ -10,6 +11,7 @@ import { formatDateTime } from '../../lib/utils.js';
 export function AdminDashboardPage() {
   const [stats, setStats] = useState(null);
   const [recentResults, setRecentResults] = useState([]);
+  const [names, setNames] = useState({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -20,6 +22,7 @@ export function AdminDashboardPage() {
           resultService.getAll()
         ]);
         setStats(summary);
+        setNames(Object.fromEntries(getAllCandidates().map((c) => [c.id, c.name])));
         
         // Get 5 most recent results
         const sorted = [...allResults].sort((a, b) => new Date(b.submittedAt) - new Date(a.submittedAt));
@@ -76,7 +79,7 @@ export function AdminDashboardPage() {
             <table className="w-full text-left text-sm text-slate-600">
               <thead className="bg-slate-50 text-xs uppercase border-b border-slate-100">
                 <tr>
-                  <th className="px-6 py-3 font-semibold">Candidate ID</th>
+                  <th className="px-6 py-3 font-semibold">Candidate</th>
                   <th className="px-6 py-3 font-semibold text-center">Score</th>
                   <th className="px-6 py-3 font-semibold text-center">Status</th>
                   <th className="px-6 py-3 font-semibold text-right">Time</th>
@@ -85,13 +88,13 @@ export function AdminDashboardPage() {
               <tbody className="divide-y divide-slate-100">
                 {recentResults.map(r => (
                   <tr key={r.id}>
-                    <td className="px-6 py-3 font-mono text-xs">{r.candidateId}</td>
+                    <td className="px-6 py-3 font-medium text-slate-900">{names[r.candidateId] || r.candidateId}</td>
                     <td className="px-6 py-3 text-center font-bold text-slate-900">{r.percentage}%</td>
                     <td className="px-6 py-3 text-center">
                       <Badge 
                         variant={r.eligibility === 'ELIGIBLE' ? 'success' : r.eligibility === 'NOT_ELIGIBLE' ? 'danger' : 'warning'}
                       >
-                        {r.eligibility.replace('_', ' ')}
+                        {r.eligibility.replaceAll('_', ' ')}
                       </Badge>
                     </td>
                     <td className="px-6 py-3 text-right text-xs text-slate-500">

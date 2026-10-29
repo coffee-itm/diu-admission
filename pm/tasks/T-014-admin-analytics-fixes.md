@@ -1,6 +1,6 @@
 # T-014 · Correct analytics counts, dashboard names, merit labels and the trend chart
 
-Status: ✅ Ready
+Status: 👀 Review
 Sprint: S1 · Role: frontend-dev · Model: free-ok · Size: M
 Depends on: T-013
 Implements: FR-ANL-01, FR-ANL-04 (prototype), D-18, D-20, D-25, D-26
@@ -19,10 +19,10 @@ Registrations are double-counted, the admin dashboard shows raw candidate ids, t
 - `src/services/analyticsService.test.js` — create
 
 ## Acceptance criteria
-1. [ ] With only the mock data, registrations = 16 (test).
-2. [ ] `perDay` groups the mock results correctly (test with 3 results over 2 days).
-3. [ ] No hard-coded trend data remains.
-4. [ ] "CONDITIONALLY ELIGIBLE" shows with both underscores replaced.
+1. [x] With only the mock data, registrations = 16 (test).
+2. [x] `perDay` groups the mock results correctly (test with 3 results over 2 days).
+3. [x] No hard-coded trend data remains.
+4. [x] "CONDITIONALLY ELIGIBLE" shows with both underscores replaced.
 
 ## Verify
 ```bash
@@ -33,5 +33,9 @@ pnpm test -- analyticsService && pnpm lint && pnpm build
 - Program filters (R2).
 
 ## Agent log
+- analyticsService: registrations via getAllCandidates (16); added exported groupPerDay -> perDay [{date, count, avgScore}] (last 14 days, local date, ascending).
+- AnalyticsPage trend uses perDay (avg score per day), hard-coded array removed, empty state "No results yet".
+- DashboardPage shows candidate names (fallback id); MeritListPage uses replaceAll + "No results yet" (dashboard badge also replaceAll).
+- Tests: analyticsService.test.js (4). lint, test (94 passed), build OK.
 
 ## Review

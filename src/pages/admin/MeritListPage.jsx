@@ -79,14 +79,14 @@ export function MeritListPage() {
                   </td>
                   <td className="px-6 py-4">
                     <Badge variant={item.eligibility === 'ELIGIBLE' ? 'success' : 'warning'}>
-                      {item.eligibility.replace('_', ' ')}
+                      {item.eligibility.replaceAll('_', ' ')}
                     </Badge>
                   </td>
                 </tr>
               ))}
               {meritList.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="px-6 py-12 text-center text-slate-500">No eligible candidates yet.</td>
+                  <td colSpan={5} className="px-6 py-12 text-center text-slate-500">No results yet</td>
                 </tr>
               )}
             </tbody>
