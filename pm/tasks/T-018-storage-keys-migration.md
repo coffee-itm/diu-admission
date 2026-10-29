@@ -1,6 +1,6 @@
 # T-018 · Rename itm-* storage keys to diu-* with a one-time migration
 
-Status: 👀 Review
+Status: ✔️ Done
 Sprint: S1 · Role: frontend-dev · Model: free-ok · Size: S
 Depends on: T-007, T-010, T-012, T-016, T-017   (runs last in the code lanes: it touches many files)
 Implements: D-28
@@ -38,3 +38,5 @@ pnpm test -- storageMigration && pnpm lint && pnpm build
 - Existing tests updated to diu-* keys. lint 0 errors (1 pre-existing warning TestPage), test 144 passed, build ok. Manual browser check (AC3) not run.
 
 ## Review
+APPROVED (reviewer). main.jsx:1 imports runStorageMigration.js -> storageMigration.js -> constants.js (no imports), so store-free and runs before hydration. Migration copies only when new key absent, removes old, idempotent, try/catch for throwing storage (storageMigration.js:14-24). All persist names and direct localStorage calls use STORAGE_KEYS; remaining 'itm-' only in LEGACY_KEY_MAP and tests. Logout reset, diu-questions and examConfig merge untouched. lint 0 errors (1 pre-existing warning), 144 tests pass, build ok.
+Notes (non-blocking): no test for a throwing localStorage; AC3 manual check not run; context/02 lines 72-79 still list itm-* keys, T-020 must update them.
