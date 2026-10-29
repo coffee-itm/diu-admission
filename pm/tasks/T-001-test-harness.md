@@ -1,6 +1,6 @@
 # T-001 · Add the Vitest + Testing Library test harness
 
-Status: ✅ Ready
+Status: 👀 Review
 Sprint: S1 · Role: test-engineer · Model: free-ok · Size: S
 Depends on: none
 Implements: P0-01, D-27 (tests part), ADR-018
@@ -40,5 +40,9 @@ pnpm test && pnpm lint && pnpm build
 - Backend tests, Playwright, CI (later sprints).
 
 ## Agent log
+- Added vitest 5.0.5, testing-library (react, user-event, jest-dom), jsdom; `test` block in vite.config.js; scripts test/test:watch.
+- Created src/test/setup.js and src/lib/utils.test.js (3 tests, all pass).
+- `pnpm lint` fails on baseline (35 problems, 31 errors) identical before/after my change; none in my files. No ESLint override needed. Needs a lint-cleanup card.
+- Build OK; test files not imported, so not bundled.
 
 ## Review
