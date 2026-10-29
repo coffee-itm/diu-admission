@@ -1,6 +1,6 @@
 # T-008 · Wall-clock deadline timer (closing the tab must not pause the exam)
 
-Status: 🔨 In Progress
+Status: 👀 Review
 Sprint: S1 · Role: frontend-dev · Model: sonnet · Size: M
 Depends on: T-005
 Implements: FR-TEST-03 (prototype version), D-06
