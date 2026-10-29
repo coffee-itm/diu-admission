@@ -15,10 +15,8 @@
     "@hookform/resolvers": "^5.4.0",
     "@tanstack/react-query": "^5.101.0",
     "clsx": "^2.1.1",
-    "date-fns": "^4.4.0",
     "framer-motion": "^12.40.0",
     "jspdf": "^4.2.1",
-    "jspdf-autotable": "^5.0.8",
     "lucide-react": "^1.18.0",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
@@ -28,11 +26,6 @@
     "sonner": "^2.0.7",
     "zod": "^4.4.3",
     "zustand": "^5.0.14"
-  },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "core-js"
-    ]
   },
   "devDependencies": {
     "@babel/core": "^7.29.0",

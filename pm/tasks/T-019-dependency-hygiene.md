@@ -1,6 +1,6 @@
 # T-019 · Remove unused dependencies
 
-Status: ✅ Ready
+Status: 👀 Review
 Sprint: S1 · Role: devops · Model: free-ok · Size: S
 Depends on: T-022
 Implements: D-27 (deps part), context/17 §8
@@ -32,6 +32,6 @@ pnpm install --frozen-lockfile && pnpm lint && pnpm test && pnpm build
 - Docs tables (T-020).
 
 ## Agent log
-Escalated E-019: date-fns imported by uncommitted T-014 AnalyticsPage.jsx:8; no package changes made.
+E-019 resolved (no date-fns/jspdf-autotable imports in src). Ran `pnpm remove date-fns jspdf-autotable`; removed obsolete `pnpm.onlyBuiltDependencies` from package.json (allowBuilds kept). Frozen install OK, lint 0 errors, build OK, test 99 pass; 1 fail in useAntiCheat.test.js (T-006 parallel work, not ours).
 
 ## Review
