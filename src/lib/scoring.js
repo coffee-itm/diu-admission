@@ -1,4 +1,5 @@
 import { SECTION_ORDER } from './constants.js';
+import { DEFAULT_SCORING_CONFIG } from '../features/scoring/scoringConfig.js';
 
 /**
  * Calculate the full scored result from a candidate's answers.
@@ -12,7 +13,7 @@ import { SECTION_ORDER } from './constants.js';
  */
 export function calculateScore({ answers, questions, examConfig, timeTaken = 0 }) {
   const { passingThresholds, sections } = examConfig;
-  const { overallMinPercent, sectionMinPercent } = passingThresholds;
+  const t = { ...DEFAULT_SCORING_CONFIG, ...passingThresholds };
 
   // Initialize per-section counters
   const sectionMap = {};
@@ -20,14 +21,18 @@ export function calculateScore({ answers, questions, examConfig, timeTaken = 0 }
     sectionMap[section.id] = { correct: 0, total: 0, questions: [] };
   }
 
-  // Tally answers
+  // Tally answers (only valid option ids for questions in the paper count)
+  let answeredCount = 0;
   for (const question of questions) {
     const sid = question.section;
     if (!sectionMap[sid]) continue;
     sectionMap[sid].total++;
     sectionMap[sid].questions.push(question.id);
-    if (answers[question.id] === question.correctAnswer) {
-      sectionMap[sid].correct++;
+    const given = answers[question.id];
+    const isValid = question.options.some((o) => o.id === given);
+    if (isValid) {
+      answeredCount++;
+      if (given === question.correctAnswer) sectionMap[sid].correct++;
     }
   }
 
@@ -42,7 +47,7 @@ export function calculateScore({ answers, questions, examConfig, timeTaken = 0 }
     const pct = total > 0 ? (correct / total) * 100 : 0;
     sectionScores[sid] = correct;
     sectionPercentages[sid] = Math.round(pct * 10) / 10;
-    if (pct < sectionMinPercent) {
+    if (pct < t.sectionMinPercent) {
       failedSections.push(sid);
     }
   }
@@ -54,9 +59,12 @@ export function calculateScore({ answers, questions, examConfig, timeTaken = 0 }
 
   // Determine eligibility
   let eligibility;
-  if (percentageRounded >= overallMinPercent && failedSections.length === 0) {
+  if (percentage >= t.overallMinPercent && failedSections.length === 0) {
     eligibility = 'ELIGIBLE';
-  } else if (percentageRounded >= 40 && failedSections.length <= 2) {
+  } else if (
+    percentage >= t.conditionalOverallMin &&
+    failedSections.length <= t.conditionalMaxFailedSections
+  ) {
     eligibility = 'CONDITIONALLY_ELIGIBLE';
   } else {
     eligibility = 'NOT_ELIGIBLE';
@@ -71,7 +79,7 @@ export function calculateScore({ answers, questions, examConfig, timeTaken = 0 }
     eligibility,
     failedSections,
     timeTaken,
-    answeredCount: Object.keys(answers).length,
+    answeredCount,
   };
 }
 

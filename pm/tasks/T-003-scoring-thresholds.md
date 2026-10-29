@@ -1,6 +1,6 @@
 # T-003 · Make scoring thresholds configurable and compare unrounded values
 
-Status: ✅ Ready
+Status: 👀 Review
 Sprint: S1 · Role: frontend-dev · Model: sonnet · Size: M
 Depends on: T-022
 Implements: FR-SCORE-03, FR-SCORE-04, D-09
@@ -40,5 +40,8 @@ pnpm test -- scoring && pnpm lint && pnpm build
 - Negative marking, program overrides, section weights (R2, shared package).
 
 ## Agent log
+- scoring.js: thresholds merged over DEFAULT_SCORING_CONFIG; classification uses unrounded percentage; invalid option ids and unknown question ids ignored; answeredCount counts valid answers only.
+- scoring.test.js: S1-S9, S11, S13, S14 + config-driven tier test; S10/S12 it.todo (R2).
+- eslint, `pnpm test -- scoring` (80 passed, 2 todo), build green. Manual demo-login UI check not done (headless).
 
 ## Review
