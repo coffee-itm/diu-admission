@@ -24,12 +24,12 @@
 | [T-008](./tasks/T-008-wallclock-timer.md) | Wall-clock deadline timer | A | frontend-dev | sonnet | T-005 | ✔️ Done |
 | [T-009](./tasks/T-009-question-navigation.md) | Visited tracking + cross-section Next/Prev | A | frontend-dev | free-ok | T-008 | ✔️ Done |
 | [T-010](./tasks/T-010-engine-uses-config.md) | Engine uses admin config + bank + sampling | A | frontend-dev | sonnet | T-009 | ✔️ Done |
-| [T-011](./tasks/T-011-config-driven-copy.md) | Config-driven copy + PDF title | A | frontend-dev | free-ok | T-010 | ✅ Ready |
+| [T-011](./tasks/T-011-config-driven-copy.md) | Config-driven copy + PDF title | A | frontend-dev | free-ok | T-010 | 🔨 In Progress |
 | [T-012](./tasks/T-012-attempts-resume-logout.md) | Single attempt, Resume, logout reset | A | frontend-dev | sonnet | T-011 | ✅ Ready |
 | [T-013](./tasks/T-013-admin-candidate-data.md) | Candidate detail fix + all candidates | B | frontend-dev | free-ok | T-022 | ✔️ Done |
 | [T-014](./tasks/T-014-admin-analytics-fixes.md) | Analytics counts, names, labels, real trend | B | frontend-dev | free-ok | T-013 | ✔️ Done |
 | [T-015](./tasks/T-015-csv-export.md) | Merit-list CSV export | B | frontend-dev | free-ok | T-014 | ✔️ Done |
-| [T-016](./tasks/T-016-csv-import.md) | Question CSV import + error report | B | frontend-dev | sonnet | T-010, T-015, T-017 | ✅ Ready |
+| [T-016](./tasks/T-016-csv-import.md) | Question CSV import + error report | B | frontend-dev | sonnet | T-010, T-015, T-017 | ✔️ Done |
 | [T-017](./tasks/T-017-forms-login-redirect.md) | Tags field, Zod 4 params, login redirect | C | frontend-dev | free-ok | T-022 | ✔️ Done |
 | [T-018](./tasks/T-018-storage-keys-migration.md) | itm-* → diu-* keys + migration | Z | frontend-dev | free-ok | T-007, T-010, T-012, T-016, T-017 | ✅ Ready |
 | [T-019](./tasks/T-019-dependency-hygiene.md) | Remove unused deps | C | devops | free-ok | T-014 | ✔️ Done |

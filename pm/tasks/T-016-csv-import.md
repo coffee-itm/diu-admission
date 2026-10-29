@@ -1,6 +1,6 @@
 # T-016 · Real question-bank CSV import with a row error report
 
-Status: 👀 Review
+Status: ✔️ Done
 Sprint: S1 · Role: frontend-dev · Model: sonnet · Size: M
 Depends on: T-010, T-015, T-017
 Implements: FR-QB-04 (prototype), D-11 (import part)
@@ -39,3 +39,13 @@ pnpm test -- csvParse importQuestions && pnpm lint && pnpm build
 - Tests: 12 new (7 parser, 5 mapper); full suite 136 passed. Manual reload check not run in a browser; store is persisted (T-010).
 
 ## Review
+
+**Verdict: APPROVED** (reviewer, 2026-10-29)
+- AC1 csvParse.test.js (quotes, comma, newline, CRLF, BOM); AC2/3 importQuestions.test.js (row numbers, bad header -> single error, nothing valid). Gate: eslint clean on changed files, `pnpm test` 136 passed, `pnpm build` ok.
+- Validation uses `questionSchema.safeParse` (importQuestions.js:46); only the extra `correct_answer in a-d` check is ad hoc. Header matches FR-QB-04, api-spec and public/samples/questions-template.csv. Ids come from `questionStore.create` (generateId, no collision). Partial import of valid rows matches FR-QB-04 (invalid skipped and reported).
+- Advisories (non-blocking, follow-up):
+  1. csvParse.js: an unterminated quote swallows the rest of the file into one field. Rows after it are misreported, with no "unterminated quote" error. Suggest flagging it.
+  2. csvParse.js:44 drops blank lines before numbering, so row numbers after a blank line are lower than the file line. Fine for the card's definition, but worth documenting.
+  3. Spec limits not enforced: 2 MB / 2000 rows (modal allows 5 MB), unique option text, imported status `draft` (R2).
+  4. Shared `Modal.jsx` has Escape and ids but no role=dialog/aria-modal/focus trap. Out of scope here, so log it as a UI a11y follow-up.
+  5. Manual reload check was not run (store persisted via T-010).
