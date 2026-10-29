@@ -37,6 +37,10 @@ export function CandidateTestPage() {
     submitTest,
     loading,
     navigateTo,
+    isFirstOverall,
+    isLastOverall,
+    getQuestionsBySectionId,
+    visitQuestion,
   } = useTestEngine();
 
   // Redirect if no session or already submitted
@@ -65,6 +69,13 @@ export function CandidateTestPage() {
     },
   });
 
+  // Mark every question the candidate lands on as visited (first load, tabs, next/prev).
+  useEffect(() => {
+    if (currentQuestion) {
+      visitQuestion(currentQuestion.id);
+    }
+  }, [currentQuestion?.id]);
+
   // Track time per question
   useEffect(() => {
     if (currentQuestion) {
@@ -77,8 +88,11 @@ export function CandidateTestPage() {
   }
 
   const isFlagged = questionStatus[currentQuestion.id] === QUESTION_STATUS.FLAGGED;
-  const isFirstQuestion = currentQuestionIndex === 0;
-  const isLastQuestion = currentQuestionIndex === currentQuestions.length - 1;
+  const handleSectionChange = (sid) => {
+    const qs = getQuestionsBySectionId(sid);
+    const firstUnanswered = qs.findIndex((q) => !answers[q.id]);
+    navigateTo(sid, firstUnanswered === -1 ? 0 : firstUnanswered);
+  };
 
   return (
     <div className="fixed inset-0 bg-slate-50 p-4 flex flex-col gap-4 z-40 overflow-hidden">
@@ -87,7 +101,7 @@ export function CandidateTestPage() {
         <div className="flex-1 w-full overflow-hidden">
           <SectionHeader 
             currentSectionId={currentSectionId} 
-            onSectionChange={(sid) => navigateTo(sid, 0)} 
+            onSectionChange={handleSectionChange} 
           />
         </div>
         <div className="flex items-center gap-4 w-full md:w-auto justify-between md:justify-end">
@@ -129,7 +143,7 @@ export function CandidateTestPage() {
             <Button
               variant="outline"
               onClick={goPrev}
-              disabled={isFirstQuestion}
+              disabled={isFirstOverall}
               leftIcon={<ChevronLeft size={20} />}
             >
               Previous
@@ -137,7 +151,7 @@ export function CandidateTestPage() {
             <Button
               variant="primary"
               onClick={goNext}
-              disabled={isLastQuestion}
+              disabled={isLastOverall}
               rightIcon={<ChevronRight size={20} />}
             >
               Next Question

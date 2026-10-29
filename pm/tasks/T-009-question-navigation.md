@@ -1,6 +1,6 @@
 # T-009 · Visited tracking and Next/Prev across sections
 
-Status: ✅ Ready
+Status: 👀 Review
 Sprint: S1 · Role: frontend-dev · Model: free-ok · Size: S
 Depends on: T-008
 Implements: FR-TEST-04, D-07
@@ -33,5 +33,8 @@ pnpm test -- useTestEngine && pnpm lint && pnpm build
 - Keyboard shortcuts, the mobile bottom sheet (R3).
 
 ## Agent log
+- useTestEngine: goNext/goPrev cross sections (SECTION_ORDER, non-empty only); added isFirstOverall/isLastOverall; visit marking moved to TestPage effect on currentQuestion.id.
+- TestPage: section tab jumps to first unanswered; Prev/Next disabled via overall flags.
+- Tests: 3 new in useTestEngine.test.js; full suite 119 passed; lint 0 errors (exhaustive-deps warning on new effect, same as existing pattern); build ok.
 
 ## Review

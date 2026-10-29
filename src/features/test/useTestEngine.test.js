@@ -51,3 +51,40 @@ describe('useTestEngine.submitTest', () => {
     expect(spy).toHaveBeenCalledTimes(1);
   });
 });
+
+describe('useTestEngine navigation', () => {
+  const qs = [
+    { id: 'm1', section: 'MATH', options: [] },
+    { id: 'm2', section: 'MATH', options: [] },
+    { id: 'l1', section: 'LOGIC', options: [] },
+    { id: 'l2', section: 'LOGIC', options: [] },
+  ];
+  beforeEach(() => {
+    useTestStore.getState().initSession({ sessionId: 's2', examConfig, questions: qs });
+  });
+
+  it('Next from the last MATH question goes to the first LOGIC question', () => {
+    const { result } = renderHook(() => useTestEngine(), { wrapper });
+    expect(result.current.isFirstOverall).toBe(true);
+    act(() => result.current.goNext());
+    act(() => result.current.goNext());
+    expect(useTestStore.getState().currentSectionId).toBe('LOGIC');
+    expect(useTestStore.getState().currentQuestionIndex).toBe(0);
+    expect(result.current.isFirstOverall).toBe(false);
+  });
+
+  it('Prev from the first LOGIC question goes to the last MATH question', () => {
+    const { result } = renderHook(() => useTestEngine(), { wrapper });
+    act(() => useTestStore.getState().navigateTo('LOGIC', 0));
+    act(() => result.current.goPrev());
+    expect(useTestStore.getState().currentSectionId).toBe('MATH');
+    expect(useTestStore.getState().currentQuestionIndex).toBe(1);
+  });
+
+  it('flags the very last question only', () => {
+    const { result } = renderHook(() => useTestEngine(), { wrapper });
+    expect(result.current.isLastOverall).toBe(false);
+    act(() => useTestStore.getState().navigateTo('LOGIC', 1));
+    expect(result.current.isLastOverall).toBe(true);
+  });
+});

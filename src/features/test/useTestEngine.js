@@ -5,7 +5,7 @@ import { testService } from '../../services/testService.js';
 import { useAuthStore } from '../../store/authStore.js';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router';
-import { ROUTES } from '../../lib/constants.js';
+import { ROUTES, SECTION_ORDER } from '../../lib/constants.js';
 
 export function useTestEngine() {
   const [loading, setLoading] = useState(false);
@@ -63,17 +63,30 @@ export function useTestEngine() {
   const currentQuestions = store.getQuestionsBySectionId(store.currentSectionId);
   const currentQuestion = currentQuestions[store.currentQuestionIndex];
 
+  // Sections that actually have questions, in display order.
+  const sectionsWithQuestions = SECTION_ORDER.filter(
+    (sid) => store.getQuestionsBySectionId(sid).length > 0,
+  );
+  const sectionPos = sectionsWithQuestions.indexOf(store.currentSectionId);
+  const isFirstOverall = sectionPos <= 0 && store.currentQuestionIndex === 0;
+  const isLastOverall =
+    sectionPos === sectionsWithQuestions.length - 1 &&
+    store.currentQuestionIndex >= currentQuestions.length - 1;
+
   const goNext = () => {
     if (store.currentQuestionIndex < currentQuestions.length - 1) {
       store.navigateTo(store.currentSectionId, store.currentQuestionIndex + 1);
-      store.visitQuestion(currentQuestions[store.currentQuestionIndex + 1].id);
+    } else if (sectionPos >= 0 && sectionPos < sectionsWithQuestions.length - 1) {
+      store.navigateTo(sectionsWithQuestions[sectionPos + 1], 0);
     }
   };
 
   const goPrev = () => {
     if (store.currentQuestionIndex > 0) {
       store.navigateTo(store.currentSectionId, store.currentQuestionIndex - 1);
-      store.visitQuestion(currentQuestions[store.currentQuestionIndex - 1].id);
+    } else if (sectionPos > 0) {
+      const prevSid = sectionsWithQuestions[sectionPos - 1];
+      store.navigateTo(prevSid, store.getQuestionsBySectionId(prevSid).length - 1);
     }
   };
 
@@ -92,6 +105,8 @@ export function useTestEngine() {
     currentQuestion,
     goNext,
     goPrev,
+    isFirstOverall,
+    isLastOverall,
     jumpTo,
   };
 }
