@@ -4,6 +4,7 @@ import { QUESTION_STATUS } from '../lib/constants.js';
 
 const initialState = {
   sessionId: null,
+  candidateId: null,    // owner of the session
   examConfig: null,
   questions: [],        // shuffled questions for this session
   answers: {},          // { questionId: optionId }
@@ -23,13 +24,14 @@ export const useTestStore = create(
     (set, get) => ({
       ...initialState,
 
-      initSession: ({ sessionId, examConfig, questions }) => {
+      initSession: ({ sessionId, candidateId = null, examConfig, questions }) => {
         const totalSeconds = examConfig.totalTimeMinutes * 60;
         const statusMap = {};
         questions.forEach((q) => { statusMap[q.id] = QUESTION_STATUS.NOT_VISITED; });
         set({
           ...initialState,
           sessionId,
+          candidateId,
           examConfig,
           questions,
           questionStatus: statusMap,

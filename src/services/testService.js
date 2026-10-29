@@ -47,6 +47,14 @@ export const testService = {
     return resultRecord;
   },
 
+  async countAttempts(candidateId) {
+    const stored = JSON.parse(localStorage.getItem('itm-results') || '[]');
+    const ids = new Set(
+      [...stored, ...mockResults].filter((r) => r.candidateId === candidateId).map((r) => r.id)
+    );
+    return ids.size;
+  },
+
   async getResultForCandidate(candidateId) {
     await sleep(300);
     // Check localStorage first

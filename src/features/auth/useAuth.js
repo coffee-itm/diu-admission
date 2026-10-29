@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useAuthStore } from '../../store/authStore.js';
 import { authService } from '../../services/authService.js';
+import { useTestStore } from '../../store/testStore.js';
+import { useAntiCheatStore } from '../../store/antiCheatStore.js';
 import { toast } from 'sonner';
 
 export function useAuth() {
@@ -39,6 +41,8 @@ export function useAuth() {
 
   const logout = () => {
     setLogout();
+    useTestStore.getState().resetSession();
+    useAntiCheatStore.getState().reset();
     toast.info('Logged out');
   };
 

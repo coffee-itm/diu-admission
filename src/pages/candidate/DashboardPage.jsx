@@ -8,12 +8,21 @@ import { Card } from '../../components/ui/Card.jsx';
 import { Button } from '../../components/ui/Button.jsx';
 import { Badge } from '../../components/ui/Badge.jsx';
 import { useExamConfigStore } from '../../store/examConfigStore.js';
-import { formatDateTime } from '../../lib/utils.js';
+import { useTestStore } from '../../store/testStore.js';
+import { formatDateTime, formatTime } from '../../lib/utils.js';
 
 export function CandidateDashboardPage() {
   const { user } = useAuthStore();
   const config = useExamConfigStore((s) => s.config);
   const totalQuestions = config.sections.reduce((sum, s) => sum + s.questionCount, 0);
+  const hasActive = useTestStore(
+    (s) => !!s.sessionId && s.candidateId === user.id && !s.isSubmitted
+  );
+  const deadline = useTestStore((s) => s.deadline);
+  const storedRemaining = useTestStore((s) => s.timeRemaining);
+  // A passed deadline still resumes: the timer auto-submits immediately.
+  const [now] = useState(() => Date.now());
+  const timeLeft = deadline == null ? storedRemaining : Math.max(0, Math.ceil((deadline - now) / 1000));
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -67,6 +76,16 @@ export function CandidateDashboardPage() {
             {result ? (
               <Button as={Link} to={ROUTES.CANDIDATE_RESULT} size="lg">
                 View Full Result
+              </Button>
+            ) : hasActive ? (
+              <Button
+                as={Link}
+                id="dashboard-resume-test"
+                to={ROUTES.CANDIDATE_TEST}
+                size="lg"
+                leftIcon={<PlayCircle size={18} />}
+              >
+                Resume test ({formatTime(timeLeft)} left)
               </Button>
             ) : (
               <Button as={Link} to={ROUTES.CANDIDATE_INSTRUCTIONS} size="lg" leftIcon={<PlayCircle size={18} />}>

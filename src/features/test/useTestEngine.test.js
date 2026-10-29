@@ -88,3 +88,49 @@ describe('useTestEngine navigation', () => {
     expect(result.current.isLastOverall).toBe(true);
   });
 });
+
+describe('useTestEngine.startTest', () => {
+  let loadSpy;
+  beforeEach(() => {
+    localStorage.clear();
+    useAuthStore.setState({ user: { id: 'cand-1' } });
+    useTestStore.getState().resetSession();
+    loadSpy = vi.spyOn(testService, 'loadTest').mockResolvedValue({
+      sessionId: 'new',
+      examConfig,
+      questions,
+    });
+  });
+  afterEach(() => {
+    vi.restoreAllMocks();
+    localStorage.clear();
+    useTestStore.getState().resetSession();
+  });
+
+  it('resumes the same user active session without loading a new one', async () => {
+    useTestStore.getState().initSession({ sessionId: 'old', candidateId: 'cand-1', examConfig, questions });
+    useTestStore.getState().setAnswer('q1', 'a');
+    const { result } = renderHook(() => useTestEngine(), { wrapper });
+    await act(async () => { await result.current.startTest(); });
+    expect(loadSpy).not.toHaveBeenCalled();
+    expect(useTestStore.getState().sessionId).toBe('old');
+    expect(useTestStore.getState().answers).toMatchObject({ q1: 'a' });
+  });
+
+  it('blocks a second attempt', async () => {
+    localStorage.setItem('itm-results', JSON.stringify([{ id: 'r1', candidateId: 'cand-1' }]));
+    const { result } = renderHook(() => useTestEngine(), { wrapper });
+    await act(async () => { await result.current.startTest(); });
+    expect(loadSpy).not.toHaveBeenCalled();
+    expect(useTestStore.getState().sessionId).toBeNull();
+  });
+
+  it('starts a new session when no attempt exists, and never resumes another user session', async () => {
+    useTestStore.getState().initSession({ sessionId: 'other', candidateId: 'cand-2', examConfig, questions });
+    const { result } = renderHook(() => useTestEngine(), { wrapper });
+    await act(async () => { await result.current.startTest(); });
+    expect(loadSpy).toHaveBeenCalledTimes(1);
+    expect(useTestStore.getState().sessionId).toBe('new');
+    expect(useTestStore.getState().candidateId).toBe('cand-1');
+  });
+});

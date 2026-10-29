@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import { useTestStore } from '../../store/testStore.js';
 import { useAntiCheatStore } from '../../store/antiCheatStore.js';
 import { testService } from '../../services/testService.js';
+import { useExamConfigStore } from '../../store/examConfigStore.js';
 import { useAuthStore } from '../../store/authStore.js';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router';
@@ -17,9 +18,22 @@ export function useTestEngine() {
   const startTest = async () => {
     try {
       setLoading(true);
+      const current = useTestStore.getState();
+      // Resume this user's unfinished session (never another user's).
+      if (current.sessionId && current.candidateId === user.id && !current.isSubmitted) {
+        navigate(ROUTES.CANDIDATE_TEST);
+        return;
+      }
+      const { maxAttempts = 1 } = useExamConfigStore.getState().config;
+      if ((await testService.countAttempts(user.id)) >= maxAttempts) {
+        toast.error('You have already taken this test');
+        navigate(ROUTES.CANDIDATE_RESULT);
+        return;
+      }
       const session = await testService.loadTest(user.id);
       store.initSession({
         sessionId: session.sessionId,
+        candidateId: user.id,
         examConfig: session.examConfig,
         questions: session.questions,
       });

@@ -1,6 +1,6 @@
 # T-012 · Enforce single attempt, add Resume, clear test state on logout
 
-Status: ✅ Ready
+Status: 👀 Review
 Sprint: S1 · Role: frontend-dev · Model: sonnet · Size: M
 Depends on: T-011
 Implements: FR-TEST-07, FR-TEST-12, FR-AUTH-04, D-12, D-13, D-15
@@ -38,5 +38,10 @@ pnpm test -- useTestEngine useAuth && pnpm lint && pnpm build
 - Server-side enforcement (R2).
 
 ## Agent log
+- testStore: `candidateId` set in `initSession`. testService: `countAttempts` (stored + mock, unique ids).
+- `startTest`: resume own active session -> block when attempts >= config.maxAttempts (toast + result page) -> new session.
+- Dashboard: `dashboard-resume-test` button with time left from deadline (expired deadline still resumes).
+- `logout` resets test + anti-cheat stores. Tests: 3 startTest branches (+other-user), logout. 141 passed; lint/build ok.
+- Note: the Instructions route has no guard; a user with a result is redirected on start via toast.
 
 ## Review
