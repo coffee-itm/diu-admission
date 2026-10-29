@@ -25,4 +25,22 @@ describe('testStore wall-clock timer', () => {
     useTestStore.getState().syncTime();
     expect(useTestStore.getState().timeRemaining).toBe(0);
   });
+
+  it('backfills a missing deadline for an in-progress session, then counts down', () => {
+    useTestStore.setState({ deadline: null, timeRemaining: 1000 });
+    useTestStore.getState().syncTime();
+    expect(useTestStore.getState().deadline).toBe(Date.now() + 1000 * 1000);
+    vi.setSystemTime(new Date('2026-06-15T10:00:10Z'));
+    useTestStore.getState().syncTime();
+    expect(useTestStore.getState().timeRemaining).toBe(990);
+  });
+
+  it('does not backfill when submitted or sessionless', () => {
+    useTestStore.setState({ deadline: null, timeRemaining: 1000, isSubmitted: true });
+    useTestStore.getState().syncTime();
+    expect(useTestStore.getState().deadline).toBeNull();
+    useTestStore.getState().resetSession();
+    useTestStore.getState().syncTime();
+    expect(useTestStore.getState().deadline).toBeNull();
+  });
 });

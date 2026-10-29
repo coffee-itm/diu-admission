@@ -80,9 +80,12 @@ export const useTestStore = create(
 
       syncTime: () =>
         set((state) => {
-          if (state.deadline == null) return {};
-          const timeRemaining = Math.max(0, Math.ceil((state.deadline - Date.now()) / 1000));
-          return timeRemaining === state.timeRemaining ? {} : { timeRemaining };
+          if (!state.sessionId || state.isSubmitted) return {};
+          // Session persisted before deadlines existed: derive one from the stored remaining time.
+          const deadline = state.deadline ?? Date.now() + state.timeRemaining * 1000;
+          const timeRemaining = Math.max(0, Math.ceil((deadline - Date.now()) / 1000));
+          if (deadline === state.deadline && timeRemaining === state.timeRemaining) return {};
+          return { deadline, timeRemaining };
         }),
 
       submitTest: (result) =>

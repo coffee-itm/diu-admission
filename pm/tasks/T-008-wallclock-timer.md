@@ -1,6 +1,6 @@
 # T-008 · Wall-clock deadline timer (closing the tab must not pause the exam)
 
-Status: 👀 Review
+Status: 🔨 In Progress
 Sprint: S1 · Role: frontend-dev · Model: sonnet · Size: M
 Depends on: T-005
 Implements: FR-TEST-03 (prototype version), D-06
@@ -45,3 +45,9 @@ pnpm test -- testStore useTimer && pnpm lint && pnpm build
 - Tests: testStore.test.js (2), useTimer.test.js (3). Gate green; no tickTimer left. AC3 manual reload check not run.
 
 ## Review
+
+Verdict: CHANGES REQUESTED
+Passed: syncTime math (testStore.js:81-86, ceil, max 0); timeTaken (useTestEngine.js:43-44, min(now, deadline) - startedAt); onExpire fires once (useTimer.js, firedRef touched only in effects/callbacks, onExpireRef updated in an effect); interval and visibilitychange cleaned up; 3 required scenarios covered; no tickTimer left; eslint clean, pnpm test 114 passed, pnpm build OK. AC3 (manual reload) not run.
+Required changes:
+1. Legacy persisted session without `deadline` freezes the timer (testStore.js:83 returns {} when deadline == null). In `syncTime` (or a persist `merge`/`onRehydrateStorage`), when a session is in progress (`sessionId` set, `!isSubmitted`) and `deadline == null`, backfill `deadline = Date.now() + timeRemaining*1000` and keep timeRemaining unchanged.
+2. Add a test in testStore.test.js: setState({deadline: null, timeRemaining: 600}), call syncTime, expect deadline === Date.now()+600000 and timeRemaining 600; after advancing the system time 60 s and syncing, timeRemaining 540. Also assert nothing is backfilled when isSubmitted or there is no sessionId.
