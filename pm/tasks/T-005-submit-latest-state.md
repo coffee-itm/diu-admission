@@ -1,6 +1,6 @@
 # T-005 · Submit must use the latest answers and be single-shot
 
-Status: 👀 Review
+Status: ✔️ Done
 Sprint: S1 · Role: frontend-dev · Model: sonnet · Size: S
 Depends on: T-004
 Implements: FR-AC-03, FR-TEST-08, D-03
@@ -41,3 +41,9 @@ pnpm test -- useTestEngine && pnpm lint && pnpm build
 - New useTestEngine.test.js (stale closure, double call). eslint clean, 96 tests pass, build ok.
 
 ## Review
+**Verdict: APPROVED** (reviewer)
+- Criteria 1-2 met: useTestEngine.js:34-40 reads useTestStore/useAntiCheatStore via getState() at call time; guard at :38-39. Tests useTestEngine.test.js:33-52 (stale fn captured before setAnswer; double call -> 1 submit). Both would fail on the old code.
+- React Compiler: submittingRef is read/written only inside the async callback (never during render). Lint clean.
+- Retry path: finally (useTestEngine.js:57-58) resets the flag, so a failed submit can be retried; isSubmitted only set on success.
+- Criterion 3: navigate call unchanged (:54). Advisory: add `expect(navigate)`/MemoryRouter location assertion later; not blocking.
+- Gate: eslint (2 files) clean, pnpm test 96 pass / 2 todo, pnpm build ok. One commit with [T-005], no out-of-scope changes.

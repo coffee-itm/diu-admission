@@ -1,6 +1,6 @@
 # T-017 · Tags field, Zod 4 error params, login redirect-back
 
-Status: 👀 Review
+Status: ✔️ Done
 Sprint: S1 · Role: frontend-dev · Model: free-ok · Size: S
 Depends on: T-022
 Implements: FR-QB-06, FR-AUTH-09, D-14, D-19, D-27 (Zod part)
@@ -37,3 +37,7 @@ pnpm test -- questionSchema resolvePostLoginPath && pnpm lint && pnpm build
 - lint, 90 tests, build pass.
 
 ## Review
+**APPROVED** (reviewer)
+- AC1: no `required_error` in src. AC2: QuestionFormPage.jsx passes full `initialData` (getById) -> QuestionForm `defaultValues`, TagsInput seeds from `field.value` (QuestionForm.jsx:~33,115). AC3: resolvePostLoginPath.test.js covers all cases + lookalike prefix.
+- LoginPage.jsx:23 uses `resolvePostLoginPath(location.state?.from?.pathname, user.role)`; ProtectedRoute sets `state.from = location`. Correct.
+- eslint clean on touched files, 94 tests pass, build OK. Note: LoginPage.test.jsx skipped (allowed by card's pure-fn option).
