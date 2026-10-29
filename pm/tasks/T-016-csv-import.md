@@ -1,6 +1,6 @@
 # T-016 · Real question-bank CSV import with a row error report
 
-Status: ✅ Ready
+Status: 👀 Review
 Sprint: S1 · Role: frontend-dev · Model: sonnet · Size: M
 Depends on: T-010, T-015, T-017
 Implements: FR-QB-04 (prototype), D-11 (import part)
@@ -35,5 +35,7 @@ pnpm test -- csvParse importQuestions && pnpm lint && pnpm build
 - Duplicate detection, question status (R2).
 
 ## Agent log
+- Added csvParse (RFC 4180, BOM-safe), importQuestions.mapRows (header check, per-row zod + correct_answer check, row numbers incl. header), reworked BulkImportModal (preview, error list, imports via questionStore.create, reset on close), sample template CSV.
+- Tests: 12 new (7 parser, 5 mapper); full suite 136 passed. Manual reload check not run in a browser; store is persisted (T-010).
 
 ## Review
