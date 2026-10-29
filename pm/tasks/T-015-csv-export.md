@@ -1,6 +1,6 @@
 # T-015 · Real merit-list CSV export
 
-Status: 👀 Review
+Status: ✔️ Done
 Sprint: S1 · Role: frontend-dev · Model: free-ok · Size: S
 Depends on: T-014
 Implements: FR-RES-06, D-11 (export part)
@@ -42,3 +42,6 @@ Passed: RFC 4180 escaping + CRLF (csvExport.js:1-17), BOM test (csvExport.test.j
 Required change:
 1. phone and program export blank, but `mockCandidates` carry `phone` and `program`, and merit items already carry `candidateId` (resultService.getMeritList spreads the result). In `MeritListPage.jsx` load `getAllCandidates()` (authService, as DashboardPage does) and join by `candidateId` in `exportCSV`, so phone and program are filled. Prefer the candidate record's `phone` / `program`. Keep the existing fallbacks. Add a small test or a note proving the join.
 2. Minor: the test never checks the `"` escape inside a quoted field's round-trip beyond the existing case. No change needed. Criterion 3 (manual spreadsheet check) is still unverified; note it in the log.
+
+**APPROVED** (reviewer, re-review of commit 77bfcaf)
+Fix verified: `buildMeritRows` (src/lib/meritCsv.js) joins `getAllCandidates()` by `candidateId`, preferring candidate `phone`/`program` with fallbacks; meritCsv.test.js proves join, ranking, and CSV output. MeritListPage.jsx `exportCSV` uses it. csvExport tests unchanged and green. Gate: eslint clean on changed files, 114 tests pass, build OK. Criterion 3 (manual spreadsheet check) remains unverified, noted in log.

@@ -1,6 +1,6 @@
 # T-007 · Save the anti-cheat summary with the stored result
 
-Status: 👀 Review
+Status: ✔️ Done
 Sprint: S1 · Role: frontend-dev · Model: free-ok · Size: S
 Depends on: T-005
 Implements: D-05 (prototype), feeds FR-RES-04
@@ -37,3 +37,8 @@ pnpm test -- testService && pnpm lint && pnpm build
 - Added testService.test.js (2 tests). lint, test (107 passed), build OK.
 
 ## Review
+Verdict: APPROVED
+- AC1: testService.js:36 stores `antiCheat`; testService.test.js:20-23 checks `itm-results`. AC2: returned record has antiCheat (test :25-28). AC3: key unchanged.
+- useTestEngine.js: finalizeTracking() runs before getSummary() (called in the submitTest args). No leftover enrich code in src.
+- Admin: CandidateDetailPage.jsx:94+ reads result.antiCheat with the same field names as getSummary(); null is guarded.
+- Gate: eslint clean on changed files, pnpm test 109 passed, pnpm build OK.

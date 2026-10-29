@@ -20,15 +20,15 @@
 | [T-004](./tasks/T-004-anticheat-counters.md) | Fix stale anti-cheat counters | A | frontend-dev | sonnet | T-022 | ✔️ Done |
 | [T-005](./tasks/T-005-submit-latest-state.md) | Submit latest answers, single-shot | A | frontend-dev | sonnet | T-004 | ✔️ Done |
 | [T-006](./tasks/T-006-fullscreen-gesture.md) | Fullscreen on Start click, iOS fallback | A | frontend-dev | free-ok | T-004 | ✔️ Done |
-| [T-007](./tasks/T-007-persist-anticheat-summary.md) | Persist anti-cheat summary with result | A | frontend-dev | free-ok | T-005 | 👀 Review |
-| [T-008](./tasks/T-008-wallclock-timer.md) | Wall-clock deadline timer | A | frontend-dev | sonnet | T-005 | ✅ Ready |
+| [T-007](./tasks/T-007-persist-anticheat-summary.md) | Persist anti-cheat summary with result | A | frontend-dev | free-ok | T-005 | ✔️ Done |
+| [T-008](./tasks/T-008-wallclock-timer.md) | Wall-clock deadline timer | A | frontend-dev | sonnet | T-005 | 👀 Review |
 | [T-009](./tasks/T-009-question-navigation.md) | Visited tracking + cross-section Next/Prev | A | frontend-dev | free-ok | T-008 | ✅ Ready |
 | [T-010](./tasks/T-010-engine-uses-config.md) | Engine uses admin config + bank + sampling | A | frontend-dev | sonnet | T-009 | ✅ Ready |
 | [T-011](./tasks/T-011-config-driven-copy.md) | Config-driven copy + PDF title | A | frontend-dev | free-ok | T-010 | ✅ Ready |
 | [T-012](./tasks/T-012-attempts-resume-logout.md) | Single attempt, Resume, logout reset | A | frontend-dev | sonnet | T-011 | ✅ Ready |
 | [T-013](./tasks/T-013-admin-candidate-data.md) | Candidate detail fix + all candidates | B | frontend-dev | free-ok | T-022 | ✔️ Done |
 | [T-014](./tasks/T-014-admin-analytics-fixes.md) | Analytics counts, names, labels, real trend | B | frontend-dev | free-ok | T-013 | ✔️ Done |
-| [T-015](./tasks/T-015-csv-export.md) | Merit-list CSV export | B | frontend-dev | free-ok | T-014 | 🔨 In Progress |
+| [T-015](./tasks/T-015-csv-export.md) | Merit-list CSV export | B | frontend-dev | free-ok | T-014 | ✔️ Done |
 | [T-016](./tasks/T-016-csv-import.md) | Question CSV import + error report | B | frontend-dev | sonnet | T-010, T-015, T-017 | ✅ Ready |
 | [T-017](./tasks/T-017-forms-login-redirect.md) | Tags field, Zod 4 params, login redirect | C | frontend-dev | free-ok | T-022 | ✔️ Done |
 | [T-018](./tasks/T-018-storage-keys-migration.md) | itm-* → diu-* keys + migration | Z | frontend-dev | free-ok | T-007, T-010, T-012, T-016, T-017 | ✅ Ready |
