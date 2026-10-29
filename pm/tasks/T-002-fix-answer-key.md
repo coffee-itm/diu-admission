@@ -1,6 +1,6 @@
 # T-002 · Fix the wrong answer key and guard the question bank with a data test
 
-Status: ✅ Ready
+Status: 👀 Review
 Sprint: S1 · Role: frontend-dev · Model: free-ok · Size: S
 Depends on: T-022
 Implements: FR-QB-07, D-01
@@ -34,5 +34,7 @@ pnpm test -- mockQuestions && pnpm lint
 - Re-checking the maths of all other 49 questions (note anything suspicious in the log only).
 
 ## Agent log
+- Fixed q_logic_010 key to `a` + clean explanation; added mockQuestions.test.js (unique ids, a-d options, key valid, difficulty, 10/section, explicit logic_010).
+- eslint on changed files clean; 60 tests pass; build ok. Did not re-check other 49 questions.
 
 ## Review
