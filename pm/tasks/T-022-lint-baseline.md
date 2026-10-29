@@ -1,6 +1,6 @@
 # T-022 · Get `pnpm lint` to zero errors (behavior-preserving cleanup)
 
-Status: 👀 Review
+Status: ✔️ Done
 Sprint: S1 · Role: frontend-dev · Model: sonnet · Size: M
 Depends on: T-001
 Implements: NFR-13 (lint clean), unblocks the Definition of Done gate for all S1 cards
@@ -42,3 +42,4 @@ pnpm lint && pnpm test && pnpm build
 - Result: lint 0 errors, test 3 passed, build ok. Manual browser smoke not run (headless); changes are removals only.
 
 ## Review
+**APPROVED** (reviewer). Diff is removals only plus behavior-equivalent moves: navItems extracted (Header/Sidebar import it, no other importers), LanguageToggle lazy init equals old effect result (better: no flash), stripPassword equals the rest-destructure, unused params (QuestionNav sectionId, loadTest candidateId) harmless to callers. No disables added, eslint.config untouched. `pnpm lint` exit 0 (3 accepted exhaustive-deps warnings), test 3 passed, build ok. Manual smoke not run; verified statically.

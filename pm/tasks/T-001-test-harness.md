@@ -1,6 +1,6 @@
 # T-001 · Add the Vitest + Testing Library test harness
 
-Status: 👀 Review
+Status: ✔️ Done
 Sprint: S1 · Role: test-engineer · Model: free-ok · Size: S
 Depends on: none
 Implements: P0-01, D-27 (tests part), ADR-018
@@ -27,9 +27,9 @@ The repo has no tests. Add a working frontend test runner so every later card ca
 6. If ESLint complains about test files, add a files override for `**/*.test.{js,jsx}` with `globals.node`. Don't disable rules.
 
 ## Acceptance criteria
-1. [ ] `pnpm test` runs and passes (≥ 3 assertions in `utils.test.js`).
-2. [ ] `pnpm build` still passes; `pnpm lint` shows no problems in files changed by this card (baseline errors are handled by T-022).
-3. [ ] No test files end up in the production bundle (build output unchanged in size order of magnitude).
+1. [x] `pnpm test` runs and passes (≥ 3 assertions in `utils.test.js`).
+2. [x] `pnpm build` still passes; `pnpm lint` shows no problems in files changed by this card (baseline errors are handled by T-022).
+3. [x] No test files end up in the production bundle (build output unchanged in size order of magnitude).
 
 ## Verify
 ```bash
@@ -46,3 +46,5 @@ pnpm test && pnpm lint && pnpm build
 - Build OK; test files not imported, so not bundled.
 
 ## Review
+
+APPROVED. pnpm test 3/3 pass; eslint clean on vite.config.js, setup.js, utils.test.js; build OK, no test files in dist. Nit: package.json pnpm.onlyBuiltDependencies reformatted (harmless).
