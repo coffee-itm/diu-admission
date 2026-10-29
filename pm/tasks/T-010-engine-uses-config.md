@@ -1,6 +1,6 @@
 # T-010 · Test engine uses admin config + persisted question bank + per-section sampling
 
-Status: 👀 Review
+Status: ✔️ Done
 Sprint: S1 · Role: frontend-dev · Model: sonnet · Size: M
 Depends on: T-009
 Implements: FR-CFG-04, D-08, D-21, D-24
@@ -36,3 +36,4 @@ pnpm test -- testService && pnpm lint && pnpm build
 questionStore persisted ('diu-questions'); loadTest samples questionCount per config section from stores, throws on small pool. 5 new tests in testService.test.js. lint/test(124)/build green.
 
 ## Review
+**APPROVED.** AC1-5 met (testService.js loadTest; questionStore persist 'diu-questions'). Lint clean, 124 tests pass, build ok. No status field on questions (R2, out of scope). Default persist merge: stored bank wins, seeded once. Advisory: startTest catch shows generic 'Failed to load test session' toast, not the specific 'Not enough questions' message (useTestEngine.js:28). 'diu-questions' matches T-018's STORAGE_KEYS.QUESTIONS, no conflict.
