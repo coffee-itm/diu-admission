@@ -33,7 +33,7 @@
 | [T-017](./tasks/T-017-forms-login-redirect.md) | Tags field, Zod 4 params, login redirect | C | frontend-dev | free-ok | T-022 | ✔️ Done |
 | [T-018](./tasks/T-018-storage-keys-migration.md) | itm-* → diu-* keys + migration | Z | frontend-dev | free-ok | T-007, T-010, T-012, T-016, T-017 | ✔️ Done |
 | [T-019](./tasks/T-019-dependency-hygiene.md) | Remove unused deps | C | devops | free-ok | T-014 | ✔️ Done |
-| [T-020](./tasks/T-020-docs-sync-s1.md) | Docs sync after S1 | Z | docs-keeper | free-ok | T-002…T-019 | ✅ Ready |
+| [T-020](./tasks/T-020-docs-sync-s1.md) | Docs sync after S1 | Z | docs-keeper | free-ok | T-002…T-019 | ✔️ Done |
 | [T-021](./tasks/T-021-s1-qa.md) | Sprint 1 QA smoke | Z | reviewer | sonnet | T-001…T-020 | ✅ Ready |
 
 Lanes: **0** first (alone) · **A** engine (sequential) · **B** admin (sequential) · **C** small independent cards · **Z** closing (sequential, last).

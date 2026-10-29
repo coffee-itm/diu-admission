@@ -1,6 +1,6 @@
 # T-020 · Sync docs with what Sprint 1 actually fixed
 
-Status: 👀 Review
+Status: ✔️ Done
 Sprint: S1 · Role: docs-keeper · Model: free-ok · Size: S
 Depends on: T-002 … T-019 (all Done)
 Implements: P0-14
@@ -40,3 +40,6 @@ grep -n "Fixed (T-" context/06-open-issues-doc-gaps.md | wc -l
 - Docs only. No src changes. No link checker in this card.
 
 ## Review
+
+## Review
+**APPROVED** (Opus): link checker "all links ok"; remaining `itm-*`/date-fns mentions in context/06 are historical defect rows (correct). ANTI_CHEAT_IMPLEMENTATION.md still names `itm-anti-cheat` → S1 carry-over.
