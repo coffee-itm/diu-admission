@@ -3,18 +3,19 @@
 > Source of truth for status = the `Status:` line in each card (`pm/tasks/T-xxx-*.md`). Agents update their own row.
 > Recount with `/sprint-status`. Process: [PROCESS.md](./PROCESS.md) · Playbook: [AGENT_PLAYBOOK.md](./AGENT_PLAYBOOK.md) · Escalations: [ESCALATIONS.md](./ESCALATIONS.md)
 
-## Current sprint: [S1 — Prototype correct + test harness](./sprints/S1.md)  ·  ✔️ Done (reviewed 2026-10-29) — next: `/plan-sprint S2`
+## Current sprint: [S1 — Prototype correct + test harness](./sprints/S1.md)  ·  🔄 Pre-merge fix T-023 (found by browser smoke), then merge + `/plan-sprint S2`
 
 ### Summary
 | ✅ Ready | 🔨 In Progress | 👀 Review | ✔️ Done | ⛔ Blocked | Total | Done % |
 |:-:|:-:|:-:|:-:|:-:|:-:|:-:|
-| 0 | 0 | 0 | 22 | 0 | 22 | 100 % |
+| 0 | 1 | 0 | 22 | 0 | 23 | 96 % |
 
 ### Cards
 | ID | Title | Lane | Role | Model | Depends on | Status |
 |:--|:--|:-:|:--|:--|:--|:--|
 | [T-001](./tasks/T-001-test-harness.md) | Vitest + Testing Library harness | 0 | test-engineer | free-ok | — | ✔️ Done |
 | [T-022](./tasks/T-022-lint-baseline.md) | Lint baseline to zero (no behavior change) | 0 | frontend-dev | sonnet | T-001 | ✔️ Done |
+| [T-023](./tasks/T-023-premerge-fixes.md) | Pre-merge fixes: Return-to-fullscreen button, config duration rule | A | frontend-dev | sonnet | T-021 | 🔨 In Progress |
 | [T-002](./tasks/T-002-fix-answer-key.md) | Fix q_logic_010 key + bank data test | C | frontend-dev | free-ok | T-022 | ✔️ Done |
 | [T-003](./tasks/T-003-scoring-thresholds.md) | Configurable thresholds, unrounded compare, boundary tests | C | frontend-dev | sonnet | T-022 | ✔️ Done |
 | [T-004](./tasks/T-004-anticheat-counters.md) | Fix stale anti-cheat counters | A | frontend-dev | sonnet | T-022 | ✔️ Done |
