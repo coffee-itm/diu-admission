@@ -1,6 +1,6 @@
 # T-017 · Tags field, Zod 4 error params, login redirect-back
 
-Status: ✅ Ready
+Status: 👀 Review
 Sprint: S1 · Role: frontend-dev · Model: free-ok · Size: S
 Depends on: T-022
 Implements: FR-QB-06, FR-AUTH-09, D-14, D-19, D-27 (Zod part)
@@ -31,5 +31,9 @@ pnpm test -- questionSchema resolvePostLoginPath && pnpm lint && pnpm build
 - New registration fields (R2).
 
 ## Agent log
+- Zod 4 `{ error }` in questionSchema; tags = trimmed/lowercased, max 10.
+- QuestionForm: `question-tags` comma input (Controller) + chip preview; initial value from defaultValues so edit reloads tags.
+- New `src/features/auth/resolvePostLoginPath.js` (+test); LoginPage uses `location.state.from.pathname`. Card's LoginPage.test.jsx skipped; logic tested via pure fn.
+- lint, 90 tests, build pass.
 
 ## Review
