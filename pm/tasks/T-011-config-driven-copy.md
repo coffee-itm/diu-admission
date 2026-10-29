@@ -34,5 +34,11 @@ pnpm lint && pnpm build && pnpm test
 - generatePdfReport(user, result, examTitle): header uses result.examTitle ?? examTitle; ResultPage and CandidateDetailPage pass the store title.
 - Extra (approved by Opus): useTestEngine startTest catch now toasts err.message, falling back to 'Failed to load test session'.
 - Gate: eslint on changed files, test, build (see report). Manual 60-min check not run in a browser.
+- Review fixes: Landing + admin Dashboard copy from config store; persist merge (one-level deep) in examConfigStore with test; Instructions uses plain config.instructions.
 
 ## Review
+
+**CHANGES REQUESTED** (reviewer, commit e0c0491). Gate: eslint 0 errors (1 pre-existing TestPage warning), test 136 pass, build OK.
+1. AC1 fails: `src/pages/public/LandingPage.jsx:10` ("54 Minutes") and `:35` ("Spring 2026"), `src/pages/admin/DashboardPage.jsx:43` ("Spring 2026") are still hard-coded. Take them from `useExamConfigStore` (title, `totalTimeMinutes`) or `mockExamConfig`; add these files to the card.
+2. `src/pages/candidate/InstructionsPage.jsx:60`: `config.instructions ?? []` is unsafe. The store persists under `itm-exam-config` with zustand's default shallow merge, so a persisted `config` from before this change replaces the default whole and has no `instructions`. The candidate then sees an empty rules list. Fall back to `mockExamConfig.instructions` (import it), or add a `merge`/`version` to examConfigStore that spreads the defaults under the persisted config.
+Verified OK: totals (Σ questionCount, totalTimeMinutes), PDF title fallback chain (result.examTitle ?? examTitle ?? 'Admission Assessment'), ResultPage/CandidateDetailPage edits are one-line PDF title callers (in scope). Toast `err.message` is safe: errors come from testService (e.g. "Not enough questions in section X: need N, have M"), no stacks; it does leak internal section IDs/counts, which is acceptable for the prototype.

@@ -57,7 +57,7 @@ export function CandidateInstructionsPage() {
       <Card className="p-8">
         <h3 className="text-lg font-bold text-slate-900 mb-4">Rules & Guidelines</h3>
         <ul className="space-y-3">
-          {(config.instructions ?? []).map((inst, idx) => (
+          {config.instructions.map((inst, idx) => (
             <li key={idx} className="flex items-start gap-3">
               <div className="mt-1 w-1.5 h-1.5 rounded-full bg-blue-500 flex-shrink-0" />
               <span className="text-slate-700 leading-relaxed">{inst}</span>

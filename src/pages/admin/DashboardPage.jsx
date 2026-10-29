@@ -6,9 +6,11 @@ import { resultService } from '../../services/resultService.js';
 import { StatCard, Card } from '../../components/ui/Card.jsx';
 import { Badge } from '../../components/ui/Badge.jsx';
 import { PageSpinner } from '../../components/ui/Spinner.jsx';
+import { useExamConfigStore } from '../../store/examConfigStore.js';
 import { formatDateTime } from '../../lib/utils.js';
 
 export function AdminDashboardPage() {
+  const examTitle = useExamConfigStore((s) => s.config.title);
   const [stats, setStats] = useState(null);
   const [recentResults, setRecentResults] = useState([]);
   const [names, setNames] = useState({});
@@ -40,7 +42,7 @@ export function AdminDashboardPage() {
     <div className="space-y-8 page-enter">
       <div>
         <h1 className="text-2xl font-bold text-slate-900 mb-2">Admin Dashboard</h1>
-        <p className="text-slate-600">Overview of the Spring 2026 Admission</p>
+        <p className="text-slate-600">Overview of {examTitle}</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

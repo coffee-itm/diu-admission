@@ -22,6 +22,14 @@ export const useExamConfigStore = create(
 
       resetToDefault: () => set({ config: { ...mockExamConfig } }),
     }),
-    { name: 'itm-exam-config' }
+    {
+      name: 'itm-exam-config',
+      // One-level deep merge so configs persisted before new default fields existed gain them.
+      merge: (persisted, current) => ({
+        ...current,
+        ...persisted,
+        config: { ...current.config, ...(persisted?.config ?? {}) },
+      }),
+    }
   )
 );
