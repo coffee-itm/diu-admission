@@ -26,6 +26,7 @@ describe('useAntiCheat', () => {
     hidden = false;
     Object.defineProperty(document, 'hidden', { configurable: true, get: () => hidden });
     Object.defineProperty(document, 'fullscreenElement', { configurable: true, get: () => null });
+    document.documentElement.requestFullscreen = vi.fn().mockResolvedValue();
     useAntiCheatStore.getState().reset();
   });
 
@@ -33,6 +34,7 @@ describe('useAntiCheat', () => {
     cleanup();
     delete document.hidden;
     delete document.fullscreenElement;
+    delete document.documentElement.requestFullscreen;
   });
 
   it('warns on the 2nd tab switch and auto-submits once at the 5th', () => {
@@ -71,6 +73,18 @@ describe('useAntiCheat', () => {
     exitFullscreen();
     expect(onAutoSubmit).toHaveBeenCalledTimes(1);
     expect(useAntiCheatStore.getState().fullscreenExitCount).toBe(4);
+  });
+
+  it('logs fullscreen_unsupported once and does not count exits when the API is absent', () => {
+    delete document.documentElement.requestFullscreen;
+    const onAutoSubmit = vi.fn();
+    renderHook(() => useAntiCheat({ onAutoSubmit }));
+    exitFullscreen();
+    exitFullscreen();
+    const st = useAntiCheatStore.getState();
+    expect(st.fullscreenExitCount).toBe(0);
+    expect(st.securityEvents.filter((e) => e.type === 'fullscreen_unsupported')).toHaveLength(1);
+    expect(onAutoSubmit).not.toHaveBeenCalled();
   });
 
   it('calls the callback from the latest render', () => {

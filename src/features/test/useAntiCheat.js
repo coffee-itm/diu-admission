@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useAntiCheatStore } from '../../store/antiCheatStore.js';
 import { ANTI_CHEAT, SECURITY_EVENT_TYPES } from '../../lib/constants.js';
 import { toast } from 'sonner';
+import { enterFullscreen, isFullscreenSupported, isFullscreenActive } from '../../lib/fullscreen.js';
 
 export function useAntiCheat({ onAutoSubmit }) {
   const store = useAntiCheatStore();
@@ -42,8 +43,17 @@ export function useAntiCheat({ onAutoSubmit }) {
     };
 
     // === 2. FULLSCREEN EXIT DETECTION ===
+    // Unsupported browsers (e.g. iOS Safari): log once, never count exits.
+    const fullscreenSupported = isFullscreenSupported();
+    if (!fullscreenSupported) {
+      useAntiCheatStore.getState().logEvent(
+        SECURITY_EVENT_TYPES.FULLSCREEN_UNSUPPORTED,
+        'Fullscreen API not supported by this browser'
+      );
+    }
     const handleFullscreenChange = () => {
-      if (!document.fullscreenElement) {
+      if (!fullscreenSupported) return;
+      if (!isFullscreenActive()) {
         useAntiCheatStore.getState().incrementFullscreenExit();
         const count = useAntiCheatStore.getState().fullscreenExitCount;
         if (count >= ANTI_CHEAT.MAX_FULLSCREEN_EXITS) {
@@ -126,6 +136,7 @@ export function useAntiCheat({ onAutoSubmit }) {
     // Register all listeners
     document.addEventListener('visibilitychange', handleVisibility);
     document.addEventListener('fullscreenchange', handleFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
     document.addEventListener('copy', handleCopy);
     document.addEventListener('paste', handlePaste);
     document.addEventListener('cut', handleCut);
@@ -136,6 +147,7 @@ export function useAntiCheat({ onAutoSubmit }) {
     return () => {
       document.removeEventListener('visibilitychange', handleVisibility);
       document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
       document.removeEventListener('copy', handleCopy);
       document.removeEventListener('paste', handlePaste);
       document.removeEventListener('cut', handleCut);
@@ -147,24 +159,23 @@ export function useAntiCheat({ onAutoSubmit }) {
     };
   }, []); // Empty deps — register once on mount
 
-  // Fullscreen request helper
-  const requestFullscreen = () => {
-    const el = document.documentElement;
-    if (el.requestFullscreen) el.requestFullscreen().catch(() => {});
-    else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
-    store.logEvent('fullscreen_entered', 'Entered fullscreen');
+  // Only call from a click handler (user gesture required by browsers)
+  const returnToFullscreen = async () => {
+    setShowWarning(false);
+    if (await enterFullscreen()) {
+      useAntiCheatStore.getState().logEvent(SECURITY_EVENT_TYPES.FULLSCREEN_ENTERED, 'Returned to fullscreen');
+    }
   };
 
   const dismissWarning = () => {
     setShowWarning(false);
-    requestFullscreen(); // Re-enter fullscreen after warning
   };
 
   return {
     showWarning,
     warningMessage,
     dismissWarning,
-    requestFullscreen,
+    returnToFullscreen,
     tabSwitchCount: store.tabSwitchCount,
     fullscreenExitCount: store.fullscreenExitCount,
   };

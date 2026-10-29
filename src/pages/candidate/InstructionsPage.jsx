@@ -6,6 +6,7 @@ import { ROUTES } from '../../lib/constants.js';
 import { mockExamConfig } from '../../data/mockExamConfig.js';
 import { Card } from '../../components/ui/Card.jsx';
 import { Button } from '../../components/ui/Button.jsx';
+import { enterFullscreen } from '../../lib/fullscreen.js';
 import { useTestEngine } from '../../features/test/useTestEngine.js';
 
 export function CandidateInstructionsPage() {
@@ -13,6 +14,12 @@ export function CandidateInstructionsPage() {
   const [integrityChecked, setIntegrityChecked] = useState(false);
   const { setIntegrityAgreed, reset: resetAntiCheat } = useAntiCheatStore();
   const { startTest, loading } = useTestEngine();
+
+  const handleStart = () => {
+    // Must run synchronously inside the click (user gesture) before any await
+    enterFullscreen();
+    startTest();
+  };
 
   return (
     <div className="max-w-4xl mx-auto space-y-6 page-enter">
@@ -93,7 +100,7 @@ export function CandidateInstructionsPage() {
         <Button variant="ghost" onClick={() => navigate(ROUTES.CANDIDATE_DASHBOARD)} disabled={loading}>
           Cancel
         </Button>
-        <Button size="lg" onClick={startTest} loading={loading} disabled={!integrityChecked}>
+        <Button size="lg" onClick={handleStart} loading={loading} disabled={!integrityChecked}>
           I Agree, Start Test
         </Button>
       </div>

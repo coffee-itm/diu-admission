@@ -1,6 +1,6 @@
 # T-006 · Request fullscreen from the Start click; add "Return to fullscreen"; handle iOS
 
-Status: ✅ Ready
+Status: 👀 Review
 Sprint: S1 · Role: frontend-dev · Model: free-ok · Size: S
 Depends on: T-004
 Implements: FR-AC-04, D-04
@@ -36,5 +36,10 @@ pnpm test -- fullscreen && pnpm lint && pnpm build
 - Changing thresholds; mobile layout.
 
 ## Agent log
+- Added `src/lib/fullscreen.js` (+tests): isFullscreenSupported/isFullscreenActive/enterFullscreen (std + webkit, never throws).
+- InstructionsPage `handleStart` calls enterFullscreen() synchronously, then startTest(). Removed TestPage mount effect.
+- useAntiCheat: logs `fullscreen_unsupported` once and skips exit counting when unsupported; listens to webkitfullscreenchange; `requestFullscreen` replaced by `returnToFullscreen` (click-only); dismiss no longer re-requests fullscreen.
+- SecurityWarningModal: `onReturnToFullscreen` -> `#security-return-fullscreen` (supported and not active). Constant added.
+- useAntiCheat.test.js: stub requestFullscreen in setup + new unsupported test. Chrome manual check (AC3) not run.
 
 ## Review

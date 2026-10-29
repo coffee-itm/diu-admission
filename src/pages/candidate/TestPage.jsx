@@ -58,17 +58,12 @@ export function CandidateTestPage() {
 
   const antiCheatStore = useAntiCheatStore();
 
-  const { showWarning, warningMessage, dismissWarning, requestFullscreen } = useAntiCheat({
+  const { showWarning, warningMessage, dismissWarning, returnToFullscreen } = useAntiCheat({
     onAutoSubmit: async () => {
       antiCheatStore.finalizeTracking();
       await submitTest();
     },
   });
-
-  // Request fullscreen on mount (empty deps — run once only)
-  useEffect(() => {
-    requestFullscreen();
-  }, []);
 
   // Track time per question
   useEffect(() => {
@@ -173,6 +168,7 @@ export function CandidateTestPage() {
         isOpen={showWarning}
         message={warningMessage}
         onDismiss={dismissWarning}
+        onReturnToFullscreen={returnToFullscreen}
       />
     </div>
   );

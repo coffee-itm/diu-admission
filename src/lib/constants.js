@@ -122,6 +122,7 @@ export const SECURITY_EVENT_TYPES = {
   INTEGRITY_AGREED: 'integrity_agreed',
   FULLSCREEN_ENTERED: 'fullscreen_entered',
   CUT_ATTEMPT: 'cut_attempt',
+  FULLSCREEN_UNSUPPORTED: 'fullscreen_unsupported',
 };
 
 // Mock credentials
