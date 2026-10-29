@@ -40,7 +40,8 @@ export function useTestEngine() {
     try {
       setLoading(true);
       ac.finalizeTracking();
-      const timeTaken = s.examConfig.totalTimeMinutes * 60 - s.timeRemaining;
+      const end = s.deadline == null ? Date.now() : Math.min(Date.now(), s.deadline);
+      const timeTaken = Math.max(0, Math.round((end - Date.parse(s.startedAt)) / 1000));
       const result = await testService.submitTest({
         candidateId: user.id,
         answers: s.answers,

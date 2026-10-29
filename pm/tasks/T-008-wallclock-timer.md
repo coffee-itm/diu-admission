@@ -1,6 +1,6 @@
 # T-008 · Wall-clock deadline timer (closing the tab must not pause the exam)
 
-Status: ✅ Ready
+Status: 👀 Review
 Sprint: S1 · Role: frontend-dev · Model: sonnet · Size: M
 Depends on: T-005
 Implements: FR-TEST-03 (prototype version), D-06
@@ -39,5 +39,9 @@ pnpm test -- testStore useTimer && pnpm lint && pnpm build
 - Server clock offset (R2), per-section timers.
 
 ## Agent log
+- testStore: added persisted `deadline`, replaced `tickTimer` with `syncTime()` (clock-derived, clamped at 0).
+- useTimer: 1s interval + visibilitychange call syncTime; onExpire fires once (ref guard, reset per session); checks immediately on mount so restored past-deadline sessions expire.
+- useTestEngine: timeTaken = min(now, deadline) - startedAt.
+- Tests: testStore.test.js (2), useTimer.test.js (3). Gate green; no tickTimer left. AC3 manual reload check not run.
 
 ## Review

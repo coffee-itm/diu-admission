@@ -13,7 +13,8 @@ const initialState = {
   startedAt: null,
   submittedAt: null,
   isSubmitted: false,
-  timeRemaining: 0,     // seconds
+  deadline: null,       // epoch ms; source of truth for remaining time
+  timeRemaining: 0,     // seconds, derived from deadline via syncTime()
   result: null,
 };
 
@@ -35,6 +36,7 @@ export const useTestStore = create(
           currentSectionId: questions[0]?.section ?? null,
           currentQuestionIndex: 0,
           startedAt: new Date().toISOString(),
+          deadline: Date.now() + totalSeconds * 1000,
           timeRemaining: totalSeconds,
           isSubmitted: false,
           result: null,
@@ -76,8 +78,12 @@ export const useTestStore = create(
       navigateTo: (sectionId, questionIndex) =>
         set({ currentSectionId: sectionId, currentQuestionIndex: questionIndex }),
 
-      tickTimer: () =>
-        set((state) => ({ timeRemaining: Math.max(0, state.timeRemaining - 1) })),
+      syncTime: () =>
+        set((state) => {
+          if (state.deadline == null) return {};
+          const timeRemaining = Math.max(0, Math.ceil((state.deadline - Date.now()) / 1000));
+          return timeRemaining === state.timeRemaining ? {} : { timeRemaining };
+        }),
 
       submitTest: (result) =>
         set({ isSubmitted: true, submittedAt: new Date().toISOString(), result }),
