@@ -38,4 +38,9 @@ pnpm test -- analyticsService && pnpm lint && pnpm build
 - DashboardPage shows candidate names (fallback id); MeritListPage uses replaceAll + "No results yet" (dashboard badge also replaceAll).
 - Tests: analyticsService.test.js (4). lint, test (94 passed), build OK.
 
+- E-019 fix: trend dates now use toLocaleDateString (en-GB); date-fns import removed, grep src clean. lint, test (96 passed), build OK.
+
 ## Review
+**CHANGES REQUESTED** (E-019)
+1. `src/pages/admin/AnalyticsPage.jsx:8,55` still imports `format` from `date-fns`, and S1 removes date-fns. Delete the import and replace line 55's `format(new Date(...), 'd MMM')` with `new Date(`${d.date}T00:00:00`).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })`.
+Everything else is OK: registrations=16, perDay grouping, no hard-coded trend, replaceAll labels, dashboard names. Eslint on the card's files is clean and the build passes. The one failing test file in `pnpm test` is outside this card (T-005 WIP); T-014's tests pass.

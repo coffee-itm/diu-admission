@@ -5,7 +5,6 @@ import { PageSpinner } from '../../components/ui/Spinner.jsx';
 import { ScoreBarChart } from '../../components/charts/ScoreBarChart.jsx';
 import { SectionPieChart } from '../../components/charts/SectionPieChart.jsx';
 import { MeritLineChart } from '../../components/charts/MeritLineChart.jsx';
-import { format } from 'date-fns';
 import { SECTIONS, ELIGIBILITY } from '../../lib/constants.js';
 
 export function AnalyticsPage() {
@@ -52,7 +51,7 @@ export function AnalyticsPage() {
   }).filter(d => d.value > 0);
 
   // Real per-day trend (average score of submissions per day)
-  const trendData = data.perDay.map((d) => ({ ...d, date: format(new Date(`${d.date}T00:00:00`), 'd MMM') }));
+  const trendData = data.perDay.map((d) => ({ ...d, date: new Date(`${d.date}T00:00:00`).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) }));
 
   return (
     <div className="space-y-6 page-enter">
