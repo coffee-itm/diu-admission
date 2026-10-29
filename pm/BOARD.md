@@ -8,14 +8,14 @@
 ### Summary
 | ✅ Ready | 🔨 In Progress | 👀 Review | ✔️ Done | ⛔ Blocked | Total | Done % |
 |:-:|:-:|:-:|:-:|:-:|:-:|:-:|
-| 0 | 1 | 0 | 22 | 0 | 23 | 96 % |
+| 0 | 0 | 1 | 22 | 0 | 23 | 96 % |
 
 ### Cards
 | ID | Title | Lane | Role | Model | Depends on | Status |
 |:--|:--|:-:|:--|:--|:--|:--|
 | [T-001](./tasks/T-001-test-harness.md) | Vitest + Testing Library harness | 0 | test-engineer | free-ok | — | ✔️ Done |
 | [T-022](./tasks/T-022-lint-baseline.md) | Lint baseline to zero (no behavior change) | 0 | frontend-dev | sonnet | T-001 | ✔️ Done |
-| [T-023](./tasks/T-023-premerge-fixes.md) | Pre-merge fixes: Return-to-fullscreen button, config duration rule | A | frontend-dev | sonnet | T-021 | 🔨 In Progress |
+| [T-023](./tasks/T-023-premerge-fixes.md) | Pre-merge fixes: Return-to-fullscreen button, config duration rule | A | frontend-dev | sonnet | T-021 | 👀 Review |
 | [T-002](./tasks/T-002-fix-answer-key.md) | Fix q_logic_010 key + bank data test | C | frontend-dev | free-ok | T-022 | ✔️ Done |
 | [T-003](./tasks/T-003-scoring-thresholds.md) | Configurable thresholds, unrounded compare, boundary tests | C | frontend-dev | sonnet | T-022 | ✔️ Done |
 | [T-004](./tasks/T-004-anticheat-counters.md) | Fix stale anti-cheat counters | A | frontend-dev | sonnet | T-022 | ✔️ Done |
