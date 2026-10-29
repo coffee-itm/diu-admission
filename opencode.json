@@ -1,0 +1,56 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "instructions": ["AGENTS.md", "pm/AGENT_PLAYBOOK.md"],
+  "agent": {
+    "frontend-dev": {
+      "description": "Frontend engineer (React 19, Zustand, Tailwind v4). Executes exactly one pm/tasks card whose Role is frontend-dev.",
+      "mode": "all",
+      "prompt": "{file:./pm/agents/frontend-dev.md}",
+      "tools": { "read": true, "write": true, "edit": true, "bash": true }
+    },
+    "backend-dev": {
+      "description": "Backend engineer (Fastify 5, Mongoose 8, MongoDB). Executes exactly one pm/tasks card whose Role is backend-dev.",
+      "mode": "all",
+      "prompt": "{file:./pm/agents/backend-dev.md}",
+      "tools": { "read": true, "write": true, "edit": true, "bash": true }
+    },
+    "test-engineer": {
+      "description": "Test engineer (Vitest, Testing Library, mongodb-memory-server, Playwright). Executes one pm/tasks card whose Role is test-engineer.",
+      "mode": "all",
+      "prompt": "{file:./pm/agents/test-engineer.md}",
+      "tools": { "read": true, "write": true, "edit": true, "bash": true }
+    },
+    "reviewer": {
+      "description": "Read-only reviewer. Reviews one pm/tasks card in Review status against its acceptance criteria and gives a verdict. Edits only pm/ files.",
+      "mode": "all",
+      "prompt": "{file:./pm/agents/reviewer.md}",
+      "tools": { "read": true, "write": false, "edit": true, "bash": true }
+    },
+    "devops": {
+      "description": "DevOps (pnpm workspace, CI, Docker, deploy config). Executes one pm/tasks card whose Role is devops.",
+      "mode": "all",
+      "prompt": "{file:./pm/agents/devops.md}",
+      "tools": { "read": true, "write": true, "edit": true, "bash": true }
+    },
+    "docs-keeper": {
+      "description": "Keeps pm/BOARD.md, defect register, roadmap ticks and README/AGENTS in sync. No code.",
+      "mode": "all",
+      "prompt": "{file:./pm/agents/docs-keeper.md}",
+      "tools": { "read": true, "write": true, "edit": true, "bash": true }
+    }
+  },
+  "command": {
+    "next-task": {
+      "description": "Build the next Ready card with the right role agent, then review it",
+      "template": "{file:./pm/commands/next-task.md}\n\nArguments: $ARGUMENTS"
+    },
+    "review-task": {
+      "description": "Review one card in Review status",
+      "template": "{file:./pm/commands/review-task.md}\n\nArguments: $ARGUMENTS"
+    },
+    "sprint-status": {
+      "description": "Recount the board and print a short status",
+      "template": "{file:./pm/commands/sprint-status.md}\n\nArguments: $ARGUMENTS"
+    }
+  }
+}

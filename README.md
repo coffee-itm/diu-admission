@@ -351,11 +351,17 @@ Login  →  Dashboard  →  Question Bank  →  Exam Config  →  Candidates  �
 - [x] Exam configuration panel
 - [x] Merit list with ranking
 - [x] Analytics charts (bar, pie, line)
-- [ ] Backend API (Node.js + Express + PostgreSQL)
+- [ ] Backend API (Node.js + Fastify + MongoDB) — see [context/16-backend-architecture.md](context/16-backend-architecture.md)
 - [ ] Email/SMS OTP verification
 - [ ] Bilingual support (English + Bangla)
 - [ ] CSV/Excel merit list export
 - [ ] Production deployment
+
+---
+
+## 📚 Documentation
+
+Full project documentation — PRD, SRS, MongoDB schema, API spec, backend/frontend specs, testing strategy, implementation roadmap and ops runbook — lives in [`context/`](context/README.md). Start with [`context/README.md`](context/README.md).
 
 ---
 
