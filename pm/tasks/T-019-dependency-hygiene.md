@@ -1,6 +1,6 @@
 # T-019 · Remove unused dependencies
 
-Status: ✅ Ready
+Status: ⛔ Blocked (E-019)
 Sprint: S1 · Role: devops · Model: free-ok · Size: S
 Depends on: T-022
 Implements: D-27 (deps part), context/17 §8
@@ -32,5 +32,6 @@ pnpm install --frozen-lockfile && pnpm lint && pnpm test && pnpm build
 - Docs tables (T-020).
 
 ## Agent log
+Escalated E-019: date-fns imported by uncommitted T-014 AnalyticsPage.jsx:8; no package changes made.
 
 ## Review
