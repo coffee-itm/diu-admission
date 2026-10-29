@@ -38,3 +38,10 @@ pnpm test -- useTestEngine && pnpm lint && pnpm build
 - Tests: 3 new in useTestEngine.test.js; full suite 119 passed; lint 0 errors (exhaustive-deps warning on new effect, same as existing pattern); build ok.
 
 ## Review
+
+**CHANGES REQUESTED** (reviewer, commit 44ced8f)
+
+Verified OK: cross-section goNext/goPrev skip empty sections via `sectionsWithQuestions` (useTestEngine.js:67-91); `isFirstOverall`/`isLastOverall` correct (:70-74); tab jumps to first unanswered (TestPage.jsx:90-95); `jumpTo` (grid) still calls `visitQuestion` (useTestEngine.js:93-97) and the new effect covers next/prev/tabs/first load, so no path skips visited marking. Tests 119 passed, build ok, eslint 0 errors.
+
+Required change:
+1. TestPage.jsx:72-77 new effect warns exhaustive-deps (missing `currentQuestion`, `visitQuestion`). Fix cleanly: before the effect add `const currentQuestionId = currentQuestion?.id;`, use it in the effect, and set deps to `[currentQuestionId, visitQuestion]`. Store actions are stable and visitQuestion is a no-op unless NOT_VISITED, so no loop. Do not add the warning to the baseline. (The warning at :84 is pre-existing.)

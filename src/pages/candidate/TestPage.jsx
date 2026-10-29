@@ -70,11 +70,12 @@ export function CandidateTestPage() {
   });
 
   // Mark every question the candidate lands on as visited (first load, tabs, next/prev).
+  const currentQuestionId = currentQuestion?.id;
   useEffect(() => {
-    if (currentQuestion) {
-      visitQuestion(currentQuestion.id);
+    if (currentQuestionId) {
+      visitQuestion(currentQuestionId);
     }
-  }, [currentQuestion?.id]);
+  }, [currentQuestionId, visitQuestion]);
 
   // Track time per question
   useEffect(() => {
