@@ -28,6 +28,9 @@ Implements: <FR-…, D-…, P0-…>
 ## Acceptance criteria
 1. [ ] <observable, testable>
 2. [ ] Tests: <which tests, what they assert>
+<!-- Planner: for "none remain" criteria, give the repo-wide grep (`grep -rn "<pattern>" src` → empty) and list EVERY file it hits under Files.
+     Touching a persisted store? Add a criterion for old persisted state. Browser-only checks go to the sprint QA card. -->
+3. [ ] No new lint warnings.
 
 ## Verify
 ```bash

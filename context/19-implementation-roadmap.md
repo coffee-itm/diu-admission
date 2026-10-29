@@ -45,7 +45,7 @@
   - Rename the `itm-*` storage keys to `diu-*` (D-28).
   - Real per-day trend from results (D-20).
   - Remove or adopt the unused deps per [17 §8](./17-frontend-spec.md#8-dependency-hygiene).
-- [ ] **P0-14 Docs sync.** Update AGENTS.md "Scoring Engine" rules and the README anti-cheat claims to match.
+- [x] **P0-14 Docs sync.** Update AGENTS.md "Scoring Engine" rules and the README anti-cheat claims to match.
 
 **Exit P0:** `pnpm lint && pnpm test && pnpm build` green. Manual demo of J1/J2 with no console errors.
 

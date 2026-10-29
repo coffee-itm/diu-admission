@@ -2,7 +2,7 @@
 
 | Sprint | Phase (context/19) | Goal | Status |
 |:--|:--|:--|:--|
-| [S1](./S1.md) | P0 | Prototype correct + test harness | 🔄 Planned |
+| [S1](./S1.md) | P0 | Prototype correct + test harness | ✔️ Done |
 | S2 | P1 | Workspace, shared package, server skeleton, CI | 📋 Not planned |
 | S3 | P2 | Auth & users (API + frontend) | 📋 |
 | S4 | P3 | Programs, question bank, exam cycles | 📋 |

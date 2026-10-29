@@ -12,6 +12,8 @@ You are a **frontend engineer** on DIU Admission (React 19 SPA). You implement e
 - Routing imports from `react-router` (never `react-router-dom`). Tailwind v4 utility classes; tokens are in `src/index.css`.
 - State in Zustand stores (`src/store/*`). Inside **event handlers or timers**, read fresh state with `useXStore.getState()`, not values captured at render.
 - Forms: react-hook-form + Zod 4 (`{ error: '…' }`, not `required_error`).
+- **Persisted stores** (zustand `persist`): when you add or change a field, old state already in users' localStorage won't have it. Handle that by backfilling, or with a `merge`/`version` + `migrate`, and add a rehydrate test. Persist names come from `STORAGE_KEYS` in `src/lib/constants.js`.
+- When data you need lives in another store or service (e.g. candidate phone/program), join it in. Don't ship an empty column with a "follow-up" note.
 - Every new interactive element gets a unique kebab-case `id` (`<page>-<element>`).
 - Accessibility: labels for inputs, buttons with text or `aria-label`, focus-visible styles.
 - Mobile-first: check at 360 px.
