@@ -7,10 +7,13 @@ import { testService } from '../../services/testService.js';
 import { Card } from '../../components/ui/Card.jsx';
 import { Button } from '../../components/ui/Button.jsx';
 import { Badge } from '../../components/ui/Badge.jsx';
+import { useExamConfigStore } from '../../store/examConfigStore.js';
 import { formatDateTime } from '../../lib/utils.js';
 
 export function CandidateDashboardPage() {
   const { user } = useAuthStore();
+  const config = useExamConfigStore((s) => s.config);
+  const totalQuestions = config.sections.reduce((sum, s) => sum + s.questionCount, 0);
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -40,10 +43,10 @@ export function CandidateDashboardPage() {
           <div className="p-8">
             <div className="flex items-start justify-between mb-6">
               <div>
-                <h2 className="text-xl font-bold text-slate-900 mb-1">Spring 2026 Admission</h2>
+                <h2 className="text-xl font-bold text-slate-900 mb-1">{config.title}</h2>
                 <div className="flex items-center gap-3 text-sm text-slate-500 mt-2">
-                  <span className="flex items-center gap-1"><Clock size={14} /> 54 Minutes</span>
-                  <span className="flex items-center gap-1"><Calendar size={14} /> 50 Questions</span>
+                  <span className="flex items-center gap-1"><Clock size={14} /> {config.totalTimeMinutes} Minutes</span>
+                  <span className="flex items-center gap-1"><Calendar size={14} /> {totalQuestions} Questions</span>
                 </div>
               </div>
               {result ? (

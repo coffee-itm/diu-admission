@@ -10,6 +10,7 @@ import { Card } from '../../components/ui/Card.jsx';
 import { Button } from '../../components/ui/Button.jsx';
 import { PageSpinner } from '../../components/ui/Spinner.jsx';
 import { formatDateTime, formatTime } from '../../lib/utils.js';
+import { useExamConfigStore } from '../../store/examConfigStore.js';
 import { generatePdfReport } from '../../lib/pdfGenerator.js';
 
 export function CandidateDetailPage() {
@@ -61,7 +62,7 @@ export function CandidateDetailPage() {
             <p className="text-slate-600 text-sm font-mono">{candidate.id}</p>
           </div>
         </div>
-        <Button variant="outline" onClick={() => generatePdfReport(candidate, result)} leftIcon={<FileDown size={18} />}>
+        <Button variant="outline" onClick={() => generatePdfReport(candidate, result, useExamConfigStore.getState().config.title)} leftIcon={<FileDown size={18} />}>
           Export PDF
         </Button>
       </div>

@@ -24,8 +24,8 @@ export function useTestEngine() {
         questions: session.questions,
       });
       navigate(ROUTES.CANDIDATE_TEST);
-    } catch {
-      toast.error('Failed to load test session');
+    } catch (err) {
+      toast.error(err?.message || 'Failed to load test session');
     } finally {
       setLoading(false);
     }

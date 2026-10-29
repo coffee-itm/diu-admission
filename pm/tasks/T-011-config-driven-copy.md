@@ -1,6 +1,6 @@
 # T-011 · Replace hard-coded exam numbers and titles with config values
 
-Status: ✅ Ready
+Status: 👀 Review
 Sprint: S1 · Role: frontend-dev · Model: free-ok · Size: S
 Depends on: T-010
 Implements: FR-CFG-04, FR-RES-02 (title part), D-17
@@ -30,5 +30,9 @@ pnpm lint && pnpm build && pnpm test
 - i18n (S7).
 
 ## Agent log
+- Instructions/Dashboard read totals (Σ questionCount, totalTimeMinutes, overallMinPercent, title) from useExamConfigStore; Instructions also reads rules from the store instead of mockExamConfig.
+- generatePdfReport(user, result, examTitle): header uses result.examTitle ?? examTitle; ResultPage and CandidateDetailPage pass the store title.
+- Extra (approved by Opus): useTestEngine startTest catch now toasts err.message, falling back to 'Failed to load test session'.
+- Gate: eslint on changed files, test, build (see report). Manual 60-min check not run in a browser.
 
 ## Review
