@@ -1,9 +1,9 @@
 import { Modal } from '../../components/ui/Modal.jsx';
 import { Button } from '../../components/ui/Button.jsx';
 import { ShieldAlert } from 'lucide-react';
-import { isFullscreenSupported, isFullscreenActive } from '../../lib/fullscreen.js';
+import { isFullscreenSupported } from '../../lib/fullscreen.js';
 
-export function SecurityWarningModal({ isOpen, message, onDismiss, onReturnToFullscreen }) {
+export function SecurityWarningModal({ isOpen, message, onDismiss, onReturnToFullscreen, isFullscreen = false }) {
   return (
     <Modal isOpen={isOpen} onClose={onDismiss} title="⚠️ Security Warning" size="md" hideClose>
       <div className="space-y-4">
@@ -16,7 +16,7 @@ export function SecurityWarningModal({ isOpen, message, onDismiss, onReturnToFul
           Continued violations will result in automatic test submission.
         </p>
         <div className="flex flex-wrap justify-end gap-3 pt-2">
-          {onReturnToFullscreen && isFullscreenSupported() && !isFullscreenActive() && (
+          {onReturnToFullscreen && isFullscreenSupported() && !isFullscreen && (
             <Button id="security-return-fullscreen" variant="secondary" onClick={onReturnToFullscreen}>
               Return to fullscreen
             </Button>

@@ -8,6 +8,7 @@ export function useAntiCheat({ onAutoSubmit }) {
   const store = useAntiCheatStore();
   const [showWarning, setShowWarning] = useState(false);
   const [warningMessage, setWarningMessage] = useState('');
+  const [isFullscreen, setIsFullscreen] = useState(() => isFullscreenActive());
   const devtoolsCheckRef = useRef(null);
   const onAutoSubmitRef = useRef(onAutoSubmit);
   const submittedRef = useRef(false);
@@ -53,6 +54,7 @@ export function useAntiCheat({ onAutoSubmit }) {
     }
     const handleFullscreenChange = () => {
       if (!fullscreenSupported) return;
+      setIsFullscreen(isFullscreenActive());
       if (!isFullscreenActive()) {
         useAntiCheatStore.getState().incrementFullscreenExit();
         const count = useAntiCheatStore.getState().fullscreenExitCount;
@@ -176,6 +178,7 @@ export function useAntiCheat({ onAutoSubmit }) {
     warningMessage,
     dismissWarning,
     returnToFullscreen,
+    isFullscreen,
     tabSwitchCount: store.tabSwitchCount,
     fullscreenExitCount: store.fullscreenExitCount,
   };

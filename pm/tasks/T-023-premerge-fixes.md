@@ -1,6 +1,6 @@
 # T-023 · Pre-merge fixes: "Return to fullscreen" button and config-driven duration rule
 
-Status: 🔨 In Progress
+Status: 👀 Review
 Sprint: S1 · Role: frontend-dev · Model: sonnet · Size: S
 Depends on: T-021
 Implements: FR-AC-04 (return to fullscreen), FR-CFG (config-driven copy). Found by the pre-merge browser smoke test (2026-10-29).
@@ -40,3 +40,7 @@ pnpm lint && pnpm test && pnpm build
 - The other carry-over items in `pm/sprints/S1.md`.
 
 ## Agent log
+- Fullscreen: `useAntiCheat` now holds `isFullscreen` state (init + updated in the fullscreenchange handler), returned and passed by TestPage to `SecurityWarningModal` as a prop; modal no longer reads the browser API in render.
+- Duration: removed static rule from mockExamConfig; new `src/lib/instructionRules.js` `buildRules(config)` drops stale `/^Total duration is \d+ minutes/` rules and inserts a computed one; used by InstructionsPage.
+- Tests: SecurityWarningModal.test.jsx (2), instructionRules.test.js (1). lint 0 errors (1 baseline warning), 147 tests pass, build OK. `grep -rni "duration is 54" src` empty.
+- Criterion 5 browser check: ⚠️ not verified (no browser).

@@ -62,7 +62,7 @@ export function CandidateTestPage() {
 
   const antiCheatStore = useAntiCheatStore();
 
-  const { showWarning, warningMessage, dismissWarning, returnToFullscreen } = useAntiCheat({
+  const { showWarning, warningMessage, dismissWarning, returnToFullscreen, isFullscreen } = useAntiCheat({
     onAutoSubmit: async () => {
       antiCheatStore.finalizeTracking();
       await submitTest();
@@ -184,6 +184,7 @@ export function CandidateTestPage() {
         message={warningMessage}
         onDismiss={dismissWarning}
         onReturnToFullscreen={returnToFullscreen}
+        isFullscreen={isFullscreen}
       />
     </div>
   );
