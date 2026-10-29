@@ -1,6 +1,6 @@
 # T-006 · Request fullscreen from the Start click; add "Return to fullscreen"; handle iOS
 
-Status: 👀 Review
+Status: ✔️ Done
 Sprint: S1 · Role: frontend-dev · Model: free-ok · Size: S
 Depends on: T-004
 Implements: FR-AC-04, D-04
@@ -43,3 +43,12 @@ pnpm test -- fullscreen && pnpm lint && pnpm build
 - useAntiCheat.test.js: stub requestFullscreen in setup + new unsupported test. Chrome manual check (AC3) not run.
 
 ## Review
+**APPROVED** (reviewer)
+- AC1: only helper (`src/lib/fullscreen.js:19-24`) and click handlers call requestFullscreen; no effect calls remain. Old name `requestFullscreen` (hook API) has no callers left.
+- Gesture: `InstructionsPage.jsx` handleStart calls `enterFullscreen()` sync, no await before it. `returnToFullscreen` (useAntiCheat.js) calls `enterFullscreen()` before any await.
+- AC2/AC4: fullscreen.test.js covers std, webkit, unsupported, reject/throw; useAntiCheat.test.js covers unsupported (1 event, 0 exits).
+- Compiler: no ref access in render. `isFullscreenActive()` reads document in the modal render (not a ref), acceptable.
+- webkitfullscreenchange added and removed in cleanup. Existing T-004 tests only gained a requestFullscreen stub in setup/teardown, so counters and the single auto-submit on the 3rd exit are intact.
+- Dismiss no longer re-requests fullscreen: matches FR-AC-04 (gesture-only request, return button). Exits are still counted.
+- Gate: eslint 0 errors (1 pre-existing exhaustive-deps warning, TestPage.jsx:73), pnpm test 105 pass, build OK.
+- Note: AC3 (manual Chrome check) not run; not blocking.

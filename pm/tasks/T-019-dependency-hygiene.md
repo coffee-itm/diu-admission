@@ -1,6 +1,6 @@
 # T-019 · Remove unused dependencies
 
-Status: 👀 Review
+Status: ✔️ Done
 Sprint: S1 · Role: devops · Model: free-ok · Size: S
 Depends on: T-022
 Implements: D-27 (deps part), context/17 §8
@@ -35,3 +35,4 @@ pnpm install --frozen-lockfile && pnpm lint && pnpm test && pnpm build
 E-019 resolved (no date-fns/jspdf-autotable imports in src). Ran `pnpm remove date-fns jspdf-autotable`; removed obsolete `pnpm.onlyBuiltDependencies` from package.json (allowBuilds kept). Frozen install OK, lint 0 errors, build OK, test 99 pass; 1 fail in useAntiCheat.test.js (T-006 parallel work, not ours).
 
 ## Review
+**APPROVED** (reviewer). Diff limited to package.json, lockfile, card. No remaining `date-fns`/`jspdf-autotable` in src (grep empty). `pnpm install --frozen-lockfile` OK, `pnpm build` OK (only chunk-size warning). `pnpm.onlyBuiltDependencies` removal safe: pnpm-workspace.yaml has `allowBuilds: core-js: true`. One commit with [T-019].
