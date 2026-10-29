@@ -1,6 +1,6 @@
 # T-007 · Save the anti-cheat summary with the stored result
 
-Status: ✅ Ready
+Status: 👀 Review
 Sprint: S1 · Role: frontend-dev · Model: free-ok · Size: S
 Depends on: T-005
 Implements: D-05 (prototype), feeds FR-RES-04
@@ -19,9 +19,9 @@ On submit, the anti-cheat summary is added only to the test store's copy of the 
 - `src/services/testService.test.js` — create
 
 ## Acceptance criteria
-1. [ ] Test: after `testService.submitTest({ …, antiCheat: { tabSwitchCount: 3, … } })`, `JSON.parse(localStorage.getItem('itm-results'))` contains a record with `antiCheat.tabSwitchCount === 3`.
-2. [ ] The result returned to the test store still contains `antiCheat` (the ResultPage is unchanged).
-3. [ ] Storage key stays `itm-results` (renamed later in T-018).
+1. [x] Test: after `testService.submitTest({ …, antiCheat: { tabSwitchCount: 3, … } })`, `JSON.parse(localStorage.getItem('itm-results'))` contains a record with `antiCheat.tabSwitchCount === 3`.
+2. [x] The result returned to the test store still contains `antiCheat` (the ResultPage is unchanged).
+3. [x] Storage key stays `itm-results` (renamed later in T-018).
 
 ## Verify
 ```bash
@@ -32,5 +32,8 @@ pnpm test -- testService && pnpm lint && pnpm build
 - Showing it in the admin UI (T-013 fixes the detail page).
 
 ## Agent log
+- testService.submitTest takes `antiCheat` and stores it in the saved record (null if absent) and the returned one.
+- useTestEngine passes `getSummary()` (taken after finalizeTracking) into submitTest; removed enrich step.
+- Added testService.test.js (2 tests). lint, test (107 passed), build OK.
 
 ## Review

@@ -23,7 +23,7 @@ export const testService = {
     };
   },
 
-  async submitTest({ candidateId, answers, questions, examConfig, timeTaken }) {
+  async submitTest({ candidateId, answers, questions, examConfig, timeTaken, antiCheat }) {
     await sleep(800);
     const result = calculateScore({ answers, questions, examConfig, timeTaken });
     const resultRecord = {
@@ -33,6 +33,7 @@ export const testService = {
       submittedAt: new Date().toISOString(),
       timeTaken,
       ...result,
+      antiCheat: antiCheat ?? null,
     };
     // Persist to localStorage
     const stored = JSON.parse(localStorage.getItem('itm-results') || '[]');

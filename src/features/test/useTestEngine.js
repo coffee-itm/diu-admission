@@ -47,10 +47,9 @@ export function useTestEngine() {
         questions: s.questions,
         examConfig: s.examConfig,
         timeTaken,
+        antiCheat: useAntiCheatStore.getState().getSummary(),
       });
-      const antiCheatSummary = useAntiCheatStore.getState().getSummary();
-      const enrichedResult = { ...result, antiCheat: antiCheatSummary };
-      useTestStore.getState().submitTest(enrichedResult);
+      useTestStore.getState().submitTest(result);
       navigate(ROUTES.CANDIDATE_RESULT);
     } catch {
       toast.error('Failed to submit test');
