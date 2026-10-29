@@ -1,6 +1,6 @@
 # T-020 · Sync docs with what Sprint 1 actually fixed
 
-Status: ✅ Ready
+Status: 👀 Review
 Sprint: S1 · Role: docs-keeper · Model: free-ok · Size: S
 Depends on: T-002 … T-019 (all Done)
 Implements: P0-14
@@ -19,8 +19,8 @@ Make the docs tell the truth after S1.
 - `context/02-tech-architecture.md` — storage keys table → `diu-*`, add the `diu-questions` key, tests row "Vitest"
 
 ## Acceptance criteria
-1. [ ] Every claim was verified with grep/ls before writing.
-2. [ ] No requirement text or IDs changed.
+1. [x] Every claim was verified with grep/ls before writing.
+2. [x] No requirement text or IDs changed.
 
 ## Verify
 ```bash
@@ -31,5 +31,12 @@ grep -n "Fixed (T-" context/06-open-issues-doc-gaps.md | wc -l
 - Writing new specs.
 
 ## Agent log
+- Verified in code: STORAGE_KEYS = `diu-*` (constants.js:133-142), storageMigration.js, all 5 stores persisted, csvExport/csvParse/meritCsv/fullscreen/storageMigration/runStorageMigration/importQuestions exist, date-fns and jspdf-autotable gone from src and package.json.
+- Fixed mapping from each card's Implements line and Review verdict. context/06: 25 rows marked `✅ Fixed (T-xxx)`; D-27 marked partly fixed (CI and react-query open); D-22, D-23, D-29 left open. csvExport.js removed from the "doesn't exist" list.
+- context/19: P0-01…P0-13 ticked. P0-14 left open (this card).
+- context/02: storage-keys table to `diu-*` (+ `diu-questions`, 5/5 persisted), Vitest tests row, deps, lib/auth/test tree. context/04: flow, timer, sampling, attempts, navigation, anti-cheat matrix. context/05: route table, inventory, MoSCoW.
+- context/17 §8: date-fns and jspdf-autotable marked removed; §3 rename marked done (T-018).
+- AGENTS.md: removed date-fns and jspdf-autotable (tables and install line), added Vitest/RTL/jsdom dev deps, reality-check note updated. README.md: "7-layer" claims replaced with "deterrence + audit", CSV merit export ticked (Excel kept open).
+- Docs only. No src changes. No link checker in this card.
 
 ## Review

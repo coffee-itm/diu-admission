@@ -18,15 +18,15 @@
 | React Compiler | `babel-plugin-react-compiler` via `@rolldown/plugin-babel` (`vite.config.js`) | 1.0 |
 | Styling | Tailwind CSS v4 (`@tailwindcss/vite`, `@theme {}` tokens in `src/index.css`) | 4.3.x |
 | Routing | React Router v7 (import from `react-router`, `BrowserRouter` in `src/main.jsx`) | 7.17.x |
-| State | Zustand v5 (4 of 5 stores persisted) | 5.0.x |
+| State | Zustand v5 (all 5 stores persisted) | 5.0.x |
 | Charts | Recharts | 3.8.x |
 | Animation | Framer Motion | 12.x |
 | Forms | React Hook Form + Zod v4 + @hookform/resolvers | 7.79 / 4.4 / 5.4 |
 | Icons / toasts | lucide-react / sonner | 1.18 / 2.0 |
-| PDF | jsPDF (`jspdf-autotable` installed but unused) | 4.2.x |
-| Unused deps | `@tanstack/react-query`, `date-fns`, `jspdf-autotable` | — |
+| PDF | jsPDF (`src/lib/pdfGenerator.js`) | 4.2.x |
+| Unused deps | `@tanstack/react-query` (kept for the S3 API layer). `date-fns` and `jspdf-autotable` removed in S1 (T-019) | — |
 | Lint | eslint 10 flat config + react-hooks + react-refresh + `react-compiler/react-compiler: error` | — |
-| Tests | **none** | — |
+| Tests | Vitest 5 + Testing Library + jsdom (`pnpm test`; setup in `src/test/setup.js`; co-located `*.test.js`) | 5.0.x |
 
 Compiler rule: **no manual `React.memo` / `useMemo` / `useCallback`**.
 
@@ -45,15 +45,17 @@ src/
 │   └── admin/     AnalyticsPage, CandidateDetailPage, CandidatesPage, DashboardPage,
 │                  ExamConfigPage, MeritListPage, QuestionBankPage, QuestionFormPage
 ├── features/
-│   ├── auth/      AuthProvider.jsx (pass-through), ProtectedRoute.jsx, useAuth.js
+│   ├── auth/      AuthProvider.jsx (pass-through), ProtectedRoute.jsx, useAuth.js, resolvePostLoginPath.js
 │   ├── test/      useTestEngine, useTimer, useAutoSave, useAntiCheat,
 │   │              QuestionCard, QuestionNav, SectionHeader, SecurityWarningModal, TestSubmitDialog
-│   ├── questions/ BulkImportModal (stub), QuestionForm, QuestionTable, questionSchema.js
-│   └── scoring/   EligibilityBadge, ScoreCard, scoringConfig.js (unused)
+│   ├── questions/ BulkImportModal (CSV import), importQuestions.js, QuestionForm, QuestionTable, questionSchema.js
+│   └── scoring/   EligibilityBadge, ScoreCard, scoringConfig.js (used by scoring.js)
 ├── store/         authStore, testStore, questionStore, examConfigStore, antiCheatStore
 ├── services/      authService, testService, resultService, analyticsService   (no api.js, no questionService)
 ├── data/          mockQuestions (50), mockCandidates (16 + 1 admin), mockResults (15), mockExamConfig
-└── lib/           constants.js, scoring.js, utils.js, pdfGenerator.js          (no csvExport.js)
+├── test/          setup.js (Vitest setup)
+└── lib/           constants.js, scoring.js, utils.js, pdfGenerator.js, csvExport.js, csvParse.js, meritCsv.js,
+                   fullscreen.js, storageMigration.js, runStorageMigration.js
 ```
 
 ### Data flow (actual)
@@ -62,21 +64,21 @@ src/
 Pages ─► feature hooks ─► services (mock, setTimeout latency) ─► src/data/* + localStorage
   │            │
   │            └─► Zustand stores (persist → localStorage)
-  └─► admin pages ALSO import mockCandidates / questionStore / examConfigStore directly  ← seam is leaky (D-08, D-10)
+  └─► admin pages ALSO import questionStore / examConfigStore directly  ← seam is leaky (D-08, D-10 fixed in S1; coupling remains)
 ```
 
 ### Stores & storage keys (actual)
 
 | Store / writer | localStorage key | Holds |
 |:---|:---|:---|
-| `authStore` | `itm-auth` | `user`, `isAuthenticated` |
-| `testStore` | `itm-test-session` | sessionId, examConfig, shuffled questions (**with `correctAnswer`**), answers, questionStatus, position, `timeRemaining` (tick-based), result |
-| `antiCheatStore` | `itm-anti-cheat` | counters, `securityEvents[]`, `integrityAgreedAt`, `questionTimeMap` |
-| `examConfigStore` | `itm-exam-config` | `config` (copy of mock; **not read by the test**, D-08) |
-| `questionStore` | *not persisted* | `questions` (copy of mock; **not read by the test**, D-21) |
+| `authStore` | `diu-auth` | `user`, `isAuthenticated` |
+| `testStore` | `diu-test-session` | sessionId, examConfig, shuffled questions (**with `correctAnswer`**), answers, questionStatus, position, `deadline` (wall-clock ms; `timeRemaining` derived), result |
+| `antiCheatStore` | `diu-anti-cheat` | counters, `securityEvents[]`, `integrityAgreedAt`, `questionTimeMap` |
+| `examConfigStore` | `diu-exam-config` | `config` (admin-edited; read by the test, D-08 fixed in S1) |
+| `questionStore` | `diu-questions` | `questions` (admin-edited bank; read by the test, D-21 fixed in S1) |
 | `authService` | `diu-candidates` | registered candidates (plaintext passwords, D-22) |
-| `testService` | `itm-results` | submitted results (no anti-cheat summary, D-05) |
-| `LanguageToggle` | `itm-lang` | unused |
+| `testService` | `diu-results` | submitted results, with the anti-cheat summary (D-05 fixed in S1) |
+| `LanguageToggle` | `diu-lang` | unused |
 
 ### Routing & guards (actual)
 

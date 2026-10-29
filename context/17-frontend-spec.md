@@ -60,7 +60,7 @@ Analytics, Users*. Items marked * are hidden from reviewers.
 | TanStack Query | All server reads (cycles, programs, results, admin lists, analytics) | in-memory cache |
 | `questionStore`, `examConfigStore` | **Removed in R2** (replaced by queries). In R1 they persist and feed the test (D-08, D-21) | — |
 
-Rename every `itm-*` storage key to `diu-*` (D-28). On logout call `resetAll()`, which clears
+Rename every `itm-*` storage key to `diu-*` (D-28, done in S1 with a one-time migration in `src/lib/storageMigration.js`). On logout call `resetAll()`, which clears
 auth, test, anti-cheat and the query cache (D-15).
 
 ## 4. Data layer
@@ -123,7 +123,7 @@ src/i18n/
 └── index.js       # useT(): (key, vars) => string; formatNumber, formatDate (Asia/Dhaka), useLang()
 ```
 - No library needed: a ~40-line `useT` that reads `uiStore.lang`. `{{var}}` interpolation. Pluralization via `key_one`/`key_other`.
-- `LanguageToggle.jsx` exists (`src/components/ui/LanguageToggle.jsx`) but isn't rendered. Mount it in `Header.jsx`, and switch its key from `itm-lang` to `uiStore`.
+- `LanguageToggle.jsx` exists (`src/components/ui/LanguageToggle.jsx`) but isn't rendered. Mount it in `Header.jsx`, and move its key (`diu-lang` since S1) to `uiStore`.
 - Set `document.documentElement.lang`. Load a Bangla font: add `Hind Siliguri` (or `Noto Sans Bengali`) to the Google Fonts link in `index.html` and to `--font-sans` as a fallback after Inter.
 - Lint guard (P7): a script that greps `src/pages` and `src/features` for JSX text nodes with Latin letters outside `t()`.
 
@@ -141,6 +141,6 @@ src/i18n/
 | Package | Action |
 |:--|:--|
 | `@tanstack/react-query` | **Adopt** (data layer, §4) |
-| `date-fns` | **Adopt** for formatting (`formatInTimeZone` needs `date-fns-tz`), or drop and use `Intl.DateTimeFormat`. Pick one in P0 |
-| `jspdf-autotable` | **Adopt** in `pdfGenerator.js` / merit list PDF, or remove |
+| `date-fns` | **Removed in S1** (T-019). Formatting uses `Intl.DateTimeFormat` |
+| `jspdf-autotable` | **Removed in S1** (T-019). Re-add only when a card needs a table in the PDF |
 | `zod` | `required_error` in `src/features/questions/questionSchema.js` is Zod 3 API. Change to `{ error: '…' }` (Zod 4) |

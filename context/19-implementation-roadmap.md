@@ -21,24 +21,24 @@
 
 ## P0 — Prototype fixes (frontend only, still mock data)
 
-- [ ] **P0-01 Test harness.** Add Vitest + RTL + jsdom, `src/test/setup.js`, and the `test` script. *Done when* `pnpm test` runs one sample test. (ADR-018)
-- [ ] **P0-02 Answer key.** `src/data/mockQuestions.js:24`: set `q_logic_010.correctAnswer` to `'a'` and clean up the explanation text. (FR-QB-07, D-01)
-- [ ] **P0-03 Scoring correctness.** `src/lib/scoring.js`: read `conditionalMinPercent` / `maxFailedSectionsForConditional` from config, with defaults from `src/features/scoring/scoringConfig.js`. Compare unrounded values. Add the boundary-table tests S1–S11. (FR-SCORE-03/04, D-09)
-- [ ] **P0-04 Anti-cheat counters + auto-submit.** `src/features/test/useAntiCheat.js`: read the fresh count via `useAntiCheatStore.getState()` inside handlers. Keep `onAutoSubmit` in a ref updated every render. Add a `cut_attempt` counter. In `src/features/test/useTestEngine.js`, `submitTest` reads `useTestStore.getState()`. Add the regression tests. (FR-AC-02/03, D-02, D-03)
-- [ ] **P0-05 Fullscreen on gesture.** Move `requestFullscreen` from `TestPage.jsx` (effect at `:70-72`) into the Start button handler in `InstructionsPage.jsx`. Add "Return to fullscreen" to `SecurityWarningModal`. Handle iOS (log `fullscreen_unsupported`). (FR-AC-04, D-04)
-- [ ] **P0-06 Persist anti-cheat summary.** `src/services/testService.js` `submitTest` stores `antiCheat` in the `itm-results` record. (D-05)
-- [ ] **P0-07 Wall-clock timer.** `testStore` stores `deadline` (ms). `useTimer` computes `deadline − Date.now()`. Remove `tickTimer`-based counting. (FR-TEST-03 prototype version, D-06)
-- [ ] **P0-08 Navigation.** Mark the first question visited on start and on section tab change. Next/Prev cross sections. (FR-TEST-04, D-07)
-- [ ] **P0-09 Config actually used.** `testService.loadTest` reads `useExamConfigStore.getState().config` and `useQuestionStore`. Persist `questionStore` (`diu-questions`). Sample `questionCount` per section from the bank. Replace the hard-coded "50"/"54"/"50%" in `InstructionsPage.jsx:37,44` and `candidate/DashboardPage.jsx:46-47`. (FR-CFG-04, D-08, D-17, D-21, D-24)
-- [ ] **P0-10 Single attempt + resume + logout.** Block start if a result exists for the user (`maxAttempts`). The dashboard shows Resume when a session is active and not submitted. Logout resets test and anti-cheat stores. (FR-TEST-07/12, FR-AUTH-04, D-12, D-13, D-15)
-- [ ] **P0-11 Admin data fixes.**
+- [x] **P0-01 Test harness.** Add Vitest + RTL + jsdom, `src/test/setup.js`, and the `test` script. *Done when* `pnpm test` runs one sample test. (ADR-018)
+- [x] **P0-02 Answer key.** `src/data/mockQuestions.js:24`: set `q_logic_010.correctAnswer` to `'a'` and clean up the explanation text. (FR-QB-07, D-01)
+- [x] **P0-03 Scoring correctness.** `src/lib/scoring.js`: read `conditionalMinPercent` / `maxFailedSectionsForConditional` from config, with defaults from `src/features/scoring/scoringConfig.js`. Compare unrounded values. Add the boundary-table tests S1–S11. (FR-SCORE-03/04, D-09)
+- [x] **P0-04 Anti-cheat counters + auto-submit.** `src/features/test/useAntiCheat.js`: read the fresh count via `useAntiCheatStore.getState()` inside handlers. Keep `onAutoSubmit` in a ref updated every render. Add a `cut_attempt` counter. In `src/features/test/useTestEngine.js`, `submitTest` reads `useTestStore.getState()`. Add the regression tests. (FR-AC-02/03, D-02, D-03)
+- [x] **P0-05 Fullscreen on gesture.** Move `requestFullscreen` from `TestPage.jsx` (effect at `:70-72`) into the Start button handler in `InstructionsPage.jsx`. Add "Return to fullscreen" to `SecurityWarningModal`. Handle iOS (log `fullscreen_unsupported`). (FR-AC-04, D-04)
+- [x] **P0-06 Persist anti-cheat summary.** `src/services/testService.js` `submitTest` stores `antiCheat` in the `itm-results` record. (D-05)
+- [x] **P0-07 Wall-clock timer.** `testStore` stores `deadline` (ms). `useTimer` computes `deadline − Date.now()`. Remove `tickTimer`-based counting. (FR-TEST-03 prototype version, D-06)
+- [x] **P0-08 Navigation.** Mark the first question visited on start and on section tab change. Next/Prev cross sections. (FR-TEST-04, D-07)
+- [x] **P0-09 Config actually used.** `testService.loadTest` reads `useExamConfigStore.getState().config` and `useQuestionStore`. Persist `questionStore` (`diu-questions`). Sample `questionCount` per section from the bank. Replace the hard-coded "50"/"54"/"50%" in `InstructionsPage.jsx:37,44` and `candidate/DashboardPage.jsx:46-47`. (FR-CFG-04, D-08, D-17, D-21, D-24)
+- [x] **P0-10 Single attempt + resume + logout.** Block start if a result exists for the user (`maxAttempts`). The dashboard shows Resume when a session is active and not submitted. Logout resets test and anti-cheat stores. (FR-TEST-07/12, FR-AUTH-04, D-12, D-13, D-15)
+- [x] **P0-11 Admin data fixes.**
   - `CandidateDetailPage.jsx:32` → `resultService.getForCandidate` (D-16).
   - Candidates/MeritList read candidates from `authService` storage, not `mockCandidates` (D-10).
   - Analytics `totalRegistrations` counts unique ids (D-18).
   - Dashboard shows names (D-26).
   - Merit list empty text + `replaceAll('_',' ')` (D-25).
-- [ ] **P0-12 CSV.** New `src/lib/csvExport.js` (BOM, escaping) used by MeritListPage. `BulkImportModal` really parses the CSV (the [15 §7](./15-api-spec.md#7-csv-formats) format), validates with `questionSchema`, adds rows to `questionStore`, and shows a row error report. (FR-RES-06, FR-QB-04, D-11)
-- [ ] **P0-13 Misc.**
+- [x] **P0-12 CSV.** New `src/lib/csvExport.js` (BOM, escaping) used by MeritListPage. `BulkImportModal` really parses the CSV (the [15 §7](./15-api-spec.md#7-csv-formats) format), validates with `questionSchema`, adds rows to `questionStore`, and shows a row error report. (FR-RES-06, FR-QB-04, D-11)
+- [x] **P0-13 Misc.**
   - Question form tags field (D-19).
   - LoginPage redirect to `from` (D-14).
   - Zod 4 `error` param in `questionSchema.js` (D-27).

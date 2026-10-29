@@ -76,10 +76,8 @@
 
 | Package | Purpose |
 |:---|:---|
-| `date-fns` | Date formatting and manipulation |
 | `sonner` | Toast notifications |
 | `jspdf` | Client-side PDF generation |
-| `jspdf-autotable` | Table support for jsPDF |
 
 ### Dev Dependencies
 
@@ -89,6 +87,9 @@
 | `eslint` | Linting |
 | `eslint-plugin-react-hooks` | React Hooks lint rules |
 | `eslint-plugin-react-compiler` | React Compiler lint rules |
+| `vitest` | Test runner (`pnpm test`) |
+| `@testing-library/react` `@testing-library/user-event` `@testing-library/jest-dom` | Component and hook tests |
+| `jsdom` | DOM environment for Vitest |
 | `@types/react` `@types/react-dom` | Type definitions for IDE support (even in JS) |
 
 ---
@@ -114,7 +115,7 @@ pnpm add lucide-react recharts framer-motion clsx sonner
 pnpm add react-hook-form zod @hookform/resolvers
 
 # Utilities
-pnpm add date-fns jspdf jspdf-autotable
+pnpm add jspdf
 
 # Dev: Tailwind CSS v4
 pnpm add -D tailwindcss @tailwindcss/vite
@@ -124,6 +125,9 @@ pnpm add -D babel-plugin-react-compiler @rolldown/plugin-babel @babel/core
 
 # Dev: Linting
 pnpm add -D eslint-plugin-react-compiler
+
+# Dev: Tests
+pnpm add -D vitest @testing-library/react @testing-library/user-event @testing-library/jest-dom jsdom
 ```
 
 ### Step 3: Configure Vite (`vite.config.js`)
@@ -309,7 +313,9 @@ prototype/
 ```
 
 > **Reality check (2026-10-29):** `services/api.js`, `services/questionService.js`, `features/scoring/useScoring.js`,
-> `lib/csvExport.js`, `hooks/` and `public/fonts/` do **not** exist yet; `store/antiCheatStore.js`,
+> `hooks/` and `public/fonts/` do **not** exist yet. `lib/csvExport.js` now exists (T-015), as do `lib/csvParse.js`,
+> `lib/meritCsv.js`, `lib/fullscreen.js`, `lib/storageMigration.js`, `lib/runStorageMigration.js` and
+> `features/questions/importQuestions.js` (S1). `store/antiCheatStore.js`,
 > `features/test/useAntiCheat.js` and `features/test/SecurityWarningModal.jsx` exist but are not listed above.
 > See `context/02-tech-architecture.md` for the actual tree and `context/06-open-issues-doc-gaps.md` for known defects.
 >
