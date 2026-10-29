@@ -6,32 +6,8 @@ import { Badge } from '../../components/ui/Badge.jsx';
 import { PageSpinner } from '../../components/ui/Spinner.jsx';
 import { toast } from 'sonner';
 import { toCSV, downloadCSV } from '../../lib/csvExport.js';
-import { formatTime } from '../../lib/utils.js';
-import { SECTION_ORDER } from '../../lib/constants.js';
-
-const pad = (n) => String(n).padStart(2, '0');
-function fmtStamp(iso) {
-  if (!iso) return '';
-  const d = new Date(iso);
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
-}
-
-const MERIT_COLUMNS = [
-  { header: 'rank', value: (r) => r.rank },
-  { header: 'name', value: (r) => r.candidateName },
-  { header: 'email', value: (r) => r.candidateEmail },
-  { header: 'phone', value: (r) => r.candidatePhone ?? r.phone ?? '' },
-  { header: 'program', value: (r) => r.programCode ?? r.program ?? '' },
-  { header: 'total_score', value: (r) => r.totalScore },
-  { header: 'percentage', value: (r) => r.percentage },
-  ...SECTION_ORDER.map((id) => ({
-    header: `${id.toLowerCase()}_pct`,
-    value: (r) => r.sectionPercentages?.[id] ?? '',
-  })),
-  { header: 'eligibility', value: (r) => r.eligibility },
-  { header: 'time_taken', value: (r) => formatTime(r.timeTaken ?? 0) },
-  { header: 'submitted_at', value: (r) => fmtStamp(r.submittedAt) },
-];
+import { MERIT_COLUMNS, buildMeritRows } from '../../lib/meritCsv.js';
+import { getAllCandidates } from '../../services/authService.js';
 
 export function MeritListPage() {
   const [meritList, setMeritList] = useState([]);
@@ -49,7 +25,7 @@ export function MeritListPage() {
   }, []);
 
   const exportCSV = () => {
-    const rows = meritList.map((r, i) => ({ ...r, rank: r.rank ?? i + 1 }));
+    const rows = buildMeritRows(meritList, getAllCandidates());
     const date = new Date().toISOString().slice(0, 10);
     downloadCSV(`DIU_Merit_List_${date}.csv`, toCSV(rows, MERIT_COLUMNS));
     toast.success('Merit list exported as CSV');
