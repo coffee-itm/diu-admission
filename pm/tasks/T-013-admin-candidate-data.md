@@ -2,7 +2,7 @@
 
 Status: ✅ Ready
 Sprint: S1 · Role: frontend-dev · Model: free-ok · Size: M
-Depends on: T-001
+Depends on: T-022
 Implements: FR-RES-03, FR-RES-04, D-10, D-16
 
 ## Goal

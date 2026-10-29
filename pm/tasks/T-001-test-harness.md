@@ -28,7 +28,7 @@ The repo has no tests. Add a working frontend test runner so every later card ca
 
 ## Acceptance criteria
 1. [ ] `pnpm test` runs and passes (≥ 3 assertions in `utils.test.js`).
-2. [ ] `pnpm lint` and `pnpm build` still pass.
+2. [ ] `pnpm build` still passes; `pnpm lint` shows no problems in files changed by this card (baseline errors are handled by T-022).
 3. [ ] No test files end up in the production bundle (build output unchanged in size order of magnitude).
 
 ## Verify

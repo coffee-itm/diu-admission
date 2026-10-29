@@ -2,7 +2,7 @@
 
 Status: ✅ Ready
 Sprint: S1 · Role: frontend-dev · Model: sonnet · Size: M
-Depends on: T-001
+Depends on: T-022
 Implements: FR-AC-02, FR-AC-03, D-02, D-03 (callback part)
 
 ## Goal

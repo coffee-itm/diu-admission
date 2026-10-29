@@ -2,7 +2,7 @@
 
 Status: ✅ Ready
 Sprint: S1 · Role: devops · Model: free-ok · Size: S
-Depends on: T-001
+Depends on: T-022
 Implements: D-27 (deps part), context/17 §8
 
 ## Goal
@@ -17,6 +17,7 @@ Decision (Opus, S1 planning): **keep** `@tanstack/react-query` (adopted in S3 fo
 ## Steps
 1. Confirm nothing imports them (grep). If something does, stop and escalate.
 2. `pnpm remove date-fns jspdf-autotable`
+3. pnpm ≥ 11 no longer reads `pnpm.onlyBuiltDependencies` in package.json (warning seen in T-001). Remove that field from package.json; `pnpm-workspace.yaml` already has the `allowBuilds` setting. Confirm the warning is gone.
 
 ## Acceptance criteria
 1. [ ] Both removed from package.json and the lockfile.
