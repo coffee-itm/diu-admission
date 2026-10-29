@@ -1,6 +1,6 @@
 # T-005 · Submit must use the latest answers and be single-shot
 
-Status: ✅ Ready
+Status: 👀 Review
 Sprint: S1 · Role: frontend-dev · Model: sonnet · Size: S
 Depends on: T-004
 Implements: FR-AC-03, FR-TEST-08, D-03
@@ -24,9 +24,9 @@ Implements: FR-AC-03, FR-TEST-08, D-03
    - two calls in a row → `testService.submitTest` called once.
 
 ## Acceptance criteria
-1. [ ] Stale-closure test passes (latest answers submitted).
-2. [ ] Double submit is impossible (test).
-3. [ ] Normal manual submit still navigates to the result page.
+1. [x] Stale-closure test passes (latest answers submitted).
+2. [x] Double submit is impossible (test).
+3. [x] Normal manual submit still navigates to the result page (unchanged navigate call; not separately tested).
 
 ## Verify
 ```bash
@@ -37,5 +37,7 @@ pnpm test -- useTestEngine && pnpm lint && pnpm build
 - Timer changes (T-008), persisting anti-cheat data (T-007).
 
 ## Agent log
+- submitTest now reads useTestStore/useAntiCheatStore via getState() at call time; useRef in-flight guard (reset in finally) plus isSubmitted check.
+- New useTestEngine.test.js (stale closure, double call). eslint clean, 96 tests pass, build ok.
 
 ## Review

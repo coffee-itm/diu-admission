@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useTestStore } from '../../store/testStore.js';
 import { useAntiCheatStore } from '../../store/antiCheatStore.js';
 import { testService } from '../../services/testService.js';
@@ -10,9 +10,9 @@ import { ROUTES } from '../../lib/constants.js';
 export function useTestEngine() {
   const [loading, setLoading] = useState(false);
   const store = useTestStore();
-  const antiCheatStore = useAntiCheatStore();
   const { user } = useAuthStore();
   const navigate = useNavigate();
+  const submittingRef = useRef(false);
 
   const startTest = async () => {
     try {
@@ -32,25 +32,30 @@ export function useTestEngine() {
   };
 
   const submitTest = async () => {
-    if (store.isSubmitted) return;
+    // Read fresh state: this function may be a stale copy held by a timer or anti-cheat callback.
+    const s = useTestStore.getState();
+    const ac = useAntiCheatStore.getState();
+    if (s.isSubmitted || submittingRef.current) return;
+    submittingRef.current = true;
     try {
       setLoading(true);
-      antiCheatStore.finalizeTracking();
-      const timeTaken = store.examConfig.totalTimeMinutes * 60 - store.timeRemaining;
+      ac.finalizeTracking();
+      const timeTaken = s.examConfig.totalTimeMinutes * 60 - s.timeRemaining;
       const result = await testService.submitTest({
         candidateId: user.id,
-        answers: store.answers,
-        questions: store.questions,
-        examConfig: store.examConfig,
+        answers: s.answers,
+        questions: s.questions,
+        examConfig: s.examConfig,
         timeTaken,
       });
-      const antiCheatSummary = antiCheatStore.getSummary();
+      const antiCheatSummary = useAntiCheatStore.getState().getSummary();
       const enrichedResult = { ...result, antiCheat: antiCheatSummary };
-      store.submitTest(enrichedResult);
+      useTestStore.getState().submitTest(enrichedResult);
       navigate(ROUTES.CANDIDATE_RESULT);
     } catch {
       toast.error('Failed to submit test');
     } finally {
+      submittingRef.current = false;
       setLoading(false);
     }
   };
