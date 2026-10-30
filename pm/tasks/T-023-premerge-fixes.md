@@ -1,6 +1,6 @@
 # T-023 · Pre-merge fixes: "Return to fullscreen" button and config-driven duration rule
 
-Status: 👀 Review
+Status: ✔️ Done
 Sprint: S1 · Role: frontend-dev · Model: sonnet · Size: S
 Depends on: T-021
 Implements: FR-AC-04 (return to fullscreen), FR-CFG (config-driven copy). Found by the pre-merge browser smoke test (2026-10-29).
