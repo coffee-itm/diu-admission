@@ -1,7 +1,8 @@
-import { Link, useNavigate } from 'react-router';
+import { Link, Navigate, useNavigate } from 'react-router';
 import { Mail, Lock, User, Phone } from 'lucide-react';
 import { ROUTES, PROGRAMS } from '../../lib/constants.js';
 import { useAuth } from '../../features/auth/useAuth.js';
+import { resolvePostLoginPath } from '../../features/auth/resolvePostLoginPath.js';
 import { Input } from '../../components/ui/Input.jsx';
 import { Button } from '../../components/ui/Button.jsx';
 import { Card } from '../../components/ui/Card.jsx';
@@ -19,12 +20,16 @@ const registerSchema = z.object({
 });
 
 export function RegisterPage() {
-  const { register: registerAction, loading } = useAuth();
+  const { register: registerAction, loading, isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
 
   const { register, handleSubmit, formState: { errors } } = useForm({
     resolver: zodResolver(registerSchema),
   });
+
+  if (isAuthenticated) {
+    return <Navigate replace to={resolvePostLoginPath(undefined, user?.role)} />;
+  }
 
   const onSubmit = async (data) => {
     try {

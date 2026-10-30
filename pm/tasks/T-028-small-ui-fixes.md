@@ -1,6 +1,6 @@
 # T-028 · Small UI fixes: question ID, auth-page redirect, section-tab cue, chart height
 
-Status: ✅ Ready
+Status: 👀 Review
 Sprint: S2 · Role: frontend-dev · Model: free-ok · Size: S
 Depends on: none
 Implements: S1 post-merge E2E findings (Low) and S1 carry-over (Recharts warning)
@@ -41,5 +41,12 @@ pnpm test -- QuestionTable RegisterPage LoginPage && pnpm lint && pnpm build
 - Adding missing `id`s (T-031). Dark mode and i18n (S7).
 
 ## Agent log
+- QuestionTable: full `q.id` (was `slice(-6)`), `whitespace-nowrap` + `title`; test added.
+- RegisterPage/LoginPage: `<Navigate replace>` to `resolvePostLoginPath(undefined, user.role)` when authenticated; tests for candidate + admin on both pages.
+- SectionHeader: CSS-only right-edge white gradient + chevron cue, `sm:hidden`; no state.
+- Charts: wrappers `h-64 min-h-64 min-w-0`, `ResponsiveContainer minWidth={0} minHeight={256}`.
+- Tests: 200 total (198 passed, 2 todo) — full suite run. Lint: only baseline TestPage warning (T-030). Build ✅.
+- Criteria 3 & 4 are browser-only → not verified here; T-040 QA.
+- Files: QuestionTable, RegisterPage, LoginPage (+ tests), SectionHeader, 3 chart components.
 
 ## Review

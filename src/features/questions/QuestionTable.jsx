@@ -30,7 +30,7 @@ export function QuestionTable({ questions, onEdit, onDelete, onView }) {
             const diff = DIFFICULTY[q.difficulty];
             return (
               <tr key={q.id} className="hover:bg-slate-50/50 transition-colors">
-                <td className="px-4 py-3 font-mono text-xs text-slate-500">{q.id.slice(-6)}</td>
+                <td className="px-4 py-3 font-mono text-xs text-slate-500 whitespace-nowrap" title={q.id}>{q.id}</td>
                 <td className="px-4 py-3">
                   <Badge variant={sec?.bg.replace('bg-', '').replace('-100', '')}>{sec?.shortName}</Badge>
                 </td>
