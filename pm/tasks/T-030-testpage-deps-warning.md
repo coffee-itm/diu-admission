@@ -1,6 +1,6 @@
 # T-030 · Fix the TestPage exhaustive-deps warning
 
-Status: ✅ Ready
+Status: 👀 Review
 Sprint: S2 · Role: frontend-dev · Model: free-ok · Size: S
 Depends on: T-026 (lane A order)
 Implements: S1 carry-over (T-009/T-022 leftover lint warning)
@@ -31,5 +31,10 @@ pnpm lint && pnpm test && pnpm build
 - Any other TestPage refactor.
 
 ## Agent log
+- TestPage: removed the `useAntiCheatStore()` subscription; the per-question effect and `onAutoSubmit` now use `useAntiCheatStore.getState()`, deps `[currentQuestionId]`. No `eslint-disable`.
+- Added `src/pages/candidate/TestPage.test.jsx` (2 tests): tracking starts on load; switching q1→q2 banks 1500ms for q1 and starts q2. Written before the refactor and green on both.
+- Verify (env override `pnpm_config_verify_deps_before_run=none`): lint ✅ 0 problems (`--max-warnings 0`), test ✅ 239 passed / 2 todo, build ✅.
+- Environment note: plain `pnpm <script>` aborts in this tree because `node_modules/.pnpm-workspace-state-v1.json` records a `/tmp/.../t029-review-*` project root (parallel T-029 review install), so pnpm's deps check wants a purge; the env override skips that check only. `.npmrc` `verify-deps-before-run=false` is not honoured by pnpm 11.13.1 (value should be `none`) — flagging for a devops card.
+- No browser needed; criterion 2 covered by the new tests.
 
 ## Review
