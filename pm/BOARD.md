@@ -3,12 +3,12 @@
 > Source of truth for status = the `Status:` line in each card (`pm/tasks/T-xxx-*.md`). Agents update their own row.
 > Recount with `/sprint-status`. Process: [PROCESS.md](./PROCESS.md) · Playbook: [AGENT_PLAYBOOK.md](./AGENT_PLAYBOOK.md) · Escalations: [ESCALATIONS.md](./ESCALATIONS.md)
 
-## Current sprint: [S1 — Prototype correct + test harness](./sprints/S1.md)  ·  🔄 Pre-merge fix T-023 (found by browser smoke), then merge + `/plan-sprint S2`
+## Current sprint: [S1 — Prototype correct + test harness](./sprints/S1.md)  ·  ✔️ Done, merged into `prototype` 2026-10-30 · next: `/plan-sprint S2`
 
 ### Summary
 | ✅ Ready | 🔨 In Progress | 👀 Review | ✔️ Done | ⛔ Blocked | Total | Done % |
 |:-:|:-:|:-:|:-:|:-:|:-:|:-:|
-| 0 | 0 | 1 | 22 | 0 | 23 | 96 % |
+| 0 | 0 | 0 | 23 | 0 | 23 | 100 % |
 
 ### Cards
 | ID | Title | Lane | Role | Model | Depends on | Status |
