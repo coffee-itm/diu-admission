@@ -1,6 +1,6 @@
 # T-024 · Header logout clears the test session (privacy)
 
-Status: ✅ Ready
+Status: 👀 Review
 Sprint: S2 · Role: frontend-dev · Model: sonnet · Size: S
 Depends on: none
 Implements: S1 carry-over (T-021 privacy finding, T-012 follow-up), NFR privacy
@@ -23,10 +23,10 @@ After a candidate logs out, the next person on the same browser must not find th
 3. Test: seed `useTestStore` with a submitted session (answers + result) and the anti-cheat store with counts. Render the Header in a MemoryRouter as a logged-in candidate and click `#nav-logout-btn`. Assert that both stores are back to their initial state and that `localStorage.getItem('diu-test-session')` contains no answers or result.
 
 ## Acceptance criteria
-1. [ ] Logging out from the Header leaves `useTestStore` equal to its initial state and resets `useAntiCheatStore`. Covered by a test.
-2. [ ] The persisted `diu-test-session` holds no answers and no result after logout. Covered by a test.
-3. [ ] `grep -rn "useAuthStore" src | grep -i logout` matches only `src/features/auth/useAuth.js`.
-4. [ ] No new lint warnings.
+1. [x] Logging out from the Header leaves `useTestStore` equal to its initial state and resets `useAntiCheatStore`. Covered by a test.
+2. [x] The persisted `diu-test-session` holds no answers and no result after logout. Covered by a test.
+3. [x] `grep -rn "useAuthStore" src | grep -i logout` matches only `src/features/auth/useAuth.js`.
+4. [x] No new lint warnings.
 
 ## Verify
 ```bash
@@ -37,5 +37,7 @@ pnpm test -- Header useAuth && pnpm lint && pnpm build
 - Server-side sessions and tokens (S3). Any change to `authStore` shape.
 
 ## Agent log
+- Header now uses `useAuth()` (single logout path); navigation unchanged. Added `Header.test.jsx` (seeds test + anti-cheat stores, clicks logout, asserts initial state and persisted storage empty).
+- Gate: lint 0 errors (1 baseline warning in TestPage.jsx), test 148 passed, build ok. grep: only useAuth.js touches authStore logout.
 
 ## Review

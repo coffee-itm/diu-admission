@@ -1,13 +1,13 @@
 import { Link, useNavigate } from 'react-router';
 import { GraduationCap, LogOut, User, Menu, X } from 'lucide-react';
 import { useState } from 'react';
-import { useAuthStore } from '../../store/authStore.js';
+import { useAuth } from '../../features/auth/useAuth.js';
 import { ROUTES } from '../../lib/constants.js';
 import { Button } from '../ui/Button.jsx';
 import { navItems } from './navItems.js';
 
 export function Header() {
-  const { user, isAuthenticated, logout } = useAuthStore();
+  const { user, isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
 
