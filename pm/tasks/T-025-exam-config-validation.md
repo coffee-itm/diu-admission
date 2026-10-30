@@ -1,6 +1,6 @@
 # T-025 · Validate exam config inputs before saving
 
-Status: 👀 Review
+Status: ✔️ Done
 Sprint: S2 · Role: frontend-dev · Model: free-ok · Size: S
 Depends on: none
 Implements: FR-CFG-01 validation (thresholds 0–100, questionCount ≥ 1). S1 post-merge E2E finding (High).
@@ -46,3 +46,10 @@ pnpm test -- examConfigValidation && pnpm lint && pnpm build
 - Nothing needed a real browser.
 
 ## Review
+
+**Verdict: APPROVED** (reviewer, 2026-10-30)
+- AC1-3: `ExamConfigPage.jsx:36-43` validates before the save timer, so `updateConfig` is never reached when invalid; errors via `Input error`. Covered by `ExamConfigPage.test.jsx`.
+- AC4: boundaries all covered in `examConfigValidation.test.js`. AC5: `isValidQuestionCount` guard at `ExamConfigPage.jsx` section input plus tests. AC6: lint baseline only.
+- Extra `ExamConfigPage.test.jsx` and section-input `aria-label`s: accepted. The test is needed to prove AC1-3 at the page level; the aria-labels are harmless a11y additions (ids still left for T-031).
+- Non-blocking note: the section count/time inputs reject an empty value, so the admin can't backspace to blank before retyping. Consider a QA-card look.
+- Verification: coordinator gate (lint 0 errors, 210 tests, build OK); examConfig tests re-run, 58 passed.

@@ -1,6 +1,6 @@
 # T-028 · Small UI fixes: question ID, auth-page redirect, section-tab cue, chart height
 
-Status: 👀 Review
+Status: ✔️ Done
 Sprint: S2 · Role: frontend-dev · Model: free-ok · Size: S
 Depends on: none
 Implements: S1 post-merge E2E findings (Low) and S1 carry-over (Recharts warning)
@@ -50,3 +50,10 @@ pnpm test -- QuestionTable RegisterPage LoginPage && pnpm lint && pnpm build
 - Files: QuestionTable, RegisterPage, LoginPage (+ tests), SectionHeader, 3 chart components.
 
 ## Review
+**APPROVED** (reviewer, commit 720e02c)
+1. Full ID: QuestionTable.jsx:33 + test QuestionTable.test.jsx. OK.
+2. Redirects: LoginPage.jsx:19-21, RegisterPage.jsx:31-33 (after all hooks, so hook order is safe); candidate and admin tests on both pages. OK.
+3. Tab cue (browser, T-040): SectionHeader.jsx right-edge gradient and chevron, `sm:hidden`, `pointer-events-none`, `aria-hidden`, CSS only. Plausible. Gradient is hard-coded `from-white` (fine until dark mode in S7).
+4. Charts (browser, T-040): wrappers `h-64 min-h-64 min-w-0` plus `ResponsiveContainer minWidth={0} minHeight={256}` in all 3 charts. Plausible.
+5. Lint and tests: coordinator gate clean (210 passed). I re-ran the 3 target test files: pass.
+Non-blocking note for T-040: after a successful login the new `<Navigate>` could race the `from` redirect in LoginPage `handleSubmit`. Check that a deep link still lands on the requested page.

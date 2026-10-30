@@ -50,7 +50,7 @@ SPEC (Opus writes card) → BUILD (builder agent) → VERIFY (agent runs tests/l
 | `frontend-dev` | Claude Code subagent / OpenCode agent | Sonnet / free | React pages, hooks, stores, UI | Change specs/contracts |
 | `backend-dev` | Claude Code subagent / OpenCode agent | Sonnet / free | Fastify modules, Mongoose models, jobs, seed | Change specs/contracts |
 | `test-engineer` | Claude Code subagent / OpenCode agent | Sonnet / free | Test harness, unit/integration/E2E tests | Change behavior to make tests pass |
-| `reviewer` | Claude Code subagent / OpenCode agent | Sonnet (preferred) / free | Reviews a finished card against acceptance criteria and the specs; read-only | Edit code |
+| `reviewer` | Claude Code subagent / OpenCode agent | Haiku / free | Reviews a finished card against acceptance criteria and the specs; read-only | Edit code |
 | `devops` | Claude Code subagent / OpenCode agent | Sonnet / free | CI, Docker, workspace, deploy configs | Feature code |
 | `docs-keeper` | Claude Code subagent / OpenCode agent | Haiku / free | Updates board, defect register, roadmap ticks, README/AGENTS after a sprint | Code |
 
@@ -63,7 +63,7 @@ Zen `*-free` models work only inside the OpenCode app. Claude Code via claude-co
 The Opus session coordinates. Builders run headless, and you leave any interactive OpenCode pane idle during builds so two agents never edit the same tree.
 1. **Build.** `free-ok` cards: `opencode run -m opencode/deepseek-v4.1-flash-free --agent <role> "Execute task card pm/tasks/T-xxx-….md following pm/AGENT_PLAYBOOK.md"`. `sonnet` cards: the matching Claude Code subagent.
 2. **Verify.** The coordinator runs `pnpm test`, `pnpm lint` (no new warnings) and `pnpm build`, and checks that the diff stays inside the card's Files list.
-3. **Review.** The Claude `reviewer` (Sonnet) reviews every card. The free model never reviews.
+3. **Review.** The Claude `reviewer` (Haiku) reviews every card. The free model never reviews.
 4. **Retry.** On rejection, resume the same OpenCode session once with the findings. After a second rejection, Sonnet takes the card, and the sprint file records it.
 5. **Fallback.** If the Zen free limit is hit, the remaining `free-ok` cards go to Sonnet.
 

@@ -28,7 +28,7 @@ opencode                 →  /next-task            (or @frontend-dev Execute ta
 ```
 Run cards marked `Model: sonnet` from Claude Code. Run `free-ok` cards in OpenCode.
 Zen free models (`*-free`) only work inside the OpenCode app. Other clients, including Claude Code via claude-code-router, get `FreeUsageLimitError` (verified 2026-10-30).
-Review `free-ok` builds with `/review-task` in plain `claude` (Sonnet), so the free model never reviews its own work.
+Review `free-ok` builds with `/review-task` in plain `claude` (Haiku), so the free model never reviews its own work.
 **Parallel lanes:** open up to 3 terminals, one per lane (A, B, C on the board), each running `/next-task <id>` for the next card in its lane.
 
 **Status (cheapest)**: `/sprint-status`.

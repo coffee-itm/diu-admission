@@ -1,6 +1,6 @@
 # T-024 · Header logout clears the test session (privacy)
 
-Status: 👀 Review
+Status: ✔️ Done
 Sprint: S2 · Role: frontend-dev · Model: sonnet · Size: S
 Depends on: none
 Implements: S1 carry-over (T-021 privacy finding, T-012 follow-up), NFR privacy
@@ -41,3 +41,4 @@ pnpm test -- Header useAuth && pnpm lint && pnpm build
 - Gate: lint 0 errors (1 baseline warning in TestPage.jsx), test 148 passed, build ok. grep: only useAuth.js touches authStore logout.
 
 ## Review
+APPROVED. Header.jsx:6,10 uses useAuth().logout (single path; useAuth.js:42 resets test + anti-cheat stores). grep: only useAuth.js/authStore.js reference store logout. Header.test.jsx asserts initial testStore, anti-cheat counts 0, persisted answers {} / result null; would fail pre-fix. In scope, no new lint warnings. Gate (coordinator, combined tree): lint 0 err/1 baseline warn, 210 tests, build OK.
