@@ -146,4 +146,39 @@ describe('useAntiCheat', () => {
     switchTab();
     expect(useAntiCheatStore.getState().tabSwitchCount).toBe(1);
   });
+
+  it('counts tab switches again after pagehide then pageshow', () => {
+    renderHook(() => useAntiCheat({ onAutoSubmit: vi.fn() }));
+    act(() => {
+      window.dispatchEvent(new Event('pagehide'));
+      window.dispatchEvent(new Event('pageshow'));
+    });
+    switchTab();
+    expect(useAntiCheatStore.getState().tabSwitchCount).toBe(1);
+  });
+
+  it('a cancelled beforeunload does not disable tab-switch detection', () => {
+    renderHook(() => useAntiCheat({ onAutoSubmit: vi.fn() }));
+    act(() => {
+      window.dispatchEvent(new Event('beforeunload'));
+    });
+    switchTab();
+    expect(useAntiCheatStore.getState().tabSwitchCount).toBe(1);
+  });
+
+  it('adds page-lifecycle listeners on mount and removes them on unmount', () => {
+    const add = vi.spyOn(window, 'addEventListener');
+    const remove = vi.spyOn(window, 'removeEventListener');
+    const { unmount } = renderHook(() => useAntiCheat({ onAutoSubmit: vi.fn() }));
+    for (const t of ['pagehide', 'pageshow']) {
+      expect(add.mock.calls.some((c) => c[0] === t)).toBe(true);
+    }
+    unmount();
+    for (const t of ['pagehide', 'pageshow']) {
+      const added = add.mock.calls.find((c) => c[0] === t)[1];
+      expect(remove.mock.calls.some((c) => c[0] === t && c[1] === added)).toBe(true);
+    }
+    add.mockRestore();
+    remove.mockRestore();
+  });
 });

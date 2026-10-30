@@ -33,8 +33,12 @@ export function useAntiCheat({ onAutoSubmit }) {
 
     // === 1. TAB SWITCH DETECTION ===
     // visibilitychange fires while the page unloads (reload/close); don't count that.
+    // pagehide precedes the unload-time visibilitychange; pageshow (bfcache restore) clears it.
     const handleUnload = () => {
       unloadingRef.current = true;
+    };
+    const handlePageShow = () => {
+      unloadingRef.current = false;
     };
     const handleVisibility = () => {
       if (unloadingRef.current) return;
@@ -147,7 +151,7 @@ export function useAntiCheat({ onAutoSubmit }) {
 
     // Register all listeners
     window.addEventListener('pagehide', handleUnload);
-    window.addEventListener('beforeunload', handleUnload);
+    window.addEventListener('pageshow', handlePageShow);
     document.addEventListener('visibilitychange', handleVisibility);
     document.addEventListener('fullscreenchange', handleFullscreenChange);
     document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
@@ -160,7 +164,7 @@ export function useAntiCheat({ onAutoSubmit }) {
     // Cleanup
     return () => {
       window.removeEventListener('pagehide', handleUnload);
-      window.removeEventListener('beforeunload', handleUnload);
+      window.removeEventListener('pageshow', handlePageShow);
       document.removeEventListener('visibilitychange', handleVisibility);
       document.removeEventListener('fullscreenchange', handleFullscreenChange);
       document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);

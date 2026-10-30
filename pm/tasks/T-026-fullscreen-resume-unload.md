@@ -44,4 +44,30 @@ pnpm test -- useAntiCheat SecurityWarningModal && pnpm lint && pnpm build
 - Criterion 5: ⚠️ not verified (no browser), for T-040.
 - pnpm test 213 passed, lint only baseline TestPage:85 warning, build ok.
 
+- Review fix: dropped beforeunload as flag source; pageshow clears unloadingRef; added pageshow, cancelled-beforeunload and spy cleanup tests.
+
 ## Review
+
+**Verdict (reviewer, commit 779226f): CHANGES REQUESTED**
+
+Checks passed:
+- Criteria 1, 2, 3 covered by tests: `useAntiCheat.test.js` mount prompt, no-prompt (active/unsupported), pagehide-then-hide tests. Mount init (`useAntiCheat.js:9-15`) is a pure read, no exit count, no event. Mutation checks: flipping the mount prompt to count an exit, dropping the support check, and dropping the `unloadingRef` guard each make a test fail.
+- Criterion 4: `returnToFullscreen` (`useAntiCheat.js:~183`) calls `enterFullscreen()` before any await, from the click.
+- Existing test adjustments do not weaken assertions. The `fsActive` mock and `exitFullscreen` flip only change setup; the exit handler still gates on `isFullscreenActive()`, so the flip makes the exit count real. No assertion removed.
+- Lint on the two changed files: clean. Full `eslint .` at the commit: only the baseline `TestPage.jsx:85` warning. `vite build` ok. `vitest run` at the commit: 213 passed (run in a clean `git archive` copy, so T-027 WIP is excluded).
+- React Compiler: `unloadingRef` is written only in listeners, never in render. Listener registration and removal are symmetric (`useAntiCheat.js:149-150` and `:162-163`).
+
+Required changes:
+1. **Sticky unload flag disables tab-switch detection (regression).** `useAntiCheat.js:36-40` sets `unloadingRef.current = true` on `pagehide`/`beforeunload` and nothing ever clears it. Two reproducible cases (probe run in a scratch copy, both leave `tabSwitchCount` at 0 after real hides):
+   a. `pagehide` followed by `pageshow` (bfcache restore after navigating away and pressing Back), then one hide. Count stays 0 for the rest of the session.
+   b. `beforeunload` fired but cancelled by another handler (no unload happens), then 3 hides. Count stays 0.
+   Fix: register a `pageshow` listener that sets `unloadingRef.current = false`, add it in the effect and remove it in cleanup. For `beforeunload`, either drop it as a flag source (per the HTML unload order, `pagehide` runs before the `visibilitychange` it guards against, so `pagehide` alone covers it), or make sure a cancelled `beforeunload` cannot leave the flag set. Record the choice in the Agent log.
+2. **Add tests for the fix.** In `useAntiCheat.test.js`: (a) `pagehide` then `pageshow` then a hide counts 1; (b) the `beforeunload` path (if kept) plus later hides count as required by item 1.
+3. **Cover listener cleanup.** Mutations that remove the `beforeunload` removal in cleanup, or the `beforeunload` listener entirely, leave all 9 tests passing. Add a test that spies on `window.removeEventListener` (or `addEventListener`) and asserts `pagehide`, `pageshow` (if added) and `beforeunload` (if kept) are added and removed on unmount.
+4. Re-run `pnpm test -- useAntiCheat SecurityWarningModal`, `pnpm lint` (only the baseline `TestPage.jsx:85` warning allowed) and `pnpm build`, then append the results to the Agent log.
+
+Non-blocking notes:
+- The mount prompt also appears on a normal start if the `enterFullscreen()` request in `InstructionsPage.jsx:23` has not landed before `TestPage` mounts (`startTest` is awaited). Harmless: no count, and the copy fits. No change needed.
+- Criterion 5 (browser reload check) is deferred to T-040 as the card says. Not a blocker.
+- In this tree `pnpm test -- <filter>` ran all 29 files (the filter after `--` is not applied), so the card's verify command runs the full suite. Not a defect.
+- Card `Status:` header line and the board row were not both changed. Per the reviewer scope, only the Review section and the board row were edited. The `Status:` line is still `👀 Review`, so it needs flipping to `🔨 In Progress` by the parent.
