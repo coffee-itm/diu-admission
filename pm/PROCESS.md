@@ -56,7 +56,8 @@ SPEC (Opus writes card) → BUILD (builder agent) → VERIFY (agent runs tests/l
 
 Role instructions (single source for both tools): [`pm/agents/*.md`](./agents/).
 Claude Code wiring: `.claude/agents/*.md` (pinned to `model: sonnet`/`haiku`) and `.claude/commands/*.md`.
-OpenCode wiring: [`opencode.json`](../opencode.json) (agents inherit your default model, currently the free `qwen3-coder-plus`).
+OpenCode wiring: [`opencode.json`](../opencode.json) (agents inherit your default model, currently the free `opencode/deepseek-v4.1-flash-free`).
+Zen `*-free` models work only inside the OpenCode app. Claude Code via claude-code-router gets `FreeUsageLimitError` (verified 2026-10-30).
 
 ### Which tier per card
 Each card says `Model: free-ok` or `Model: sonnet`.

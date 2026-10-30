@@ -23,10 +23,12 @@ claude --model opus      →  /plan-sprint S2   ·   /resolve-escalations   ·  
 # Option 1: Claude Code. The command pins Sonnet; the subagents are pinned to Sonnet/Haiku.
 claude --model sonnet    →  /next-task            (or /next-task T-004)
 
-# Option 2: OpenCode with your free default model
+# Option 2: OpenCode with your free default model (opencode/deepseek-v4.1-flash-free)
 opencode                 →  /next-task            (or @frontend-dev Execute task card pm/tasks/T-002-fix-answer-key.md)
 ```
 Run cards marked `Model: sonnet` from Claude Code. Run `free-ok` cards in OpenCode.
+Zen free models (`*-free`) only work inside the OpenCode app. Other clients, including Claude Code via claude-code-router, get `FreeUsageLimitError` (verified 2026-10-30).
+Review `free-ok` builds with `/review-task` in plain `claude` (Sonnet), so the free model never reviews its own work.
 **Parallel lanes:** open up to 3 terminals, one per lane (A, B, C on the board), each running `/next-task <id>` for the next card in its lane.
 
 **Status (cheapest)**: `/sprint-status`.
