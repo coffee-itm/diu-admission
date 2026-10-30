@@ -1,19 +1,25 @@
 import { Link } from 'react-router';
-import { ArrowRight, CheckCircle2, MonitorPlay, BrainCircuit, Target, Clock } from 'lucide-react';
+import { ArrowRight, MonitorPlay, BrainCircuit, Target, Clock } from 'lucide-react';
 import { ROUTES } from '../../lib/constants.js';
 import { Button } from '../../components/ui/Button.jsx';
 import { useAuthStore } from '../../store/authStore.js';
+import { useExamConfigStore } from '../../store/examConfigStore.js';
 import { motion } from 'framer-motion';
 
-const features = [
+const getFeatures = (minutes, questions) => [
   { icon: MonitorPlay, title: '5 Sections', desc: 'Math, Logic, IT, English, Business' },
-  { icon: Clock, title: '54 Minutes', desc: 'Strict time limit for all sections' },
-  { icon: Target, title: 'Objective MCQ', desc: '50 multiple-choice questions' },
+  { icon: Clock, title: `${minutes} Minutes`, desc: 'Strict time limit for all sections' },
+  { icon: Target, title: 'Objective MCQ', desc: `${questions} multiple-choice questions` },
   { icon: BrainCircuit, title: 'Instant Scoring', desc: 'Get your results immediately' },
 ];
 
 export function LandingPage() {
   const { isAuthenticated, user } = useAuthStore();
+  const config = useExamConfigStore((s) => s.config);
+  const features = getFeatures(
+    config.totalTimeMinutes,
+    config.sections.reduce((sum, s) => sum + s.questionCount, 0),
+  );
   const getStartedRoute = isAuthenticated 
     ? (user?.role === 'admin' ? ROUTES.ADMIN_DASHBOARD : ROUTES.CANDIDATE_DASHBOARD)
     : ROUTES.REGISTER;
@@ -32,7 +38,7 @@ export function LandingPage() {
         >
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-50 border border-blue-100 text-blue-700 text-sm font-medium mb-8">
             <span className="flex h-2 w-2 rounded-full bg-blue-600 animate-pulse" />
-            Admissions Open for Spring 2026
+            Admissions Open: {config.title}
           </div>
           
           <h1 className="text-5xl md:text-7xl font-extrabold text-slate-900 tracking-tight leading-[1.1] mb-6">

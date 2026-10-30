@@ -1,9 +1,30 @@
-import { useForm, useFieldArray } from 'react-hook-form';
+import { useState } from 'react';
+import { useForm, useFieldArray, useWatch, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { questionSchema, defaultQuestionValues } from './questionSchema.js';
 import { Input } from '../../components/ui/Input.jsx';
 import { Button } from '../../components/ui/Button.jsx';
 import { SECTIONS, SECTION_ORDER, DIFFICULTY } from '../../lib/constants.js';
+
+function parseTags(text) {
+  return text.split(',').map((t) => t.trim().toLowerCase()).filter(Boolean);
+}
+
+// Keeps raw text locally so typing commas/spaces isn't eaten; emits the array.
+function TagsInput({ value, onChange, onBlur }) {
+  const [text, setText] = useState(value.join(', '));
+  return (
+    <input
+      id="question-tags"
+      type="text"
+      value={text}
+      onChange={(e) => { setText(e.target.value); onChange(parseTags(e.target.value)); }}
+      onBlur={onBlur}
+      placeholder="e.g. percentage, arithmetic"
+      className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+    />
+  );
+}
 
 export function QuestionForm({ initialData, onSubmit, onCancel }) {
   const { register, control, handleSubmit, formState: { errors } } = useForm({
@@ -12,6 +33,7 @@ export function QuestionForm({ initialData, onSubmit, onCancel }) {
   });
 
   const { fields } = useFieldArray({ control, name: 'options' });
+  const watchedTags = useWatch({ control, name: 'tags' }) || [];
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
@@ -85,6 +107,25 @@ export function QuestionForm({ initialData, onSubmit, onCancel }) {
           className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
           placeholder="Explain the correct answer..."
         />
+      </div>
+
+      <div className="flex flex-col gap-1.5">
+        <label htmlFor="question-tags" className="text-sm font-medium text-slate-700">Tags (comma-separated, optional)</label>
+        <Controller
+          control={control}
+          name="tags"
+          render={({ field }) => (
+            <TagsInput value={field.value || []} onChange={field.onChange} onBlur={field.onBlur} />
+          )}
+        />
+        {errors.tags && <p className="text-xs text-red-600">{errors.tags.message}</p>}
+        {watchedTags.length > 0 && (
+          <div id="question-tags-preview" className="flex flex-wrap gap-1.5" aria-label="Tags preview">
+            {watchedTags.map((t) => (
+              <span key={t} className="rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-medium text-blue-700">{t}</span>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="flex justify-end gap-3 pt-4 border-t border-slate-100">

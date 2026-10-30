@@ -1,9 +1,9 @@
 import { useTestStore } from '../../store/testStore.js';
-import { SECTIONS, SECTION_ORDER, QUESTION_STATUS } from '../../lib/constants.js';
+import { SECTIONS, SECTION_ORDER } from '../../lib/constants.js';
 import { cn } from '../../lib/utils.js';
 
 export function SectionHeader({ currentSectionId, onSectionChange }) {
-  const { questions, questionStatus, answers } = useTestStore();
+  const { questions, answers } = useTestStore();
 
   const getSectionStats = (sid) => {
     const secQuestions = questions.filter((q) => q.section === sid);

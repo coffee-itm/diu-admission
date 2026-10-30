@@ -1,5 +1,10 @@
 # 08 — Domain Model
 
+> Conceptual model. The physical MongoDB collections that implement it are in [14-database-schema.md](./14-database-schema.md):
+> User → `users` · Program → `programs` (new since the pivot) · Question → `questions` · ExamConfig → `examCycles` ·
+> TestSession (+ ServedPaper, Answers, SecurityEvents, timings embedded) → `testSessions` · Result → `results` ·
+> OTP → `otpCodes` · audit trail → `auditLogs`. Role `reviewer` is now accepted (FR-AUTH-10). Users carry `programCode`.
+
 ## Ubiquitous Language → Entities
 
 ```
@@ -92,11 +97,12 @@ RIGHT_CLICK, SHORTCUT_BLOCKED, DEVTOOLS_SUSPECTED, AUTO_SUBMIT_TRIGGERED.
 let overall = totalScore/totalQuestions
 let failed  = sections where sectionPct < sectionMinPercent
 
-ELIGIBLE               ⟺ overall ≥ overallMin ∧ failed = ∅
-CONDITIONALLY_ELIGIBLE ⟺ overall ≥ sectionMin ∧ 1 ≤ |failed| ≤ 2
-NOT_ELIGIBLE           ⟺ overall < sectionMin ∨ |failed| ≥ 3
-   (includes the dead zone: sectionMin ≤ overall < overallMin ∧ failed = ∅ — see grilling Q7)
+ELIGIBLE               ⟺ overall ≥ overallMin ∧ |failed| = 0
+CONDITIONALLY_ELIGIBLE ⟺ ¬ELIGIBLE ∧ overall ≥ conditionalMin (40) ∧ |failed| ≤ maxFailed (2)
+NOT_ELIGIBLE           ⟺ otherwise
 ```
+This matches the current code (`src/lib/scoring.js:56-63`, where 40 and 2 are hard-coded) and FR-SCORE-04 (configurable).
+The earlier version of this section said `1 ≤ |failed|`, which created a "dead zone" that **never existed in code**. See 07 Q7.
 
 ## State Machines
 

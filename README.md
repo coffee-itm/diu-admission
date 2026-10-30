@@ -60,7 +60,7 @@ DIU Admission is a comprehensive web platform designed to evaluate prospective s
 | **Merit List** | Auto-ranked candidates by score with eligibility badges — top 3 get 🥇🥈🥉 |
 | **Analytics** | Interactive charts — section averages (bar), eligibility distribution (pie), score trends (line) |
 
-### 🔒 Anti-Cheating System (7-Layer Protection)
+### 🔒 Anti-Cheating System (deterrence + audit)
 
 ```
 Layer 1  │  Tab-Switch Detection        →  Warns at 2, auto-submits at 5 switches
@@ -169,7 +169,7 @@ src/
 │       ├── SectionHeader.jsx          # Section tab switcher
 │       ├── SecurityWarningModal.jsx   # Anti-cheat warning popup
 │       ├── TestSubmitDialog.jsx       # Submit confirmation dialog
-│       ├── useAntiCheat.js            # 7-layer anti-cheat hook
+│       ├── useAntiCheat.js            # Anti-cheat hook (deterrence + audit log)
 │       ├── useAutoSave.js             # Periodic answer persistence
 │       ├── useTestEngine.js           # Core test orchestration
 │       └── useTimer.js                # Countdown timer logic
@@ -343,7 +343,7 @@ Login  →  Dashboard  →  Question Bank  →  Exam Config  →  Candidates  �
 
 - [x] Candidate registration & login
 - [x] 5-section timed MCQ test engine
-- [x] 7-layer anti-cheating system
+- [x] Anti-cheating deterrence + audit log
 - [x] Instant scoring with eligibility classification
 - [x] PDF score report generation
 - [x] Admin dashboard with metrics
@@ -351,11 +351,18 @@ Login  →  Dashboard  →  Question Bank  →  Exam Config  →  Candidates  �
 - [x] Exam configuration panel
 - [x] Merit list with ranking
 - [x] Analytics charts (bar, pie, line)
-- [ ] Backend API (Node.js + Express + PostgreSQL)
+- [ ] Backend API (Node.js + Fastify + MongoDB) — see [context/16-backend-architecture.md](context/16-backend-architecture.md)
 - [ ] Email/SMS OTP verification
 - [ ] Bilingual support (English + Bangla)
-- [ ] CSV/Excel merit list export
+- [x] CSV merit list export
+- [ ] Excel merit list export
 - [ ] Production deployment
+
+---
+
+## 📚 Documentation
+
+Full project documentation — PRD, SRS, MongoDB schema, API spec, backend/frontend specs, testing strategy, implementation roadmap and ops runbook — lives in [`context/`](context/README.md). Start with [`context/README.md`](context/README.md).
 
 ---
 

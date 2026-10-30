@@ -121,8 +121,22 @@ export const SECURITY_EVENT_TYPES = {
   AUTO_SUBMIT_CHEAT: 'auto_submit_cheat',
   INTEGRITY_AGREED: 'integrity_agreed',
   FULLSCREEN_ENTERED: 'fullscreen_entered',
+  CUT_ATTEMPT: 'cut_attempt',
+  FULLSCREEN_UNSUPPORTED: 'fullscreen_unsupported',
 };
 
 // Mock credentials
 export const MOCK_ADMIN = { email: 'admin@diu.edu', password: 'Admin@1234' };
 export const MOCK_CANDIDATE = { email: 'demo@candidate.com', password: 'Test@1234' };
+
+// localStorage keys (renamed from itm-* in T-018; see lib/storageMigration.js)
+export const STORAGE_KEYS = {
+  AUTH: 'diu-auth',
+  TEST_SESSION: 'diu-test-session',
+  ANTI_CHEAT: 'diu-anti-cheat',
+  EXAM_CONFIG: 'diu-exam-config',
+  RESULTS: 'diu-results',
+  LANG: 'diu-lang',
+  CANDIDATES: 'diu-candidates',
+  QUESTIONS: 'diu-questions',
+};

@@ -50,14 +50,8 @@ export function AnalyticsPage() {
     };
   }).filter(d => d.value > 0);
 
-  // Prepare Mock Data for Trend Line Chart (Simulating last 7 days)
-  const trendData = [
-    { date: '10 Jun', avgScore: 68 },
-    { date: '11 Jun', avgScore: 72 },
-    { date: '12 Jun', avgScore: 70 },
-    { date: '13 Jun', avgScore: 75 },
-    { date: '14 Jun', avgScore: Math.round(data.avgScore) },
-  ];
+  // Real per-day trend (average score of submissions per day)
+  const trendData = data.perDay.map((d) => ({ ...d, date: new Date(`${d.date}T00:00:00`).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) }));
 
   return (
     <div className="space-y-6 page-enter">
@@ -90,10 +84,14 @@ export function AnalyticsPage() {
         <Card className="lg:col-span-2">
           <CardHeader>
             <h3 className="font-bold text-slate-900">Performance Trend</h3>
-            <p className="text-xs text-slate-500 font-normal mt-0.5">Average overall score over the last 5 days.</p>
+            <p className="text-xs text-slate-500 font-normal mt-0.5">Average overall score per day, for the most recent days with submissions.</p>
           </CardHeader>
           <CardBody>
-            <MeritLineChart data={trendData} />
+            {trendData.length > 0 ? (
+              <MeritLineChart data={trendData} />
+            ) : (
+              <p id="analytics-trend-empty" className="py-12 text-center text-slate-500">No results yet</p>
+            )}
           </CardBody>
         </Card>
       </div>

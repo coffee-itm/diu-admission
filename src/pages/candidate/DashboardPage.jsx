@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router';
+import { Link } from 'react-router';
 import { PlayCircle, CheckCircle, Clock, Calendar } from 'lucide-react';
 import { ROUTES } from '../../lib/constants.js';
 import { useAuthStore } from '../../store/authStore.js';
@@ -7,13 +7,24 @@ import { testService } from '../../services/testService.js';
 import { Card } from '../../components/ui/Card.jsx';
 import { Button } from '../../components/ui/Button.jsx';
 import { Badge } from '../../components/ui/Badge.jsx';
-import { formatDateTime } from '../../lib/utils.js';
+import { useExamConfigStore } from '../../store/examConfigStore.js';
+import { useTestStore } from '../../store/testStore.js';
+import { formatDateTime, formatTime } from '../../lib/utils.js';
 
 export function CandidateDashboardPage() {
   const { user } = useAuthStore();
+  const config = useExamConfigStore((s) => s.config);
+  const totalQuestions = config.sections.reduce((sum, s) => sum + s.questionCount, 0);
+  const hasActive = useTestStore(
+    (s) => !!s.sessionId && s.candidateId === user.id && !s.isSubmitted
+  );
+  const deadline = useTestStore((s) => s.deadline);
+  const storedRemaining = useTestStore((s) => s.timeRemaining);
+  // A passed deadline still resumes: the timer auto-submits immediately.
+  const [now] = useState(() => Date.now());
+  const timeLeft = deadline == null ? storedRemaining : Math.max(0, Math.ceil((deadline - now) / 1000));
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchResult = async () => {
@@ -41,10 +52,10 @@ export function CandidateDashboardPage() {
           <div className="p-8">
             <div className="flex items-start justify-between mb-6">
               <div>
-                <h2 className="text-xl font-bold text-slate-900 mb-1">Spring 2026 Admission</h2>
+                <h2 className="text-xl font-bold text-slate-900 mb-1">{config.title}</h2>
                 <div className="flex items-center gap-3 text-sm text-slate-500 mt-2">
-                  <span className="flex items-center gap-1"><Clock size={14} /> 54 Minutes</span>
-                  <span className="flex items-center gap-1"><Calendar size={14} /> 50 Questions</span>
+                  <span className="flex items-center gap-1"><Clock size={14} /> {config.totalTimeMinutes} Minutes</span>
+                  <span className="flex items-center gap-1"><Calendar size={14} /> {totalQuestions} Questions</span>
                 </div>
               </div>
               {result ? (
@@ -65,6 +76,16 @@ export function CandidateDashboardPage() {
             {result ? (
               <Button as={Link} to={ROUTES.CANDIDATE_RESULT} size="lg">
                 View Full Result
+              </Button>
+            ) : hasActive ? (
+              <Button
+                as={Link}
+                id="dashboard-resume-test"
+                to={ROUTES.CANDIDATE_TEST}
+                size="lg"
+                leftIcon={<PlayCircle size={18} />}
+              >
+                Resume test ({formatTime(timeLeft)} left)
               </Button>
             ) : (
               <Button as={Link} to={ROUTES.CANDIDATE_INSTRUCTIONS} size="lg" leftIcon={<PlayCircle size={18} />}>

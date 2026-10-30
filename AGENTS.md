@@ -3,6 +3,19 @@
 
 ---
 
+## ▶ Start Here (read before any change)
+
+0. **Work is tracked in [`pm/`](./pm/README.md).** Builder agents execute **one task card** (`pm/tasks/T-xxx-*.md`) per session following [`pm/AGENT_PLAYBOOK.md`](./pm/AGENT_PLAYBOOK.md) and their role file in `pm/agents/`. The board is [`pm/BOARD.md`](./pm/BOARD.md). If you were given a card, read the card first and follow its "Context to read". You don't need the rest of this file beyond the "Important Notes for Agents".
+1. **Read [`context/README.md`](./context/README.md)** — the project knowledge base and source-of-truth order (planning sessions; builders only read what their card lists).
+2. **Cards come from [`context/19-implementation-roadmap.md`](./context/19-implementation-roadmap.md)** (phases P0 → P8), refined per sprint by the planner, and cite requirement IDs in [`context/13-srs.md`](./context/13-srs.md).
+3. Backend work follows [`context/16-backend-architecture.md`](./context/16-backend-architecture.md), [`context/14-database-schema.md`](./context/14-database-schema.md) and [`context/15-api-spec.md`](./context/15-api-spec.md). Frontend work follows [`context/17-frontend-spec.md`](./context/17-frontend-spec.md).
+4. Meet the Definition of Done in [`context/18-testing-strategy.md`](./context/18-testing-strategy.md#6-definition-of-done-every-task-in-19) and update the docs in the same change.
+
+> **Where the context docs and this file disagree, `context/13-srs.md` and `context/09-adrs.md` win.**
+> This file keeps the frontend stack/conventions; the sections below describe the original prototype scaffold.
+
+---
+
 ## Project Identity
 
 | Field | Value |
@@ -16,6 +29,9 @@
 | **Styling** | Tailwind CSS v4 |
 | **Routing** | React Router v7 |
 | **Language** | JavaScript (ES2025+, JSX) |
+| **Backend (target, R2)** | Fastify 5 + Mongoose 8 on Node.js 22, in `server/` — see `context/16-backend-architecture.md` (ADR-014) |
+| **Database (target, R2)** | **MongoDB ≥ 7** (replica set) — see `context/14-database-schema.md` (ADR-013; replaces the earlier PostgreSQL plan) |
+| **Shared logic** | `packages/shared` (`@diu/shared`): scoring, risk, constants, Zod schemas — used by SPA and server (ADR-019) |
 
 ---
 
@@ -60,10 +76,8 @@
 
 | Package | Purpose |
 |:---|:---|
-| `date-fns` | Date formatting and manipulation |
 | `sonner` | Toast notifications |
 | `jspdf` | Client-side PDF generation |
-| `jspdf-autotable` | Table support for jsPDF |
 
 ### Dev Dependencies
 
@@ -73,6 +87,9 @@
 | `eslint` | Linting |
 | `eslint-plugin-react-hooks` | React Hooks lint rules |
 | `eslint-plugin-react-compiler` | React Compiler lint rules |
+| `vitest` | Test runner (`pnpm test`) |
+| `@testing-library/react` `@testing-library/user-event` `@testing-library/jest-dom` | Component and hook tests |
+| `jsdom` | DOM environment for Vitest |
 | `@types/react` `@types/react-dom` | Type definitions for IDE support (even in JS) |
 
 ---
@@ -98,7 +115,7 @@ pnpm add lucide-react recharts framer-motion clsx sonner
 pnpm add react-hook-form zod @hookform/resolvers
 
 # Utilities
-pnpm add date-fns jspdf jspdf-autotable
+pnpm add jspdf
 
 # Dev: Tailwind CSS v4
 pnpm add -D tailwindcss @tailwindcss/vite
@@ -108,6 +125,9 @@ pnpm add -D babel-plugin-react-compiler @rolldown/plugin-babel @babel/core
 
 # Dev: Linting
 pnpm add -D eslint-plugin-react-compiler
+
+# Dev: Tests
+pnpm add -D vitest @testing-library/react @testing-library/user-event @testing-library/jest-dom jsdom
 ```
 
 ### Step 3: Configure Vite (`vite.config.js`)
@@ -292,6 +312,17 @@ prototype/
 └── README.md
 ```
 
+> **Reality check (2026-10-29):** `services/api.js`, `services/questionService.js`, `features/scoring/useScoring.js`,
+> `hooks/` and `public/fonts/` do **not** exist yet. `lib/csvExport.js` now exists (T-015), as do `lib/csvParse.js`,
+> `lib/meritCsv.js`, `lib/fullscreen.js`, `lib/storageMigration.js`, `lib/runStorageMigration.js` and
+> `features/questions/importQuestions.js` (S1). `store/antiCheatStore.js`,
+> `features/test/useAntiCheat.js` and `features/test/SecurityWarningModal.jsx` exist but are not listed above.
+> See `context/02-tech-architecture.md` for the actual tree and `context/06-open-issues-doc-gaps.md` for known defects.
+>
+> **Target additions** (R2, see `context/16-backend-architecture.md`): `packages/shared/` (`@diu/shared`),
+> `server/` (`@diu/server`: `src/{app,server,config}.js`, `plugins/`, `modules/<domain>/{model,routes,service}.js`, `jobs/`),
+> `e2e/` (Playwright), `load/` (k6), `pnpm-workspace.yaml` packages `['.', 'server', 'packages/*']`.
+
 ---
 
 ## Application Routes
@@ -357,10 +388,12 @@ Output: {
   timeTaken: 2400 // seconds
 }
 
-Rules (default, configurable):
+Rules (default, configurable — authoritative spec: context/13-srs.md FR-SCORE-04):
   - ELIGIBLE: ≥ 50% overall AND ≥ 40% in ALL sections
-  - CONDITIONALLY_ELIGIBLE: ≥ 40% overall AND < 40% in 1-2 sections
-  - NOT_ELIGIBLE: < 40% overall OR < 40% in 3+ sections
+  - CONDITIONALLY_ELIGIBLE: otherwise, ≥ 40% overall AND at most 2 sections below 40%
+    (includes 0 failed sections with 40–49% overall — this is what scoring.js already does)
+  - NOT_ELIGIBLE: everything else (< 40% overall OR 3+ sections below 40%)
+  - Compare unrounded percentages; thresholds may be overridden per program.
 ```
 
 ### 3. Question Bank (Admin)
@@ -484,7 +517,7 @@ pnpm lint
 ## Important Notes for Agents
 
 0. **UNIVERSITY-WIDE SCOPE:** This app serves ALL DIU departments, not just ITM. Candidates pick an intended program at registration (`PROGRAMS` in `src/lib/constants.js`). Branding/wording must never be ITM-specific. Per-program exam configs and program-specific question sections are future work.
-1. **This is a PROTOTYPE** — use mock data, localStorage for persistence, no real backend.
+1. **Prototype → production in phases.** Phase P0 keeps mock data + localStorage (fix defects only). From P1 the real backend (Fastify + MongoDB) is built and the SPA moves to the API; keep `VITE_USE_MOCKS=true` working for offline demos. Never send `correctAnswer` to candidates once the API exists.
 2. **React Compiler** is enabled — do NOT use `React.memo()`, `useMemo()`, or `useCallback()` manually. The compiler handles it.
 3. **Tailwind CSS v4** uses `@import "tailwindcss"` and `@theme {}` — no `tailwind.config.js` needed.
 4. **React Router v7** — import from `react-router`, not `react-router-dom`.
@@ -498,11 +531,19 @@ pnpm lint
 ---
 
 ## Reference Documents
-- [SRS Document](../SRS_Document.md)
-- [PRD Document](../PRD_Document.md)
-- [Project Proposal](../Project_Proposal.md)
-- [ITM Brochure](../ITM_BSc_Program_Brochure.md)
-- [Anti-Cheat Implementation Guide](./ANTI_CHEAT_IMPLEMENTATION.md) — **MUST IMPLEMENT** — Complete step-by-step guide for all 10 anti-cheating features with exact code, file paths, and integration instructions.
+- [Context index — start here](./context/README.md)
+- [PRD — Product Requirements](./context/12-prd.md)
+- [SRS — Software Requirements Specification](./context/13-srs.md)
+- [Database design (MongoDB/Mongoose)](./context/14-database-schema.md)
+- [REST API spec](./context/15-api-spec.md)
+- [Backend architecture (Fastify)](./context/16-backend-architecture.md)
+- [Frontend spec](./context/17-frontend-spec.md)
+- [Testing strategy](./context/18-testing-strategy.md)
+- [Implementation roadmap (task list)](./context/19-implementation-roadmap.md)
+- [Deployment & ops](./context/20-deployment-ops.md)
+- [Architecture decisions (ADRs)](./context/09-adrs.md) · [Defect register](./context/06-open-issues-doc-gaps.md) · [Glossary](./context/10-glossary.md)
+- [Anti-Cheat Implementation Guide](./ANTI_CHEAT_IMPLEMENTATION.md) — client-side reference for the 10 anti-cheat features. Note the known bugs in its code (stale counters, auto-submit closure — `context/06` D-02/D-03) and the server-side target in `context/04`.
+- The original SRS/PRD/Proposal/ITM brochure files referenced by earlier versions are **not in this repo**; their content is consolidated into `context/`.
 
 ---
 

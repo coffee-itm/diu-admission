@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router';
 import { Mail, Lock, LogIn } from 'lucide-react';
 import { ROUTES } from '../../lib/constants.js';
 import { useAuth } from '../../features/auth/useAuth.js';
+import { resolvePostLoginPath } from '../../features/auth/resolvePostLoginPath.js';
 import { Input } from '../../components/ui/Input.jsx';
 import { Button } from '../../components/ui/Button.jsx';
 import { Card } from '../../components/ui/Card.jsx';
@@ -15,14 +16,12 @@ export function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const from = location.state?.from?.pathname || '/';
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       const user = await login(email, password);
-      navigate(user.role === 'admin' ? ROUTES.ADMIN_DASHBOARD : ROUTES.CANDIDATE_DASHBOARD, { replace: true });
-    } catch (err) {
+      navigate(resolvePostLoginPath(location.state?.from?.pathname, user.role), { replace: true });
+    } catch {
       // Error handled by hook
     }
   };

@@ -3,13 +3,14 @@ import { useParams, useNavigate } from 'react-router';
 import { ArrowLeft, FileDown, Calendar, Clock, ShieldAlert, Eye, Copy, Mouse, Keyboard } from 'lucide-react';
 import { ROUTES } from '../../lib/constants.js';
 import { resultService } from '../../services/resultService.js';
-import { mockCandidates } from '../../data/mockCandidates.js';
+import { getAllCandidates } from '../../services/authService.js';
 import { ScoreCard } from '../../features/scoring/ScoreCard.jsx';
 import { EligibilityBadge } from '../../features/scoring/EligibilityBadge.jsx';
 import { Card } from '../../components/ui/Card.jsx';
 import { Button } from '../../components/ui/Button.jsx';
 import { PageSpinner } from '../../components/ui/Spinner.jsx';
 import { formatDateTime, formatTime } from '../../lib/utils.js';
+import { useExamConfigStore } from '../../store/examConfigStore.js';
 import { generatePdfReport } from '../../lib/pdfGenerator.js';
 
 export function CandidateDetailPage() {
@@ -18,31 +19,36 @@ export function CandidateDetailPage() {
   const [result, setResult] = useState(null);
   const [candidate, setCandidate] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     const fetchResult = async () => {
       try {
-        const c = mockCandidates.find(x => x.id === id);
-        if (!c) {
-          navigate(ROUTES.ADMIN_CANDIDATES);
-          return;
-        }
+        const c = getAllCandidates().find((x) => x.id === id) || null;
         setCandidate(c);
-        
-        const r = await resultService.getResultForCandidate(id);
-        if (!r) {
-          navigate(ROUTES.ADMIN_CANDIDATES);
-          return;
-        }
-        setResult(r);
+        if (c) setResult(await resultService.getForCandidate(id));
+      } catch (err) {
+        setError(err?.message || 'Failed to load candidate report.');
       } finally {
         setLoading(false);
       }
     };
     fetchResult();
-  }, [id, navigate]);
+  }, [id]);
 
-  if (loading || !result || !candidate) return <PageSpinner />;
+  if (loading) return <PageSpinner />;
+
+  if (error || !candidate || !result) {
+    const message = error || (!candidate ? 'Candidate not found' : 'No test result yet for this candidate');
+    return (
+      <div className="max-w-4xl mx-auto space-y-4 page-enter" id="candidate-detail-empty">
+        <Button id="candidate-detail-back" variant="ghost" size="sm" onClick={() => navigate(ROUTES.ADMIN_CANDIDATES)} leftIcon={<ArrowLeft size={18} />}>
+          Back
+        </Button>
+        <p role="alert" className="text-slate-700 font-medium">{message}</p>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-4xl mx-auto space-y-6 page-enter">
@@ -56,7 +62,7 @@ export function CandidateDetailPage() {
             <p className="text-slate-600 text-sm font-mono">{candidate.id}</p>
           </div>
         </div>
-        <Button variant="outline" onClick={() => generatePdfReport(candidate, result)} leftIcon={<FileDown size={18} />}>
+        <Button variant="outline" onClick={() => generatePdfReport(candidate, result, useExamConfigStore.getState().config.title)} leftIcon={<FileDown size={18} />}>
           Export PDF
         </Button>
       </div>

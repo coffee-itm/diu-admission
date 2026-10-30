@@ -1,6 +1,11 @@
 # 11 — Pivot: ITM-only → DIU Admission (University-Wide)
 
 > Change-of-plan record. Supersedes all ITM-only framing in docs 01–10 wherever they conflict.
+> **Update 2026-10-29:** docs 01–10 have since been rewritten for the university-wide scope. The open questions below are
+> now tracked with assumed defaults in [06 §3](./06-open-issues-doc-gaps.md#3-open-product-questions) and specified in
+> [12-prd.md](./12-prd.md) / [13-srs.md](./13-srs.md): per-program thresholds (FR-CFG-02), program-scoped reviewers
+> (FR-AUTH-10), per-program merit lists (FR-RES-05) and program analytics (FR-ANL-03). Note: `itm-*` storage keys
+> listed as renamed below were **not** all renamed (D-28).
 
 ## The Pivot
 

@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import { Download, Award } from 'lucide-react';
 import { resultService } from '../../services/resultService.js';
-import { mockCandidates } from '../../data/mockCandidates.js';
 import { Button } from '../../components/ui/Button.jsx';
 import { Badge } from '../../components/ui/Badge.jsx';
 import { PageSpinner } from '../../components/ui/Spinner.jsx';
 import { toast } from 'sonner';
+import { toCSV, downloadCSV } from '../../lib/csvExport.js';
+import { MERIT_COLUMNS, buildMeritRows } from '../../lib/meritCsv.js';
+import { getAllCandidates } from '../../services/authService.js';
 
 export function MeritListPage() {
   const [meritList, setMeritList] = useState([]);
@@ -14,15 +16,7 @@ export function MeritListPage() {
   useEffect(() => {
     const fetchMeritList = async () => {
       try {
-        const list = await resultService.getMeritList();
-        
-        // Merge candidate details
-        const enriched = list.map(r => {
-          const candidate = mockCandidates.find(c => c.id === r.candidateId);
-          return { ...r, candidate };
-        }).filter(r => r.candidate); // ensure candidate exists
-        
-        setMeritList(enriched);
+        setMeritList(await resultService.getMeritList());
       } finally {
         setLoading(false);
       }
@@ -31,8 +25,10 @@ export function MeritListPage() {
   }, []);
 
   const exportCSV = () => {
+    const rows = buildMeritRows(meritList, getAllCandidates());
+    const date = new Date().toISOString().slice(0, 10);
+    downloadCSV(`DIU_Merit_List_${date}.csv`, toCSV(rows, MERIT_COLUMNS));
     toast.success('Merit list exported as CSV');
-    // In reality, we'd generate a CSV blob here
   };
 
   if (loading) return <PageSpinner />;
@@ -44,7 +40,7 @@ export function MeritListPage() {
           <h1 className="text-2xl font-bold text-slate-900 mb-1">Merit List</h1>
           <p className="text-slate-600">Ranked list of eligible and conditionally eligible candidates.</p>
         </div>
-        <Button onClick={exportCSV} leftIcon={<Download size={18} />}>
+        <Button id="merit-export-csv" onClick={exportCSV} leftIcon={<Download size={18} />}>
           Export CSV
         </Button>
       </div>
@@ -75,10 +71,10 @@ export function MeritListPage() {
                   </td>
                   <td className="px-6 py-4">
                     <p className="font-bold text-slate-900 flex items-center gap-2">
-                      {item.candidate.name}
+                      {item.candidateName}
                       {index < 3 && <Award size={16} className={index === 0 ? 'text-yellow-500' : index === 1 ? 'text-slate-400' : 'text-orange-400'} />}
                     </p>
-                    <p className="text-xs text-slate-500 mt-0.5">{item.candidate.email}</p>
+                    <p className="text-xs text-slate-500 mt-0.5">{item.candidateEmail}</p>
                   </td>
                   <td className="px-6 py-4 text-center">
                     <span className="text-lg font-black text-blue-700">{item.percentage}%</span>
@@ -88,14 +84,14 @@ export function MeritListPage() {
                   </td>
                   <td className="px-6 py-4">
                     <Badge variant={item.eligibility === 'ELIGIBLE' ? 'success' : 'warning'}>
-                      {item.eligibility.replace('_', ' ')}
+                      {item.eligibility.replaceAll('_', ' ')}
                     </Badge>
                   </td>
                 </tr>
               ))}
               {meritList.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="px-6 py-12 text-center text-slate-500">No eligible candidates yet.</td>
+                  <td colSpan={5} className="px-6 py-12 text-center text-slate-500">No results yet</td>
                 </tr>
               )}
             </tbody>

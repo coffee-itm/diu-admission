@@ -4,8 +4,7 @@ import { useState } from 'react';
 import { useAuthStore } from '../../store/authStore.js';
 import { ROUTES } from '../../lib/constants.js';
 import { Button } from '../ui/Button.jsx';
-import { navItems } from './Sidebar.jsx';
-import { cn } from '../../lib/utils.js';
+import { navItems } from './navItems.js';
 
 export function Header() {
   const { user, isAuthenticated, logout } = useAuthStore();

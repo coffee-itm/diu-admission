@@ -2,7 +2,7 @@ import { jsPDF } from 'jspdf';
 import { formatDateTime, formatTime } from './utils.js';
 import { ELIGIBILITY } from './constants.js';
 
-export function generatePdfReport(user, result) {
+export function generatePdfReport(user, result, examTitle) {
   const doc = new jsPDF();
   
   // DIU Header
@@ -16,7 +16,7 @@ export function generatePdfReport(user, result) {
   
   doc.setFontSize(12);
   doc.setFont('helvetica', 'normal');
-  doc.text('Daffodil International University - Spring 2026', 20, 30);
+  doc.text(`Daffodil International University - ${result.examTitle ?? examTitle ?? 'Admission Assessment'}`, 20, 30);
   
   // Candidate Info
   doc.setTextColor(30, 41, 59); // slate-800

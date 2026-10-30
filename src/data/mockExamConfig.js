@@ -19,7 +19,6 @@ export const mockExamConfig = {
   endDate: '2026-07-15T23:59:59+06:00',
   instructions: [
     'The test consists of 50 questions across 5 sections.',
-    'Total duration is 54 minutes. The exam will auto-submit when time expires.',
     'You can navigate freely between sections and questions.',
     'There is NO negative marking for wrong answers.',
     'Each correct answer carries 1 mark.',

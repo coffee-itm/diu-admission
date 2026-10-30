@@ -1,8 +1,9 @@
 import { Modal } from '../../components/ui/Modal.jsx';
 import { Button } from '../../components/ui/Button.jsx';
 import { ShieldAlert } from 'lucide-react';
+import { isFullscreenSupported } from '../../lib/fullscreen.js';
 
-export function SecurityWarningModal({ isOpen, message, onDismiss }) {
+export function SecurityWarningModal({ isOpen, message, onDismiss, onReturnToFullscreen, isFullscreen = false }) {
   return (
     <Modal isOpen={isOpen} onClose={onDismiss} title="⚠️ Security Warning" size="md" hideClose>
       <div className="space-y-4">
@@ -14,8 +15,13 @@ export function SecurityWarningModal({ isOpen, message, onDismiss }) {
           Any suspicious activity is being logged and will be reviewed by the exam administrator. 
           Continued violations will result in automatic test submission.
         </p>
-        <div className="flex justify-end pt-2">
-          <Button variant="primary" onClick={onDismiss}>
+        <div className="flex flex-wrap justify-end gap-3 pt-2">
+          {onReturnToFullscreen && isFullscreenSupported() && !isFullscreen && (
+            <Button id="security-return-fullscreen" variant="secondary" onClick={onReturnToFullscreen}>
+              Return to fullscreen
+            </Button>
+          )}
+          <Button id="security-dismiss" variant="primary" onClick={onDismiss}>
             I Understand, Continue Test
           </Button>
         </div>

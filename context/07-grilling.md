@@ -191,3 +191,32 @@ actually observe.
 8. Add question lifecycle states (draft/reviewed/active/retired) (Q18).
 9. Add `reviewer` read-only role (Q17).
 10. Perf budget + iOS fullscreen fallback for the mobile-first promise (Q11).
+
+---
+
+## Resolution status (2026-10-29)
+
+How each question is now handled in the spec set. "Assumed" means a default was chosen so work can proceed; it still needs stakeholder confirmation ([06 §3](./06-open-issues-doc-gaps.md#3-open-product-questions)).
+
+| Q | Topic | Status | Where |
+|:--|:--|:--|:--|
+| Q1 | Advisory vs gate | Assumed: advisory ("Recommendation:") | 12 §9, FR-SCORE-07 |
+| Q2 | Mandatory test | Assumed: mandatory | 06 Q2 |
+| Q3 | Science/GPA eligibility | Assumed: collect, don't block | FR-AUTH-01, 06 Q8 |
+| Q4 | Reliability of 50 items | Accepted risk. Bank growth + item stats | FR-ANL-05, 06 Q10 |
+| Q5 | Unjustified constants | Configurable per cycle/program; calibrate after the pilot | FR-CFG-01/02 |
+| Q6 | Per-section timers | Resolved: informational unless `enforceSectionTime` (Could) | FR-CFG-05, ADR-004 |
+| Q7 | Scoring dead zone | **Resolved: not a code bug.** `scoring.js` already treats 0 failed + ≥40 % as Conditional; only the written rule was wrong. Thresholds made configurable, boundary tests added | FR-SCORE-04, 18 §3.1, D-09 |
+| Q8 | Anti-cheat claims | Resolved: "deterrence + audit"; server-side counting + review | FR-AC-*, ADR-005 |
+| Q9 | Bank leak | Resolved: pool sampling + publish check + bank growth | FR-TEST-02, 06 Q10 |
+| Q10 | Single attempt in localStorage | Resolved: unique index on the server | 14 §3.5, FR-TEST-01 |
+| Q11 | Mobile perf / iOS fullscreen | Resolved: perf budget + fullscreen fallback | NFR-01, FR-AC-04 |
+| Q12 | i18n missing | Scheduled (Must): P7 | FR-I18N-*, ADR-017 |
+| Q13 | No tests | Scheduled first: P0-01 | 18, ADR-018 |
+| Q14 | Services seam aspirational | Resolved: full API contract + `api.js` design | 15, 17 §4 |
+| Q15 | TestSession entity | Resolved | 14 §3.5, ADR-015 |
+| Q16 | Cross-device recovery | Resolved: server sessions + offline queue | FR-TEST-06/07 |
+| Q17 | Reviewer role | Resolved: `reviewer` scoped to programs | FR-AUTH-10, 05 |
+| Q18 | Question lifecycle | Resolved: draft → reviewed → active → retired | FR-QB-02 |
+| Q19 | Hosting | Assumed: Atlas Mumbai for the pilot; on-prem supported | 20 §2, 06 Q6 |
+| Q20 | Unmeasurable KPI | Resolved: KPIs restated as observable; retention measured outside the app | 12 §7 |

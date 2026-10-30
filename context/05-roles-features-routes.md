@@ -1,101 +1,84 @@
-# 05 — Roles, Features & Routes (Consolidated)
+# 05 — Roles, Features & Routes
 
-## Roles & Access
+> Current status verified against the code on 2026-10-29. Target pages and endpoints: [17 §2](./17-frontend-spec.md#2-routes--pages) and [15](./15-api-spec.md).
 
-| Role | Auth | Scope |
+---
+
+## Roles
+
+| Role | Current | Target |
 |:---|:---|:---|
-| `candidate` | Register (RHF+Zod) → login | Dashboard → Instructions → Test → Result |
-| `admin` | Login (seeded credentials) | Full admin panel |
-| (reviewer — PRD persona Kamal) | Not modeled | Read-only results access is NOT implemented |
+| `candidate` | Register (RHF + Zod) → auto-login → dashboard → instructions → test → result | Same + email OTP verification before starting (FR-AUTH-05) |
+| `admin` | Seeded `admin@diu.edu` / `Admin@1234`, full panel | Office of Admissions. Creates reviewers/admins (FR-AUTH-10) |
+| `reviewer` | **Not implemented** | Read-only admin subset, scoped to `programCodes` (PRD persona Kamal) |
 
-Auth: `authStore` (persisted) + `AuthProvider` context + `ProtectedRoute role=...`.
-Prototype uses mock credentials; no JWT/OTP yet (OTP-ready flow only).
+Auth today: `authService` (mock, plaintext) → `authStore` (`diu-auth`). `AuthProvider` is a pass-through.
+`ProtectedRoute role=…` guards subtrees. Target: JWT + refresh cookie (ADR-016), and the server enforces the same RBAC.
 
-## Route Table
+## Route table with current status
 
-```
-PUBLIC
-  /                          LandingPage
-  /login                     LoginPage
-  /register                  RegisterPage
+| Route | Page | Current status | Target notes |
+|:--|:--|:--|:--|
+| `/` | LandingPage | ✅ | Data from `/cycles/current`, `/programs` |
+| `/login` | LoginPage | ✅ redirects back to the requested page (D-14 fixed in S1) | — |
+| `/register` | RegisterPage | ✅ name, email, phone, program, password | + GPA, HSC group; then `/verify-email` |
+| `/verify-email` | — | ❌ new | OTP |
+| `/forgot-password` | — | ❌ new | Should |
+| `/candidate/dashboard` | DashboardPage | ✅ config-driven copy (D-17), Resume button (D-13) fixed in S1 | Status card incl. Resume |
+| `/candidate/instructions` | InstructionsPage | ✅ config-driven copy (D-17), one attempt (D-12), fullscreen on Start click (T-006) | Fullscreen in the Start click |
+| `/candidate/test` | TestPage | ⚠️ see [04](./04-test-engine-anticheat.md) | Server session |
+| `/candidate/result` | ResultPage | ✅ + PDF (title from exam config) | "Recommendation:", release policy |
+| `/admin/dashboard` | DashboardPage | ✅ names shown (D-26), no double count (D-18) fixed in S1 | — |
+| `/admin/questions` | QuestionBankPage | ⚠️ bank persisted in localStorage (D-21 fixed); CSV import with error report (D-11 fixed) | Server pagination, status, CSV |
+| `/admin/questions/new`, `/:id/edit` | QuestionFormPage | ✅ tags field (D-19 fixed in S1) | + Bangla fields, status |
+| `/admin/exam-config` | ExamConfigPage | ✅ applied by the test engine (D-08 fixed in S1) | Cycles, overrides, lock |
+| `/admin/candidates` | CandidatesPage | ✅ all registered candidates (D-10 fixed in S1) | Filters, pagination |
+| `/admin/candidates/:id` | CandidateDetailPage | ✅ loads; shows result and security report (D-16 fixed in S1) | + review decision |
+| `/admin/merit-list` | MeritListPage | ✅ all registered candidates, CSV export (D-10, D-11, D-25 fixed in S1) | Per program, CSV/PDF |
+| `/admin/analytics` | AnalyticsPage | ✅ real per-day trend (D-20 fixed in S1) | Filters, per program |
+| `/admin/security` | — | ❌ new | Review panel (FR-AC-07) |
+| `/admin/users` | — | ❌ new | Reviewer management |
+| `*` | NotFoundPage | ✅ | — |
 
-CANDIDATE (protected)
-  /candidate/dashboard       status + profile + CTA
-  /candidate/instructions    rules, format, integrity declaration
-  /candidate/test            THE EXAM (fullscreen)
-  /candidate/result          score breakdown, eligibility, PDF download
+Sidebar (`src/components/layout/Sidebar.jsx:7-12`): Dashboard, Question Bank, Exam Config, Candidates, Merit List, Analytics.
+Target adds Security Review and Users. Question Bank and Users are hidden from reviewers.
 
-ADMIN (protected)
-  /admin/dashboard           stats overview + recent submissions
-  /admin/questions           bank list + filters + bulk import
-  /admin/questions/new       create
-  /admin/questions/:id/edit  edit
-  /admin/exam-config         sections, time, thresholds, window
-  /admin/candidates          all candidates + results table
-  /admin/candidates/:id      individual detail report
-  /admin/merit-list          ranked list + export
-  /admin/analytics           charts + trends
+## Access matrix (target, enforced on the server)
 
-FALLBACK  /*                 NotFoundPage
-```
+| Capability | candidate | reviewer | admin |
+|:--|:--|:--|:--|
+| Take test, see own result | ✅ | — | — |
+| View dashboard/analytics | — | ✅ (own programs) | ✅ |
+| View candidates/results/merit list | — | ✅ (own programs) | ✅ |
+| Export CSV/PDF | own PDF | ✅ (own programs) | ✅ |
+| View security report | — | ✅ (own programs) | ✅ |
+| Review decision (clear/disqualify) | — | — | ✅ |
+| Question bank CRUD/import | — | — | ✅ |
+| Exam cycle create/publish/close/recompute | — | read-only | ✅ |
+| Manage users | — | — | ✅ |
 
-## Feature Inventory by Module
+## Feature inventory by module (current)
 
-### features/auth
-- `useAuth.js` — login/logout, register, current user/role
-- `AuthProvider.jsx` — context wiring
-- `ProtectedRoute.jsx` — role gate + redirect to /login
+- **features/auth:** `useAuth` (login/register/logout + toasts), `AuthProvider` (no-op), `ProtectedRoute` (role gate), `resolvePostLoginPath` (redirect-back).
+- **features/test:** see [04](./04-test-engine-anticheat.md).
+- **features/questions:** `QuestionTable` (truncated text, section, difficulty; edit/delete with `window.confirm`), `QuestionForm` (RHF + Zod, live preview, tags), `BulkImportModal` (CSV import with preview and row error report, `importQuestions.js`), `questionSchema.js`.
+- **features/scoring:** `ScoreCard`, `EligibilityBadge` (colour + icon), `scoringConfig.js` (defaults used by `scoring.js`).
+- **services:** `authService`, `testService`, `resultService`, `analyticsService` (mock latency 200–800 ms). No `api.js`/`questionService.js`.
+- **lib:** `scoring.js`, `pdfGenerator.js` (jsPDF; title from the exam config), `csvExport.js` + `csvParse.js` + `meritCsv.js` (CSV export/import, merit rows), `fullscreen.js`, `storageMigration.js` + `runStorageMigration.js` (`itm-*` → `diu-*`), `utils.js` (shuffle, formatters, ids), `constants.js` (programs, sections, routes, storage keys, anti-cheat config).
 
-### features/test
-- `useTestEngine.js` — state machine (start/answer/flag/navigate/submit)
-- `useTimer.js` — countdown, expiry callback
-- `useAutoSave.js` — 5 s persistence
-- `useAntiCheat.js` — event listeners, thresholds, forced submit
-- UI: QuestionCard, QuestionNav, SectionHeader, SecurityWarningModal, TestSubmitDialog
+## MoSCoW status (PRD Must-haves)
 
-### features/questions (admin)
-- `QuestionTable.jsx` — columns: ID, text (truncated), section, difficulty, status; row actions
-- `QuestionForm.jsx` — create/edit with live preview
-- `BulkImportModal.jsx` — CSV upload, client-side parse + validation
-- `questionSchema.js` — Zod schema (section enum, 4 options, difficulty, tags)
-
-### features/scoring
-- `ScoreCard.jsx` — per-section score display
-- `EligibilityBadge.jsx` — color-coded status badge
-- `scoringConfig.js` — threshold copy/constants for UI
-
-### pages/admin highlights
-- DashboardPage: StatCards (registrations, completions, pass rate, avg score) + recent table
-- ExamConfigPage: edit sections/time/thresholds/window → examConfigStore
-- MeritListPage: rank desc by score, tie-break by timeTaken, top-3 medals, PDF export
-- AnalyticsPage: ScoreBarChart (section averages), SectionPieChart (eligibility distribution),
-  MeritLineChart (score trend), recent results table
-
-### services (mock, API-swappable)
-- `authService` — login/register/logout against mock candidates
-- `testService` — session create/get, answers persistence helpers
-- `resultService` — results list, by-candidate lookup, merit ranking
-- `analyticsService` — aggregate stats, section averages, distributions, trends
-
-### lib
-- `scoring.js` — the scoring/eligibility algorithm (single source of truth)
-- `pdfGenerator.js` — jsPDF candidate report
-- `utils.js` — formatters (date, duration, percent), id generation
-- `constants.js` — routes, section metadata, storage keys
-
-## MoSCoW Snapshot (PRD) vs Prototype
-
-| PRD Must-Have | Prototype status |
-|:---|:---|
-| Registration + auth | ✅ (mock, no OTP) |
-| Test engine (50 Q, 5 sec, timed, randomized) | ✅ |
-| Auto-save + recovery | ✅ (5 s) |
-| Question navigation panel | ✅ |
-| Automated scoring + eligibility | ✅ |
-| Result view | ✅ |
-| Admin question bank CRUD | ✅ |
-| Exam config | ✅ |
-| Results dashboard | ✅ |
-| Merit list export | ⚠️ PDF yes, CSV missing (csvExport.js absent) |
-| Responsive design | ✅ |
-| Bilingual EN/BN | ❌ not started |
+| Must-have ([12 §6](./12-prd.md#6-feature-scope-moscow)) | Prototype |
+|:--|:--|
+| Registration + auth | ⚠️ mock, plaintext, no OTP |
+| Test engine (timer, sections, nav, flags, grid) | ✅ works; D-02…D-07 fixed in S1, still client-side |
+| Autosave + resume | ⚠️ same browser only (resume button added in S1) |
+| Randomized questions from the pool | ✅ shuffled and sampled per section (D-24 fixed in S1), client-side |
+| Scoring + eligibility | ✅ (configurable thresholds, D-09 fixed in S1) |
+| Result page + PDF | ✅ |
+| Question bank CRUD + import | ⚠️ works in localStorage; CSV import with error report (D-11 fixed in S1) |
+| Exam config | ✅ applied by the test engine (D-08 fixed in S1), localStorage only |
+| Candidates / merit list / analytics | ⚠️ stored candidates and real CSV export (D-10, D-11 fixed in S1); no server aggregation |
+| Anti-cheat + admin review | ⚠️ thresholds fixed (D-02/03/05 in S1); no review panel yet |
+| Responsive 360 px | ✅ |
+| Bilingual EN/BN, dark mode | ❌ (D-29) |

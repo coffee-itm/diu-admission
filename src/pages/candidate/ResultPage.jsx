@@ -9,6 +9,7 @@ import { EligibilityBadge } from '../../features/scoring/EligibilityBadge.jsx';
 import { Button } from '../../components/ui/Button.jsx';
 import { PageSpinner } from '../../components/ui/Spinner.jsx';
 import { generatePdfReport } from '../../lib/pdfGenerator.js';
+import { useExamConfigStore } from '../../store/examConfigStore.js';
 import { motion } from 'framer-motion';
 
 export function CandidateResultPage() {
@@ -34,7 +35,7 @@ export function CandidateResultPage() {
   }, [user.id, navigate]);
 
   const handleDownload = () => {
-    generatePdfReport(user, result);
+    generatePdfReport(user, result, useExamConfigStore.getState().config.title);
   };
 
   if (loading || !result) return <PageSpinner />;

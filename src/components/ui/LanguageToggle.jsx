@@ -1,19 +1,15 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Button } from './Button.jsx';
 import { Languages } from 'lucide-react';
+import { STORAGE_KEYS } from '../../lib/constants.js';
 
 export function LanguageToggle() {
-  const [lang, setLang] = useState('en');
-
-  useEffect(() => {
-    const saved = localStorage.getItem('itm-lang') || 'en';
-    setLang(saved);
-  }, []);
+  const [lang, setLang] = useState(() => localStorage.getItem(STORAGE_KEYS.LANG) || 'en');
 
   const toggle = () => {
     const next = lang === 'en' ? 'bn' : 'en';
     setLang(next);
-    localStorage.setItem('itm-lang', next);
+    localStorage.setItem(STORAGE_KEYS.LANG, next);
     // In a real app, this might trigger a context update or page reload
     // window.location.reload(); 
   };

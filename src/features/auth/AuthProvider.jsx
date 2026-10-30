@@ -1,5 +1,4 @@
 import { useEffect } from 'react';
-import { useAuthStore } from '../../store/authStore.js';
 
 export function AuthProvider({ children }) {
   // The persist middleware handles rehydration automatically

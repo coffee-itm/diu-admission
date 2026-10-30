@@ -1,23 +1,38 @@
 import { useEffect, useRef, useState } from 'react';
 import { useAntiCheatStore } from '../../store/antiCheatStore.js';
-import { ANTI_CHEAT } from '../../lib/constants.js';
+import { ANTI_CHEAT, SECURITY_EVENT_TYPES } from '../../lib/constants.js';
 import { toast } from 'sonner';
+import { enterFullscreen, isFullscreenSupported, isFullscreenActive } from '../../lib/fullscreen.js';
 
 export function useAntiCheat({ onAutoSubmit }) {
   const store = useAntiCheatStore();
   const [showWarning, setShowWarning] = useState(false);
   const [warningMessage, setWarningMessage] = useState('');
+  const [isFullscreen, setIsFullscreen] = useState(() => isFullscreenActive());
   const devtoolsCheckRef = useRef(null);
+  const onAutoSubmitRef = useRef(onAutoSubmit);
+  const submittedRef = useRef(false);
+
+  // Keep the latest callback without re-registering listeners
+  useEffect(() => {
+    onAutoSubmitRef.current = onAutoSubmit;
+  });
 
   useEffect(() => {
+    const fireAutoSubmit = (reason) => {
+      if (submittedRef.current) return;
+      submittedRef.current = true;
+      useAntiCheatStore.getState().logEvent(SECURITY_EVENT_TYPES.AUTO_SUBMIT_CHEAT, reason);
+      onAutoSubmitRef.current?.();
+    };
+
     // === 1. TAB SWITCH DETECTION ===
     const handleVisibility = () => {
       if (document.hidden) {
-        store.incrementTabSwitch();
-        const count = store.tabSwitchCount + 1; // +1 because state hasn't updated yet in sync
+        useAntiCheatStore.getState().incrementTabSwitch();
+        const count = useAntiCheatStore.getState().tabSwitchCount;
         if (count >= ANTI_CHEAT.MAX_TAB_SWITCHES) {
-          store.logEvent('auto_submit_cheat', 'Too many tab switches');
-          onAutoSubmit?.();
+          fireAutoSubmit('Too many tab switches');
         } else if (count >= ANTI_CHEAT.WARNING_AT_SWITCHES) {
           setWarningMessage(
             `You have switched tabs ${count} times. Your test will be auto-submitted after ${ANTI_CHEAT.MAX_TAB_SWITCHES} switches. Switches remaining: ${ANTI_CHEAT.MAX_TAB_SWITCHES - count}`
@@ -29,13 +44,22 @@ export function useAntiCheat({ onAutoSubmit }) {
     };
 
     // === 2. FULLSCREEN EXIT DETECTION ===
+    // Unsupported browsers (e.g. iOS Safari): log once, never count exits.
+    const fullscreenSupported = isFullscreenSupported();
+    if (!fullscreenSupported) {
+      useAntiCheatStore.getState().logEvent(
+        SECURITY_EVENT_TYPES.FULLSCREEN_UNSUPPORTED,
+        'Fullscreen API not supported by this browser'
+      );
+    }
     const handleFullscreenChange = () => {
-      if (!document.fullscreenElement) {
-        store.incrementFullscreenExit();
-        const count = store.fullscreenExitCount + 1;
+      if (!fullscreenSupported) return;
+      setIsFullscreen(isFullscreenActive());
+      if (!isFullscreenActive()) {
+        useAntiCheatStore.getState().incrementFullscreenExit();
+        const count = useAntiCheatStore.getState().fullscreenExitCount;
         if (count >= ANTI_CHEAT.MAX_FULLSCREEN_EXITS) {
-          store.logEvent('auto_submit_cheat', 'Too many fullscreen exits');
-          onAutoSubmit?.();
+          fireAutoSubmit('Too many fullscreen exits');
         } else {
           setWarningMessage(
             `You exited fullscreen mode (${count}/${ANTI_CHEAT.MAX_FULLSCREEN_EXITS}). Please return to fullscreen. Your test will be auto-submitted if you exit ${ANTI_CHEAT.MAX_FULLSCREEN_EXITS - count} more times.`
@@ -49,25 +73,28 @@ export function useAntiCheat({ onAutoSubmit }) {
     // === 3. COPY/PASTE/SELECT BLOCKING ===
     const handleCopy = (e) => {
       e.preventDefault();
-      store.incrementCopyAttempt();
-      store.logEvent('copy_attempt', 'Copy blocked');
+      useAntiCheatStore.getState().incrementCopyAttempt();
+      useAntiCheatStore.getState().logEvent('copy_attempt', 'Copy blocked');
       toast.error('Copying is disabled during the exam');
     };
     const handlePaste = (e) => {
       e.preventDefault();
-      store.logEvent('paste_attempt', 'Paste blocked');
+      useAntiCheatStore.getState().incrementCopyAttempt();
+      useAntiCheatStore.getState().logEvent(SECURITY_EVENT_TYPES.PASTE_ATTEMPT, 'Paste blocked');
       toast.error('Pasting is disabled during the exam');
     };
     const handleCut = (e) => {
       e.preventDefault();
+      useAntiCheatStore.getState().incrementCopyAttempt();
+      useAntiCheatStore.getState().logEvent(SECURITY_EVENT_TYPES.CUT_ATTEMPT, 'Cut blocked');
       toast.error('Cutting is disabled during the exam');
     };
 
     // === 4. RIGHT-CLICK BLOCKING ===
     const handleContextMenu = (e) => {
       e.preventDefault();
-      store.incrementRightClick();
-      store.logEvent('right_click', 'Right-click blocked');
+      useAntiCheatStore.getState().incrementRightClick();
+      useAntiCheatStore.getState().logEvent('right_click', 'Right-click blocked');
     };
 
     // === 5. KEYBOARD SHORTCUT BLOCKING ===
@@ -78,8 +105,8 @@ export function useAntiCheat({ onAutoSubmit }) {
         if (e.key === rule.key && ctrlMatch && shiftMatch) {
           e.preventDefault();
           e.stopPropagation();
-          store.incrementBlockedKey();
-          store.logEvent('blocked_key', `Blocked: ${rule.ctrl ? 'Ctrl+' : ''}${rule.shift ? 'Shift+' : ''}${rule.key}`);
+          useAntiCheatStore.getState().incrementBlockedKey();
+          useAntiCheatStore.getState().logEvent('blocked_key', `Blocked: ${rule.ctrl ? 'Ctrl+' : ''}${rule.shift ? 'Shift+' : ''}${rule.key}`);
           toast.error('This keyboard shortcut is disabled during the exam');
           return;
         }
@@ -87,7 +114,7 @@ export function useAntiCheat({ onAutoSubmit }) {
       // Block PrintScreen
       if (e.key === 'PrintScreen') {
         e.preventDefault();
-        store.logEvent('blocked_key', 'PrintScreen blocked');
+        useAntiCheatStore.getState().logEvent('blocked_key', 'PrintScreen blocked');
       }
     };
 
@@ -101,8 +128,8 @@ export function useAntiCheat({ onAutoSubmit }) {
       const widthDiff = window.outerWidth - window.innerWidth > threshold;
       const heightDiff = window.outerHeight - window.innerHeight > threshold;
       if (widthDiff || heightDiff) {
-        store.incrementDevtools();
-        store.logEvent('devtools_open', 'DevTools may be open');
+        useAntiCheatStore.getState().incrementDevtools();
+        useAntiCheatStore.getState().logEvent('devtools_open', 'DevTools may be open');
         toast.error('Developer tools detected. Please close them.');
       }
     };
@@ -111,6 +138,7 @@ export function useAntiCheat({ onAutoSubmit }) {
     // Register all listeners
     document.addEventListener('visibilitychange', handleVisibility);
     document.addEventListener('fullscreenchange', handleFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
     document.addEventListener('copy', handleCopy);
     document.addEventListener('paste', handlePaste);
     document.addEventListener('cut', handleCut);
@@ -121,6 +149,7 @@ export function useAntiCheat({ onAutoSubmit }) {
     return () => {
       document.removeEventListener('visibilitychange', handleVisibility);
       document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
       document.removeEventListener('copy', handleCopy);
       document.removeEventListener('paste', handlePaste);
       document.removeEventListener('cut', handleCut);
@@ -132,24 +161,24 @@ export function useAntiCheat({ onAutoSubmit }) {
     };
   }, []); // Empty deps — register once on mount
 
-  // Fullscreen request helper
-  const requestFullscreen = () => {
-    const el = document.documentElement;
-    if (el.requestFullscreen) el.requestFullscreen().catch(() => {});
-    else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
-    store.logEvent('fullscreen_entered', 'Entered fullscreen');
+  // Only call from a click handler (user gesture required by browsers)
+  const returnToFullscreen = async () => {
+    setShowWarning(false);
+    if (await enterFullscreen()) {
+      useAntiCheatStore.getState().logEvent(SECURITY_EVENT_TYPES.FULLSCREEN_ENTERED, 'Returned to fullscreen');
+    }
   };
 
   const dismissWarning = () => {
     setShowWarning(false);
-    requestFullscreen(); // Re-enter fullscreen after warning
   };
 
   return {
     showWarning,
     warningMessage,
     dismissWarning,
-    requestFullscreen,
+    returnToFullscreen,
+    isFullscreen,
     tabSwitchCount: store.tabSwitchCount,
     fullscreenExitCount: store.fullscreenExitCount,
   };

@@ -1,9 +1,10 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { QUESTION_STATUS } from '../lib/constants.js';
+import { QUESTION_STATUS, STORAGE_KEYS } from '../lib/constants.js';
 
 const initialState = {
   sessionId: null,
+  candidateId: null,    // owner of the session
   examConfig: null,
   questions: [],        // shuffled questions for this session
   answers: {},          // { questionId: optionId }
@@ -13,7 +14,8 @@ const initialState = {
   startedAt: null,
   submittedAt: null,
   isSubmitted: false,
-  timeRemaining: 0,     // seconds
+  deadline: null,       // epoch ms; source of truth for remaining time
+  timeRemaining: 0,     // seconds, derived from deadline via syncTime()
   result: null,
 };
 
@@ -22,19 +24,21 @@ export const useTestStore = create(
     (set, get) => ({
       ...initialState,
 
-      initSession: ({ sessionId, examConfig, questions }) => {
+      initSession: ({ sessionId, candidateId = null, examConfig, questions }) => {
         const totalSeconds = examConfig.totalTimeMinutes * 60;
         const statusMap = {};
         questions.forEach((q) => { statusMap[q.id] = QUESTION_STATUS.NOT_VISITED; });
         set({
           ...initialState,
           sessionId,
+          candidateId,
           examConfig,
           questions,
           questionStatus: statusMap,
           currentSectionId: questions[0]?.section ?? null,
           currentQuestionIndex: 0,
           startedAt: new Date().toISOString(),
+          deadline: Date.now() + totalSeconds * 1000,
           timeRemaining: totalSeconds,
           isSubmitted: false,
           result: null,
@@ -76,8 +80,15 @@ export const useTestStore = create(
       navigateTo: (sectionId, questionIndex) =>
         set({ currentSectionId: sectionId, currentQuestionIndex: questionIndex }),
 
-      tickTimer: () =>
-        set((state) => ({ timeRemaining: Math.max(0, state.timeRemaining - 1) })),
+      syncTime: () =>
+        set((state) => {
+          if (!state.sessionId || state.isSubmitted) return {};
+          // Session persisted before deadlines existed: derive one from the stored remaining time.
+          const deadline = state.deadline ?? Date.now() + state.timeRemaining * 1000;
+          const timeRemaining = Math.max(0, Math.ceil((deadline - Date.now()) / 1000));
+          if (deadline === state.deadline && timeRemaining === state.timeRemaining) return {};
+          return { deadline, timeRemaining };
+        }),
 
       submitTest: (result) =>
         set({ isSubmitted: true, submittedAt: new Date().toISOString(), result }),
@@ -89,6 +100,6 @@ export const useTestStore = create(
         return questions.filter((q) => q.section === sectionId);
       },
     }),
-    { name: 'itm-test-session' }
+    { name: STORAGE_KEYS.TEST_SESSION }
   )
 );
