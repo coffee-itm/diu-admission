@@ -1,6 +1,6 @@
 # T-029 · CSV import hardening: quotes, line numbers, limits, unique options
 
-Status: ✅ Ready
+Status: 👀 Review
 Sprint: S2 · Role: frontend-dev · Model: sonnet · Size: M
 Depends on: T-027 (lane B order)
 Implements: FR-QB-04 (2 MB / 2,000 rows, row-numbered errors) and FR-QB-01 (unique option text). S1 carry-over (T-016) and post-merge E2E finding ("Section is required" message).
@@ -51,5 +51,10 @@ pnpm test -- csvParse importQuestions questionSchema && pnpm lint && pnpm build
 - Dry-run mode (S4). Duplicate-question detection, FR-QB-05 (S4).
 
 ## Agent log
+- Added parseCSVDetailed (line tracking, unterminated-quote error); parseCSV is a wrapper. mapRows accepts detailed rows or legacy string[][] and reports real file lines; MAX_IMPORT_ROWS=2000.
+- questionSchema: section missing vs invalid message, superRefine for unique option text (error path options.N.text, shown by QuestionForm).
+- Modal: 2 MB limit/copy, parse error shown as one error row (limit copy also mentions 2,000 rows).
+- Tests added in 3 files; lint 0 new warnings (1 existing in TestPage.jsx, not mine); test 234 passed; build ok.
+- Criterion 6 (modal rejects >2 MB) by code only: ⚠️ not verified (no browser).
 
 ## Review

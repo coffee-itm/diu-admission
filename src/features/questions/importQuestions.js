@@ -5,14 +5,18 @@ export const IMPORT_HEADER = [
   'correct_answer', 'difficulty', 'explanation', 'tags',
 ];
 
+export const MAX_IMPORT_ROWS = 2000;
+
 const OPTION_IDS = ['a', 'b', 'c', 'd'];
 
-// rows: output of parseCSV (header first). Row numbers are 1-based including the header.
-export function mapRows(rows) {
+// rows: output of parseCSVDetailed().rows ([{ cells, line }], header first) or, for
+// compatibility, parseCSV() output (string[][]; line = index + 1). `row` in errors is the file line.
+export function mapRows(input) {
+  const rows = (input ?? []).map((r, i) => (Array.isArray(r) ? { cells: r, line: i + 1 } : r));
   if (!rows || rows.length === 0) {
     return { valid: [], errors: [{ row: 1, messages: ['File is empty'] }] };
   }
-  const header = rows[0].map((h) => h.trim().toLowerCase());
+  const header = rows[0].cells.map((h) => h.trim().toLowerCase());
   const missing = IMPORT_HEADER.filter((h) => !header.includes(h));
   if (missing.length > 0) {
     return {
@@ -23,13 +27,18 @@ export function mapRows(rows) {
       }],
     };
   }
+  if (rows.length - 1 > MAX_IMPORT_ROWS) {
+    return {
+      valid: [],
+      errors: [{ row: 1, messages: [`Too many rows (max ${MAX_IMPORT_ROWS}); found ${rows.length - 1}`] }],
+    };
+  }
   const col = Object.fromEntries(header.map((h, i) => [h, i]));
   const get = (r, name) => (r[col[name]] ?? '').trim();
 
   const valid = [];
   const errors = [];
-  rows.slice(1).forEach((r, idx) => {
-    const rowNum = idx + 2;
+  rows.slice(1).forEach(({ cells: r, line: rowNum }) => {
     const correct = get(r, 'correct_answer').toLowerCase();
     const candidate = {
       section: get(r, 'section').toUpperCase(),

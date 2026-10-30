@@ -20,3 +20,16 @@ describe('questionSchema', () => {
     expect(r.error.issues[0].message).toBe('Section is required');
   });
 });
+
+describe('questionSchema extras', () => {
+  it('says which sections are valid for an unknown section', () => {
+    const r = questionSchema.safeParse({ ...valid, section: 'HISTORY' });
+    expect(r.error.issues[0].message).toMatch(/^Section must be one of MATH/);
+  });
+  it('rejects duplicate option text (trimmed, case-insensitive)', () => {
+    const options = valid.options.map((o, i) => ({ ...o, text: i === 0 ? 'Paris' : i === 1 ? 'paris ' : o.text }));
+    const r = questionSchema.safeParse({ ...valid, options });
+    expect(r.success).toBe(false);
+    expect(r.error.issues[0].path.slice(0, 1)).toEqual(['options']);
+  });
+});
