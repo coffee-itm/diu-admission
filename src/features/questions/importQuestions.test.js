@@ -65,6 +65,11 @@ describe('mapRows hardening', () => {
     expect(r.errors).toHaveLength(1);
     expect(r.errors[0].messages[0]).toMatch(/max 2000/);
   });
+  it('says section is required for a blank section cell', () => {
+    const bad = [...ok]; bad[0] = '';
+    const { errors } = mapRows([IMPORT_HEADER, bad]);
+    expect(errors[0].messages.join(' ')).toMatch(/Section is required/);
+  });
   it('lists valid sections for an invalid one', () => {
     const bad = [...ok]; bad[0] = 'HISTORY';
     const { errors } = mapRows([IMPORT_HEADER, bad]);

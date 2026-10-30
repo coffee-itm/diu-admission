@@ -22,6 +22,10 @@ describe('questionSchema', () => {
 });
 
 describe('questionSchema extras', () => {
+  it('says section is required for a blank section', () => {
+    const r = questionSchema.safeParse({ ...valid, section: '' });
+    expect(r.error.issues[0].message).toBe('Section is required');
+  });
   it('says which sections are valid for an unknown section', () => {
     const r = questionSchema.safeParse({ ...valid, section: 'HISTORY' });
     expect(r.error.issues[0].message).toMatch(/^Section must be one of MATH/);

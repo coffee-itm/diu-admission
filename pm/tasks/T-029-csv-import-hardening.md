@@ -58,3 +58,35 @@ pnpm test -- csvParse importQuestions questionSchema && pnpm lint && pnpm build
 - Criterion 6 (modal rejects >2 MB) by code only: ⚠️ not verified (no browser).
 
 ## Review
+
+**Reviewer verdict (2026-10-30): CHANGES REQUESTED** (one test gap; everything else passes). Reviewed commit `2d13b94` in a `git archive` copy.
+
+Verification: `CI=true pnpm exec vitest run src/lib/csvParse.test.js src/features/questions` → 4 files, 25 tests pass. `pnpm lint` → 0 errors, 1 warning at `src/pages/candidate/TestPage.jsx:85` (pre-existing, file not in this commit). `pnpm build` → ok.
+
+Acceptance criteria:
+- AC1 ✅ `csvParse.js` unterminated check (`if (inQuotes)`, `quoteLine`); test in `csvParse.test.js` "reports an unterminated quote with its line". Probe: `'a\n"b\nc\nd'` → line 2.
+- AC2 ✅ in-quote newline counting (`csvParse.js` in-quote branch) and `rowLine` advance; tests "keeps real line numbers…" and `importQuestions.test.js` "reports the real file line after a blank line" (row 3). Probes also correct: CRLF multi-line quoted field `[1,2,4]`, bare CR `[1,2]`, mixed blank CRLF `[1,3]`, escaped `""` at line end.
+- AC3 ✅ `importQuestions.js:30` `rows.length - 1 > MAX_IMPORT_ROWS` is the right off-by-one (2,000 accepted, 2,001 → one error). 
+- AC4 ⚠️ `questionSchema.js:6-9` message logic is right. The "missing" branch for `undefined` is covered by the pre-existing test. The `iss.input === ''` branch (what a blank CSV section cell produces) has **no test**, see Required change 1.
+- AC5 ✅ `questionSchema.js:21-32` superRefine (trim + lowercase key, path `options.i.text`); tests in `questionSchema.test.js`. Form display: `QuestionForm.jsx:92` passes `errors.options?.[index]?.text?.message` to `Input`, which renders it (`Input.jsx:46`). CSV path yields `options.1.text: Option text must be unique`.
+- AC6 ✅ code: `BulkImportModal.jsx` `MAX_BYTES = 2 * 1024 * 1024`, copy "Max file size: 2 MB, 2,000 rows". Browser rejection ⚠️ deferred to T-040 as the card says.
+- AC7 ✅ `csvParse.test.js` diff only changes the import line (adds `parseCSVDetailed`); all 7 existing `parseCSV` tests unchanged.
+- AC8 ✅ no new lint warnings.
+- Scope ✅ commit touches only the T-029 source/test files and the card. Matches FR-QB-01 (unique option text) and FR-QB-04 (2 MB / 2,000 rows, row-numbered errors) in `context/13-srs.md`.
+
+Mutation checks (one at a time, in the archive copy):
+- M1 row limit `>` → `>=`: caught (importQuestions test).
+- M2 drop in-quote line counting: caught (csvParse test).
+- M3 drop unterminated-quote error: caught (5 tests).
+- M4 drop duplicate-option check: caught (questionSchema test).
+- M5 drop `.trim()` from dup key: caught.
+- M6 drop `iss.input === ''` branch: **survives** (no test), see Required change 1.
+- M7 don't advance `rowLine`: caught (3 tests).
+- M8 `MAX_BYTES` back to 5 MB: not caught by unit tests (expected; browser check is T-040).
+
+Advisory (non-blocking):
+- `parseCSV('a,"b\n')` now returns `[]` (previously a partial row). No `src` caller uses `parseCSV` any more, only tests, so this is fine. Do not add new callers without using `parseCSVDetailed`.
+- A stray `"` mid-field (`a"b,c`) still opens quoted mode (pre-existing). It now surfaces as "Unterminated quoted field" when unclosed, which is truthful.
+
+Required changes:
+1. Add a test (`questionSchema.test.js` or `importQuestions.test.js`) that an empty section cell gives the "Section is required" message, e.g. `mapRows([IMPORT_HEADER, <row with section ''>])` → message `section: Section is required`. This covers the `iss.input === ''` branch at `questionSchema.js:6-9`. Test-only change.
