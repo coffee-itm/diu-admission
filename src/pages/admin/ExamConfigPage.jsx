@@ -73,8 +73,8 @@ export function ExamConfigPage() {
           <p className="text-slate-600">Manage rules, time, and thresholds</p>
         </div>
         <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-          <Button variant="outline" className="w-full sm:w-auto" onClick={handleReset} leftIcon={<RefreshCw size={16} />}>Restore Defaults</Button>
-          <Button className="w-full sm:w-auto" onClick={handleSave} loading={loading} leftIcon={<Save size={16} />}>Save Changes</Button>
+          <Button id="exam-config-reset" variant="outline" className="w-full sm:w-auto" onClick={handleReset} leftIcon={<RefreshCw size={16} />}>Restore Defaults</Button>
+          <Button id="exam-config-save" className="w-full sm:w-auto" onClick={handleSave} loading={loading} leftIcon={<Save size={16} />}>Save Changes</Button>
         </div>
       </div>
 
@@ -83,11 +83,13 @@ export function ExamConfigPage() {
           <CardHeader><h3 className="font-bold text-slate-900">General Settings</h3></CardHeader>
           <CardBody className="space-y-4">
             <Input 
+              id="exam-config-title"
               label="Exam Title" 
               value={formData.title} 
               onChange={e => handleFieldChange('title', e.target.value)} 
             />
             <Input 
+              id="exam-config-duration"
               label="Total Duration (Minutes)" 
               type="number" 
               value={formData.totalTimeMinutes} 
@@ -102,6 +104,7 @@ export function ExamConfigPage() {
           <CardHeader><h3 className="font-bold text-slate-900">Passing Thresholds</h3></CardHeader>
           <CardBody className="space-y-4">
             <Input 
+              id="exam-config-overall-min"
               label="Overall Minimum % (ELIGIBLE)" 
               type="number" 
               value={formData.overallMinPercent} 
@@ -110,6 +113,7 @@ export function ExamConfigPage() {
               rightIcon={<span className="text-slate-400">%</span>}
             />
             <Input 
+              id="exam-config-section-min"
               label="Per-Section Minimum %" 
               type="number" 
               value={formData.sectionMinPercent} 
@@ -141,6 +145,7 @@ export function ExamConfigPage() {
                       <td className="px-4 py-3">{sec.name}</td>
                       <td className="px-4 py-3 text-center">
                         <input 
+                          id={`exam-config-${sec.id}-count`}
                           type="number" 
                           className="w-20 text-center border border-slate-300 rounded p-1" 
                           value={sec.questionCount}
@@ -153,6 +158,7 @@ export function ExamConfigPage() {
                       </td>
                       <td className="px-4 py-3 text-center">
                         <input 
+                          id={`exam-config-${sec.id}-time`}
                           type="number" 
                           className="w-20 text-center border border-slate-300 rounded p-1" 
                           value={sec.timeMinutes}

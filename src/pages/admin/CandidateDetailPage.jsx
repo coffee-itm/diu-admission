@@ -54,7 +54,7 @@ export function CandidateDetailPage() {
     <div className="max-w-4xl mx-auto space-y-6 page-enter">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="sm" onClick={() => navigate(ROUTES.ADMIN_CANDIDATES)} leftIcon={<ArrowLeft size={18} />}>
+          <Button id="candidate-detail-back" variant="ghost" size="sm" onClick={() => navigate(ROUTES.ADMIN_CANDIDATES)} leftIcon={<ArrowLeft size={18} />}>
             Back
           </Button>
           <div>
@@ -62,7 +62,7 @@ export function CandidateDetailPage() {
             <p className="text-slate-600 text-sm font-mono">{candidate.id}</p>
           </div>
         </div>
-        <Button variant="outline" onClick={() => generatePdfReport(candidate, result, useExamConfigStore.getState().config.title)} leftIcon={<FileDown size={18} />}>
+        <Button id="candidate-detail-export-pdf" variant="outline" onClick={() => generatePdfReport(candidate, result, useExamConfigStore.getState().config.title)} leftIcon={<FileDown size={18} />}>
           Export PDF
         </Button>
       </div>

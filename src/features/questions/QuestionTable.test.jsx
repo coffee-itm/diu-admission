@@ -22,4 +22,15 @@ describe('QuestionTable', () => {
 
     expect(screen.getByText('q_math_001')).toBeInTheDocument();
   });
+
+  it('gives each row action a unique id', () => {
+    const second = { ...question, id: 'q_math_002' };
+    render(<QuestionTable questions={[question, second]} />);
+
+    for (const id of ['q_math_001', 'q_math_002']) {
+      for (const action of ['view', 'edit', 'remove']) {
+        expect(document.getElementById(`question-${id}-${action}`)).toBeInTheDocument();
+      }
+    }
+  });
 });

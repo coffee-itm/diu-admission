@@ -19,7 +19,7 @@ export function QuestionFormPage() {
     return (
       <div className="p-8 text-center">
         <p className="text-red-500">Question not found.</p>
-        <Button variant="ghost" onClick={() => navigate(ROUTES.ADMIN_QUESTIONS)} className="mt-4">Back</Button>
+        <Button id="question-form-page-back" variant="ghost" onClick={() => navigate(ROUTES.ADMIN_QUESTIONS)} className="mt-4">Back</Button>
       </div>
     );
   }
@@ -38,7 +38,7 @@ export function QuestionFormPage() {
   return (
     <div className="max-w-4xl mx-auto space-y-6 page-enter">
       <div className="flex items-center gap-4">
-        <Button variant="ghost" size="sm" onClick={() => navigate(ROUTES.ADMIN_QUESTIONS)} leftIcon={<ArrowLeft size={18} />}>
+        <Button id="question-form-page-back" variant="ghost" size="sm" onClick={() => navigate(ROUTES.ADMIN_QUESTIONS)} leftIcon={<ArrowLeft size={18} />}>
           Back
         </Button>
         <div>

@@ -7,8 +7,8 @@ import { toast } from 'sonner';
 
 vi.mock('sonner', () => ({ toast: { success: vi.fn(), error: vi.fn(), info: vi.fn() } }));
 
-// The page inputs have no ids yet (T-031), so reach them through their label.
-const fieldInput = (label) => screen.getByText(label).parentElement.querySelector('input');
+// Labelled inputs are linked via `htmlFor`, so reach them by their label (T-031).
+const fieldInput = (label) => screen.getByLabelText(label);
 
 const save = () => fireEvent.click(screen.getByRole('button', { name: /save changes/i }));
 
@@ -75,6 +75,29 @@ describe('ExamConfigPage validation', () => {
 
     fireEvent.change(fieldInput('Total Duration (Minutes)'), { target: { value: '90' } });
     expect(screen.queryByText(/duration/i, { selector: 'p' })).not.toBeInTheDocument();
+  });
+
+  it('links every labelled input to its id', () => {
+    render(<ExamConfigPage />);
+
+    expect(screen.getByLabelText('Exam Title')).toHaveAttribute('id', 'exam-config-title');
+    expect(screen.getByLabelText('Total Duration (Minutes)')).toHaveAttribute('id', 'exam-config-duration');
+    expect(screen.getByLabelText('Overall Minimum % (ELIGIBLE)')).toHaveAttribute('id', 'exam-config-overall-min');
+    expect(screen.getByLabelText('Per-Section Minimum %')).toHaveAttribute('id', 'exam-config-section-min');
+
+    expect(screen.getByRole('button', { name: /save changes/i })).toHaveAttribute('id', 'exam-config-save');
+    expect(screen.getByRole('button', { name: /restore defaults/i })).toHaveAttribute('id', 'exam-config-reset');
+
+    useExamConfigStore.getState().config.sections.forEach((sec) => {
+      expect(screen.getByLabelText(`${sec.name} question count`)).toHaveAttribute(
+        'id',
+        `exam-config-${sec.id}-count`
+      );
+      expect(screen.getByLabelText(`${sec.name} recommended time in minutes`)).toHaveAttribute(
+        'id',
+        `exam-config-${sec.id}-time`
+      );
+    });
   });
 
   it('ignores a section question count below 1', () => {

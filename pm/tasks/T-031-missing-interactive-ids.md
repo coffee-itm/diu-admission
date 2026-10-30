@@ -1,6 +1,6 @@
 # T-031 · Add missing `id`s to admin interactive elements
 
-Status: ✅ Ready
+Status: 👀 Review
 Sprint: S2 · Role: frontend-dev · Model: free-ok · Size: S
 Depends on: T-025, T-027, T-028, T-029 (they touch the same files; this card runs last in wave 1)
 Implements: AGENTS.md rule 5 ("All interactive elements must have unique `id` attributes"). S1 post-merge E2E finding (Low).
@@ -39,5 +39,9 @@ pnpm test && pnpm lint && pnpm build
 - Candidate-facing pages, which already have ids from S1. i18n of labels.
 
 ## Agent log
+- Part 1 (ids in 7 files + QuestionForm.test.jsx, QuestionTable/ExamConfig tests) was done by DeepSeek (cut off by usage limit); reviewed by Claude, kept as-is: all hunks are id-only (incl. CandidateDetailPage/QuestionFormPage, extra files, id-only so kept). No code fixes were needed.
+- AC1 proof (`grep -cE '<(button|Button|input|Input|select|textarea)\b'` vs elements with id; multi-line tags checked by hand): ExamConfigPage 8/8 (2 Button, 4 Input, 2 per-section input), QuestionBankPage 5/5, QuestionTable 3/3, QuestionForm 9/9 (tags input `question-tags`, 2 select, 2 textarea, radio, option Input, hidden, 2 Button), CandidatesPage 2/2, CandidateDetailPage 3/3 (not-found back already had id), QuestionFormPage 2/2.
+- AC2: labelled Inputs/selects/textareas have htmlFor = id (tests use getByLabelText). AC3: per-row ids include entity id; same-named back ids sit in mutually exclusive early-return branches.
+- Gate: lint 0 warnings, test 245 passed, build ok.
 
 ## Review

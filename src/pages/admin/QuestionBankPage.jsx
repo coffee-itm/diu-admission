@@ -44,10 +44,10 @@ export function QuestionBankPage() {
           <p className="text-slate-600">Manage exam questions ({questions.length} total)</p>
         </div>
         <div className="flex gap-3">
-          <Button variant="outline" onClick={() => setImportOpen(true)} leftIcon={<Upload size={18} />}>
+          <Button id="question-bank-import" variant="outline" onClick={() => setImportOpen(true)} leftIcon={<Upload size={18} />}>
             Import CSV
           </Button>
-          <Button as={Link} to={ROUTES.ADMIN_QUESTIONS_NEW} leftIcon={<Plus size={18} />}>
+          <Button id="question-bank-new" as={Link} to={ROUTES.ADMIN_QUESTIONS_NEW} leftIcon={<Plus size={18} />}>
             Add Question
           </Button>
         </div>
@@ -56,6 +56,7 @@ export function QuestionBankPage() {
       <div className="flex flex-col md:flex-row gap-4 bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
         <div className="flex-1">
           <Input 
+            id="question-bank-search"
             placeholder="Search questions..." 
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -66,6 +67,7 @@ export function QuestionBankPage() {
           <div className="w-full sm:w-48 relative">
             <span className="absolute left-3 top-3 text-slate-400 pointer-events-none"><Filter size={16} /></span>
             <select 
+              id="question-bank-filter-section"
               className="w-full h-[42px] pl-9 pr-8 rounded-lg border border-slate-300 bg-white text-sm focus:ring-2 focus:ring-blue-500"
               value={filterSection}
               onChange={(e) => setFilterSection(e.target.value)}
@@ -77,6 +79,7 @@ export function QuestionBankPage() {
           <div className="w-full sm:w-40 relative">
             <span className="absolute left-3 top-3 text-slate-400 pointer-events-none"><Filter size={16} /></span>
             <select 
+              id="question-bank-filter-difficulty"
               className="w-full h-[42px] pl-9 pr-8 rounded-lg border border-slate-300 bg-white text-sm focus:ring-2 focus:ring-blue-500"
               value={filterDifficulty}
               onChange={(e) => setFilterDifficulty(e.target.value)}

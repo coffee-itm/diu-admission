@@ -47,6 +47,7 @@ export function CandidatesPage() {
 
       <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
         <Input 
+          id="candidates-search"
           placeholder="Search by name or email..." 
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
@@ -98,6 +99,7 @@ export function CandidatesPage() {
                     <td className="px-6 py-4 text-right">
                       {result && (
                         <button 
+                          id={`candidate-${c.id}-view`}
                           onClick={() => navigate(`${ROUTES.ADMIN_CANDIDATES}/${c.id}`)}
                           className="p-2 text-slate-400 hover:text-blue-600 rounded-lg hover:bg-blue-50 transition-colors inline-flex items-center"
                           title="View detailed result"

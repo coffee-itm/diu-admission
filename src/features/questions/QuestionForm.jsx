@@ -39,8 +39,8 @@ export function QuestionForm({ initialData, onSubmit, onCancel }) {
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="flex flex-col gap-1.5">
-          <label className="text-sm font-medium text-slate-700">Section <span className="text-red-500">*</span></label>
-          <select {...register('section')} className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm">
+          <label htmlFor="question-form-section" className="text-sm font-medium text-slate-700">Section <span className="text-red-500">*</span></label>
+          <select id="question-form-section" {...register('section')} className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm">
             {SECTION_ORDER.map((sid) => (
               <option key={sid} value={sid}>{SECTIONS[sid].name}</option>
             ))}
@@ -49,8 +49,8 @@ export function QuestionForm({ initialData, onSubmit, onCancel }) {
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label className="text-sm font-medium text-slate-700">Difficulty <span className="text-red-500">*</span></label>
-          <select {...register('difficulty')} className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm">
+          <label htmlFor="question-form-difficulty" className="text-sm font-medium text-slate-700">Difficulty <span className="text-red-500">*</span></label>
+          <select id="question-form-difficulty" {...register('difficulty')} className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm">
             {Object.entries(DIFFICULTY).map(([key, val]) => (
               <option key={key} value={key}>{val.label}</option>
             ))}
@@ -60,8 +60,9 @@ export function QuestionForm({ initialData, onSubmit, onCancel }) {
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label className="text-sm font-medium text-slate-700">Question Text <span className="text-red-500">*</span></label>
+        <label htmlFor="question-form-text" className="text-sm font-medium text-slate-700">Question Text <span className="text-red-500">*</span></label>
         <textarea
+          id="question-form-text"
           {...register('text')}
           rows={3}
           className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -78,6 +79,7 @@ export function QuestionForm({ initialData, onSubmit, onCancel }) {
             <div key={field.id} className="flex items-start gap-3">
               <div className="pt-2.5">
                 <input
+                  id={`question-form-correct-answer-${letter}`}
                   type="radio"
                   value={letter}
                   {...register('correctAnswer')}
@@ -86,12 +88,13 @@ export function QuestionForm({ initialData, onSubmit, onCancel }) {
               </div>
               <div className="flex-1">
                 <Input
+                  id={`question-form-option-${letter}`}
                   {...register(`options.${index}.text`)}
                   placeholder={`Option ${letter.toUpperCase()}`}
                   leftIcon={<span className="text-xs font-bold uppercase">{letter}</span>}
                   error={errors.options?.[index]?.text?.message}
                 />
-                <input type="hidden" {...register(`options.${index}.id`)} value={letter} />
+                <input id={`question-form-option-${letter}-id`} type="hidden" {...register(`options.${index}.id`)} value={letter} />
               </div>
             </div>
           );
@@ -100,8 +103,9 @@ export function QuestionForm({ initialData, onSubmit, onCancel }) {
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label className="text-sm font-medium text-slate-700">Explanation (Optional)</label>
+        <label htmlFor="question-form-explanation" className="text-sm font-medium text-slate-700">Explanation (Optional)</label>
         <textarea
+          id="question-form-explanation"
           {...register('explanation')}
           rows={2}
           className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -129,8 +133,8 @@ export function QuestionForm({ initialData, onSubmit, onCancel }) {
       </div>
 
       <div className="flex justify-end gap-3 pt-4 border-t border-slate-100">
-        <Button variant="ghost" onClick={onCancel}>Cancel</Button>
-        <Button type="submit">Save Question</Button>
+        <Button id="question-form-cancel" variant="ghost" onClick={onCancel}>Cancel</Button>
+        <Button id="question-form-submit" type="submit">Save Question</Button>
       </div>
     </form>
   );
