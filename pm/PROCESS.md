@@ -59,6 +59,14 @@ Claude Code wiring: `.claude/agents/*.md` (pinned to `model: sonnet`/`haiku`) an
 OpenCode wiring: [`opencode.json`](../opencode.json) (agents inherit your default model, currently the free `opencode/deepseek-v4.1-flash-free`).
 Zen `*-free` models work only inside the OpenCode app. Claude Code via claude-code-router gets `FreeUsageLimitError` (verified 2026-10-30).
 
+### Build routing (from S2)
+The Opus session coordinates. Builders run headless, and you leave any interactive OpenCode pane idle during builds so two agents never edit the same tree.
+1. **Build.** `free-ok` cards: `opencode run -m opencode/deepseek-v4.1-flash-free --agent <role> "Execute task card pm/tasks/T-xxx-….md following pm/AGENT_PLAYBOOK.md"`. `sonnet` cards: the matching Claude Code subagent.
+2. **Verify.** The coordinator runs `pnpm test`, `pnpm lint` (no new warnings) and `pnpm build`, and checks that the diff stays inside the card's Files list.
+3. **Review.** The Claude `reviewer` (Sonnet) reviews every card. The free model never reviews.
+4. **Retry.** On rejection, resume the same OpenCode session once with the findings. After a second rejection, Sonnet takes the card, and the sprint file records it.
+5. **Fallback.** If the Zen free limit is hit, the remaining `free-ok` cards go to Sonnet.
+
 ### Which tier per card
 Each card says `Model: free-ok` or `Model: sonnet`.
 - **free-ok**: mechanical, well-specified, little hidden coupling (data fixes, copy changes, simple utilities, docs).
