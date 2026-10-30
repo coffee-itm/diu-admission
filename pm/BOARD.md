@@ -3,12 +3,12 @@
 > Source of truth for status = the `Status:` line in each card (`pm/tasks/T-xxx-*.md`). Agents update their own row.
 > Recount with `/sprint-status`. Process: [PROCESS.md](./PROCESS.md) · Playbook: [AGENT_PLAYBOOK.md](./AGENT_PLAYBOOK.md) · Escalations: [ESCALATIONS.md](./ESCALATIONS.md)
 
-## Current sprint: [S2 — Carry-over + workspace & server skeleton](./sprints/S2.md)  ·  🔄 Active (wave 1)
+## Current sprint: [S2 — Carry-over + workspace & server skeleton](./sprints/S2.md)  ·  🔄 Active (wave 1 ✔️ done · wave 2 waiting on the owner's build-routing decision)
 
 ### Summary
 | ✅ Ready | 🔨 In Progress | 👀 Review | ✔️ Done | ⛔ Blocked | Total | Done % |
 |:-:|:-:|:-:|:-:|:-:|:-:|:-:|
-| 10 | 0 | 1 | 6 | 0 | 17 | 35 % |
+| 9 | 0 | 0 | 8 | 0 | 17 | 47 % |
 
 ### Cards
 | ID | Title | Lane | Role | Model | Depends on | Status |
@@ -19,8 +19,8 @@
 | [T-027](./tasks/T-027-merit-eligibility-filter.md) | Merit list eligibility filter | B | frontend-dev | free-ok | T-025 | ✔️ Done |
 | [T-028](./tasks/T-028-small-ui-fixes.md) | Small UI fixes (ID, auth redirect, tab cue, charts) | C | frontend-dev | free-ok | — | ✔️ Done |
 | [T-029](./tasks/T-029-csv-import-hardening.md) | CSV import hardening | B | frontend-dev | sonnet | T-027 | ✔️ Done |
-| [T-030](./tasks/T-030-testpage-deps-warning.md) | TestPage exhaustive-deps warning | A | frontend-dev | free-ok | T-026 | 👀 Review |
-| [T-031](./tasks/T-031-missing-interactive-ids.md) | Missing ids on admin elements | W1 | frontend-dev | free-ok | T-025, T-027, T-028, T-029 | ✅ Ready |
+| [T-030](./tasks/T-030-testpage-deps-warning.md) | TestPage exhaustive-deps warning | A | frontend-dev | free-ok | T-026 | ✔️ Done |
+| [T-031](./tasks/T-031-missing-interactive-ids.md) | Missing ids on admin elements | W1 | frontend-dev | free-ok | T-025, T-027, T-028, T-029 | ✔️ Done |
 | [T-032](./tasks/T-032-pnpm-workspace.md) | pnpm workspace + empty packages | W2 | devops | free-ok | T-031 | ✅ Ready |
 | [T-033](./tasks/T-033-shared-scoring-constants.md) | @diu/shared: scoring, constants, shuffle | W2 | frontend-dev | sonnet | T-032 | ✅ Ready |
 | [T-034](./tasks/T-034-shared-risk-schemas.md) | @diu/shared: risk + question schemas | W2 | frontend-dev | free-ok | T-033 | ✅ Ready |
