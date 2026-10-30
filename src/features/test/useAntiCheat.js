@@ -6,12 +6,17 @@ import { enterFullscreen, isFullscreenSupported, isFullscreenActive } from '../.
 
 export function useAntiCheat({ onAutoSubmit }) {
   const store = useAntiCheatStore();
-  const [showWarning, setShowWarning] = useState(false);
-  const [warningMessage, setWarningMessage] = useState('');
+  // Resumed outside fullscreen (e.g. after a reload): prompt, but don't count it as an exit.
+  const [resumeNeedsFullscreen] = useState(() => isFullscreenSupported() && !isFullscreenActive());
+  const [showWarning, setShowWarning] = useState(resumeNeedsFullscreen);
+  const [warningMessage, setWarningMessage] = useState(
+    resumeNeedsFullscreen ? 'Your exam continues in fullscreen. Click Return to fullscreen.' : ''
+  );
   const [isFullscreen, setIsFullscreen] = useState(() => isFullscreenActive());
   const devtoolsCheckRef = useRef(null);
   const onAutoSubmitRef = useRef(onAutoSubmit);
   const submittedRef = useRef(false);
+  const unloadingRef = useRef(false);
 
   // Keep the latest callback without re-registering listeners
   useEffect(() => {
@@ -27,7 +32,12 @@ export function useAntiCheat({ onAutoSubmit }) {
     };
 
     // === 1. TAB SWITCH DETECTION ===
+    // visibilitychange fires while the page unloads (reload/close); don't count that.
+    const handleUnload = () => {
+      unloadingRef.current = true;
+    };
     const handleVisibility = () => {
+      if (unloadingRef.current) return;
       if (document.hidden) {
         useAntiCheatStore.getState().incrementTabSwitch();
         const count = useAntiCheatStore.getState().tabSwitchCount;
@@ -136,6 +146,8 @@ export function useAntiCheat({ onAutoSubmit }) {
     devtoolsCheckRef.current = setInterval(checkDevtools, 3000);
 
     // Register all listeners
+    window.addEventListener('pagehide', handleUnload);
+    window.addEventListener('beforeunload', handleUnload);
     document.addEventListener('visibilitychange', handleVisibility);
     document.addEventListener('fullscreenchange', handleFullscreenChange);
     document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
@@ -147,6 +159,8 @@ export function useAntiCheat({ onAutoSubmit }) {
 
     // Cleanup
     return () => {
+      window.removeEventListener('pagehide', handleUnload);
+      window.removeEventListener('beforeunload', handleUnload);
       document.removeEventListener('visibilitychange', handleVisibility);
       document.removeEventListener('fullscreenchange', handleFullscreenChange);
       document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);

@@ -1,6 +1,6 @@
 # T-026 · Ask for fullscreen again on resume; no false tab switch on reload
 
-Status: ✅ Ready
+Status: 👀 Review
 Sprint: S2 · Role: frontend-dev · Model: sonnet · Size: S
 Depends on: T-024 (lane A order)
 Implements: FR-AC-04 (fullscreen enforcement). S1 carry-over (T-021: false tab switch on reload). S1 post-merge E2E finding (Medium).
@@ -38,5 +38,10 @@ pnpm test -- useAntiCheat SecurityWarningModal && pnpm lint && pnpm build
 - The `TestPage.jsx:85` deps warning (T-030). Server-side events (S5).
 
 ## Agent log
+- useAntiCheat: lazy initial state shows the "Return to fullscreen" prompt when fullscreen is supported but inactive at mount (no exit count, no event). `unloadingRef` set by pagehide/beforeunload; handleVisibility returns early; listeners removed in cleanup.
+- Tests: 3 new; existing tests now mock fullscreen as active at mount (exit helper flips it off).
+- Return button already calls enterFullscreen from click (unchanged, criterion 4).
+- Criterion 5: ⚠️ not verified (no browser), for T-040.
+- pnpm test 213 passed, lint only baseline TestPage:85 warning, build ok.
 
 ## Review

@@ -8,6 +8,7 @@ vi.mock('sonner', () => ({
 }));
 
 let hidden = false;
+let fsActive = true;
 const switchTab = () => {
   act(() => {
     hidden = true;
@@ -17,6 +18,7 @@ const switchTab = () => {
 };
 const exitFullscreen = () => {
   act(() => {
+    fsActive = false;
     document.dispatchEvent(new Event('fullscreenchange'));
   });
 };
@@ -24,8 +26,12 @@ const exitFullscreen = () => {
 describe('useAntiCheat', () => {
   beforeEach(() => {
     hidden = false;
+    fsActive = true;
     Object.defineProperty(document, 'hidden', { configurable: true, get: () => hidden });
-    Object.defineProperty(document, 'fullscreenElement', { configurable: true, get: () => null });
+    Object.defineProperty(document, 'fullscreenElement', {
+      configurable: true,
+      get: () => (fsActive ? document.documentElement : null),
+    });
     document.documentElement.requestFullscreen = vi.fn().mockResolvedValue();
     useAntiCheatStore.getState().reset();
   });
@@ -110,5 +116,34 @@ describe('useAntiCheat', () => {
     const types = s.securityEvents.map((e) => e.type);
     expect(types).toContain('cut_attempt');
     expect(types).toContain('paste_attempt');
+  });
+
+  it('prompts to return to fullscreen on mount without counting an exit', () => {
+    fsActive = false;
+    const { result } = renderHook(() => useAntiCheat({ onAutoSubmit: vi.fn() }));
+    expect(result.current.showWarning).toBe(true);
+    expect(result.current.fullscreenExitCount).toBe(0);
+    expect(useAntiCheatStore.getState().securityEvents).toHaveLength(0);
+  });
+
+  it('shows no mount prompt when fullscreen is active or unsupported', () => {
+    const a = renderHook(() => useAntiCheat({ onAutoSubmit: vi.fn() }));
+    expect(a.result.current.showWarning).toBe(false);
+    a.unmount();
+    fsActive = false;
+    delete document.documentElement.requestFullscreen;
+    const b = renderHook(() => useAntiCheat({ onAutoSubmit: vi.fn() }));
+    expect(b.result.current.showWarning).toBe(false);
+  });
+
+  it('ignores visibilitychange after pagehide but counts a normal hide', () => {
+    renderHook(() => useAntiCheat({ onAutoSubmit: vi.fn() }));
+    switchTab();
+    expect(useAntiCheatStore.getState().tabSwitchCount).toBe(1);
+    act(() => {
+      window.dispatchEvent(new Event('pagehide'));
+    });
+    switchTab();
+    expect(useAntiCheatStore.getState().tabSwitchCount).toBe(1);
   });
 });
