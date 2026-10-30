@@ -1,6 +1,6 @@
 # T-029 · CSV import hardening: quotes, line numbers, limits, unique options
 
-Status: 👀 Review
+Status: ✔️ Done
 Sprint: S2 · Role: frontend-dev · Model: sonnet · Size: M
 Depends on: T-027 (lane B order)
 Implements: FR-QB-04 (2 MB / 2,000 rows, row-numbered errors) and FR-QB-01 (unique option text). S1 carry-over (T-016) and post-merge E2E finding ("Section is required" message).
@@ -90,3 +90,5 @@ Advisory (non-blocking):
 
 Required changes:
 1. Add a test (`questionSchema.test.js` or `importQuestions.test.js`) that an empty section cell gives the "Section is required" message, e.g. `mapRows([IMPORT_HEADER, <row with section ''>])` → message `section: Section is required`. This covers the `iss.input === ''` branch at `questionSchema.js:6-9`. Test-only change.
+
+**Re-review (coordinator, Opus, 2026-10-30): APPROVED.** The fix commit `bfeb9db` adds a blank-section test in `questionSchema.test.js` and in `importQuestions.test.js` (through `mapRows`). Mutation check: dropping `|| iss.input === ''` makes both new tests fail; the source was restored. Full gate on the combined tree: lint 0 problems, 241 tests passed, build OK.

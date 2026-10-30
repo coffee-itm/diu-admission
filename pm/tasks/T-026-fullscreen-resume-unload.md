@@ -1,6 +1,6 @@
 # T-026 · Ask for fullscreen again on resume; no false tab switch on reload
 
-Status: 👀 Review
+Status: ✔️ Done
 Sprint: S2 · Role: frontend-dev · Model: sonnet · Size: S
 Depends on: T-024 (lane A order)
 Implements: FR-AC-04 (fullscreen enforcement). S1 carry-over (T-021: false tab switch on reload). S1 post-merge E2E finding (Medium).
@@ -56,6 +56,16 @@ Checks passed:
 - Existing test adjustments do not weaken assertions. The `fsActive` mock and `exitFullscreen` flip only change setup; the exit handler still gates on `isFullscreenActive()`, so the flip makes the exit count real. No assertion removed.
 - Lint on the two changed files: clean. Full `eslint .` at the commit: only the baseline `TestPage.jsx:85` warning. `vite build` ok. `vitest run` at the commit: 213 passed (run in a clean `git archive` copy, so T-027 WIP is excluded).
 - React Compiler: `unloadingRef` is written only in listeners, never in render. Listener registration and removal are symmetric (`useAntiCheat.js:149-150` and `:162-163`).
+
+**Re-review at 6b0951c: APPROVED**
+
+- Item 1 (sticky flag): `pageshow` now clears `unloadingRef` (`useAntiCheat.js:39-41`, `pageshow` registered at `:154`, removed in cleanup at `:167`). `beforeunload` no longer sets the flag, so a cancelled `beforeunload` cannot disable detection. Choice recorded in the Agent log.
+- Item 2 (tests): `useAntiCheat.test.js` new tests "counts tab switches again after pagehide then pageshow" and "a cancelled beforeunload does not disable tab-switch detection" pass.
+- Item 3 (cleanup coverage): "adds page-lifecycle listeners on mount and removes them on unmount" spies on `addEventListener` and `removeEventListener` and checks each `pagehide`/`pageshow` add is matched by a remove of the same function.
+- Mutations run in a clean `git archive 6b0951c` copy: drop the pageshow clear, so `unloadingRef` is never cleared → "counts tab switches again" fails. Drop the pageshow removal in cleanup → the spy test fails. Drop the pageshow registration → both fail. Drop the pagehide guard → the original pagehide test fails. Source restored and verified byte-identical after each run.
+- Verification at 6b0951c (clean archive, T-027/T-029 WIP excluded): `vitest run` 237 passed, 2 todo (29 files). `useAntiCheat` + `SecurityWarningModal`: 14 passed. `eslint .`: only the baseline `TestPage.jsx:85` warning. `eslint` on the two changed files: clean. `vite build`: exit 0.
+- Criterion 5 (browser reload check) remains deferred to T-040, per the card.
+- Card `Status:` header set to `✔️ Done` per the coordinator's authorization. Board row set to `✔️ Done`.
 
 Required changes:
 1. **Sticky unload flag disables tab-switch detection (regression).** `useAntiCheat.js:36-40` sets `unloadingRef.current = true` on `pagehide`/`beforeunload` and nothing ever clears it. Two reproducible cases (probe run in a scratch copy, both leave `tabSwitchCount` at 0 after real hides):
