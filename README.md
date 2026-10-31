@@ -274,6 +274,17 @@ pnpm build
 pnpm preview
 ```
 
+### GitHub Codespaces
+
+The repo ships a dev container (`.devcontainer/`): Node 22, pnpm 11.13.1, Docker (for the local MongoDB replica set), GitHub CLI, Claude Code and OpenCode.
+
+1. On GitHub: **Code → Codespaces → Create codespace** on your working branch (4-core machine).
+2. Wait for the post-create step (`pnpm install` and the agent CLIs) to finish.
+3. Sign in to the agents in the terminal: `claude` then `/login`, and run `opencode` once.
+4. Run `pnpm dev`. Port 5173 is forwarded; open it from the **Ports** tab.
+
+Personal Claude Code / OpenCode settings are not in this repo. Bring them with a private [dotfiles repo](https://docs.github.com/en/codespaces/setting-your-user-preferences/personalizing-github-codespaces-for-your-account#dotfiles). Never commit secrets: this repository is public.
+
 ---
 
 ## 🔑 Demo Credentials
