@@ -1,6 +1,6 @@
 # T-033 · Move scoring, domain constants and shuffle into `@diu/shared`
 
-Status: 👀 Review
+Status: ✔️ Done
 Sprint: S2 · Role: frontend-dev · Model: build · Size: M
 Tier rationale: cross-package move touching ~43 import sites; silent-failure risk in scoring (PROCESS §2.3)
 Depends on: T-032
@@ -50,3 +50,11 @@ pnpm --filter @diu/shared test && pnpm test && pnpm lint && pnpm build
 - Results: shared 13 passed + 2 todo (scoring) + 5 shuffle; root 232 passed (was 245, minus the 13 moved); lint clean; build ✅. Grep for `document|window|process.` in `packages/shared` is empty.
 
 ## Review
+- ✅ AC1: `pnpm --filter @diu/shared test` passed: 18 passed, 2 R2 todos. The unchanged scoring boundary suite is at `packages/shared/scoring.test.js:51-149`; seeded shuffle coverage is at `packages/shared/shuffle.test.js:16-37`.
+- ✅ AC2: root `pnpm test` passed 232/232 (245 before, less the 13 moved scoring tests); the package test entry is `packages/shared/package.json:9-10`.
+- ✅ AC3: repo-wide `grep -rn "document\\|window\\|process\\." packages/shared --include='*.js' | grep -v test` produced no results; shared modules are pure data/logic at `packages/shared/constants.js:4-57`, `packages/shared/scoring.js:28-110`, and `packages/shared/shuffle.js:7-14`.
+- ✅ AC4: production build passed; workspace resolution is declared at `package.json:21-23`, wildcard exports at `packages/shared/package.json:5-8`, and the legacy score shim resolves it at `src/lib/scoring.js:1-2`.
+- ✅ AC5: `calculateScore` preserves unrounded comparison (`percentage`, not display rounding) and all three tiers at `packages/shared/scoring.js:61-84`; failed sections use raw section percentage at `packages/shared/scoring.js:58-66`. Normalized parent/new implementation diff was functionally empty. Boundary assertions cover 50/40/failed-section edges at `packages/shared/scoring.test.js:52-107` and the 66.67→66.7 display-rounding trap at `packages/shared/scoring.test.js:112-120`.
+- ✅ AC6: `pnpm lint` passed with no warnings. `ELIGIBILITY`/`DIFFICULTY` presentation maps remain deliberately in `src/lib/constants.js:42-73`; all map-indexing consumers import that facade (`src/features/scoring/EligibilityBadge.jsx:1-28`, `src/features/questions/QuestionTable.jsx:3-42`, `src/lib/pdfGenerator.js:3-77`, `src/pages/admin/AnalyticsPage.jsx:8-49`). The requested Merit/Candidates pages do not index either map (`src/pages/admin/MeritListPage.jsx:26-129`, `src/pages/admin/CandidatesPage.jsx:83-87`).
+- Mutation check (reverted): changed the eligibility comparison to `percentageRounded`; shared tests failed S11 as expected (`packages/shared/scoring.test.js:112-120`), proving raw percentage governs classification.
+- Verification (main tree): `pnpm --filter @diu/shared test && pnpm test && pnpm lint && pnpm build` ✅ (18 passed + 2 todo; 232 passed; build warning only: existing >500 kB chunk). Re-ran `pnpm lint && pnpm test && pnpm build` ✅.
