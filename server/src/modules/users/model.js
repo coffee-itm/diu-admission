@@ -1,8 +1,9 @@
 import { Schema, model } from 'mongoose'
+import { ROLES } from '@diu/shared/constants'
 
 // context/14-database-schema.md §3.2. Password hashing (argon2id) happens in the service layer, never here.
 const UserSchema = new Schema({
-  role: { type: String, enum: ['candidate', 'reviewer', 'admin'], required: true, index: true },
+  role: { type: String, enum: ROLES, required: true, index: true },
   name: { type: String, required: true, trim: true, minlength: 3, maxlength: 100 },
   email: { type: String, required: true, lowercase: true, trim: true },
   phone: { type: String, trim: true }, // normalized +8801XXXXXXXXX

@@ -4,7 +4,7 @@ import { startTestApp } from './helpers/app.js'
 import { Program } from '../src/modules/programs/model.js'
 import { User } from '../src/modules/users/model.js'
 import { RefreshToken } from '../src/modules/auth/refreshToken.model.js'
-import { PROGRAMS } from '../../src/lib/constants.js'
+import { PROGRAMS } from '@diu/shared/constants'
 import { seedDatabase, loadSeedEnv } from '../scripts/seed.js'
 
 const ARGON2_OPTS = { type: argon2.argon2id, memoryCost: 19456, timeCost: 2 }
@@ -100,7 +100,7 @@ describe('models (T-044)', () => {
       expect(await User.countDocuments({ role: 'admin' })).toBe(1)
     })
 
-    it('seeds exactly the PROGRAMS from src/lib/constants.js (ids, names, faculties)', async () => {
+    it('seeds exactly the PROGRAMS from @diu/shared/constants (ids, names, faculties)', async () => {
       await seedDatabase({ adminPassword: SEED_PW })
       const docs = await Program.find().lean()
       const byId = Object.fromEntries(docs.map((d) => [d._id, d]))

@@ -5,6 +5,7 @@ import { ELIGIBILITY as ELIGIBILITY_ID, DIFFICULTY as DIFFICULTY_ID } from '@diu
 
 export {
   SECTION_ORDER,
+  PROGRAMS,
   QUESTION_STATUS,
   ANTI_CHEAT,
   SECURITY_EVENT_TYPES,
@@ -13,23 +14,6 @@ export {
 export const APP_NAME = 'DIU Admission';
 export const APP_ORG = 'Daffodil International University';
 export const APP_DEPT = 'Office of Admissions — All Departments';
-
-// Programs across all DIU faculties that candidates can apply to
-export const PROGRAMS = [
-  { id: 'CSE', name: 'B.Sc. in Computer Science & Engineering', faculty: 'Science & Technology' },
-  { id: 'SWE', name: 'B.Sc. in Software Engineering', faculty: 'Science & Technology' },
-  { id: 'EEE', name: 'B.Sc. in Electrical & Electronic Engineering', faculty: 'Science & Technology' },
-  { id: 'ARCH', name: 'B.Arch. in Architecture', faculty: 'Science & Technology' },
-  { id: 'PHARM', name: 'B.Pharm. in Pharmacy', faculty: 'Science & Technology' },
-  { id: 'NURSING', name: 'B.Sc. in Nursing', faculty: 'Science & Technology' },
-  { id: 'BBA', name: 'BBA in Business Administration', faculty: 'Business & Entrepreneurship' },
-  { id: 'ACC', name: 'B.Sc. in Accounting & Information Systems', faculty: 'Business & Entrepreneurship' },
-  { id: 'THM', name: 'B.Sc. in Tourism & Hospitality Management', faculty: 'Business & Entrepreneurship' },
-  { id: 'ITM', name: 'B.Sc. in Information Technology Management', faculty: 'Business & Entrepreneurship' },
-  { id: 'ENG', name: 'B.A. (Hons.) in English', faculty: 'Arts & Humanities' },
-  { id: 'LAW', name: 'LL.B. (Hons.) in Law', faculty: 'Arts & Humanities' },
-  { id: 'JMC', name: 'B.A. (Hons.) in Journalism & Mass Communication', faculty: 'Arts & Humanities' },
-];
 
 export const SECTIONS = {
   MATH: { id: 'MATH', name: 'Mathematical Reasoning', shortName: 'Math', color: '#1e40af', bg: 'bg-blue-100', text: 'text-blue-800' },

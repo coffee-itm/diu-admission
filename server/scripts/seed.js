@@ -1,5 +1,5 @@
 /**
- * Idempotent seed: the 13 programs (from PROGRAMS in src/lib/constants.js) and one admin account.
+ * Idempotent seed: the 13 programs (from PROGRAMS in @diu/shared/constants) and one admin account.
  *
  * Usage (from the repo root): `pnpm seed`. Needs MONGODB_URI and SEED_ADMIN_PASSWORD (min 12 chars).
  * Refuses NODE_ENV=production unless SEED_ALLOW_PROD=true. The admin password is never a literal.
@@ -11,7 +11,7 @@ import mongoose from 'mongoose'
 import { loadConfig } from '../src/config.js'
 import { Program } from '../src/modules/programs/model.js'
 import { User } from '../src/modules/users/model.js'
-import { PROGRAMS } from '../../src/lib/constants.js'
+import { PROGRAMS } from '@diu/shared/constants'
 
 export const ADMIN_EMAIL = 'admin@diu.edu'
 const MIN_PASSWORD_LENGTH = 12
