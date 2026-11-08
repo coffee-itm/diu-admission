@@ -1,6 +1,6 @@
 # T-034 · `@diu/shared`: risk function and question Zod schemas
 
-Status: 👀 Review
+Status: ✔️ Done
 Sprint: S2 · Role: frontend-dev · Model: lite · Size: S
 Tier rationale: additive files in a package that already exists; schema shape is given (PROCESS §2.3)
 Depends on: T-033
@@ -57,3 +57,20 @@ Required changes:
 4. (Nit, non-blocking) `packages/shared/schemas/common.js` (`percent`, `objectIdString`) has no test. Add a small `common.test.js` so shared coverage stays ≥ 95 % lines (`context/18-testing-strategy.md:25`).
 
 No manual `useMemo`/`useCallback`/`memo` in the diff. Re-review after items 1–2 are fixed.
+
+**Re-review verdict (2026-11-08): APPROVED** · fix commit 303233f (base 4c30fb1)
+
+Required changes 1–4 from the previous round: all fixed.
+1. ✅ `tabSwitch` read: `packages/shared/risk.js:5`. Regression: `risk.test.js:6-11` (boundaries) and `risk.test.js:17-18` (weight `tabSwitch`=2). Mutation `count('tabSwitch')`→`count('tab')` in a scratch copy: 5 of 13 tests fail.
+2. ✅ Unit fixed: `risk.js:3` JSDoc (ms), `risk.js:10` `< 3000`. Regression: `risk.test.js:23-29` uses 2500 ms / 3000 ms fixtures (30 % false, 31 % true). Mutations: `< 3` → 1 failure (the fast-answer test); `<= 3000` → 1 failure; `>= 0.3` → 1 failure. Each reverted form is caught.
+3. ✅ `src/features/questions/questionSchema.test.js` deleted in 303233f. Case-by-case comparison with `packages/shared/schemas/question.test.js`: `diff` shows only the import path (`./questionSchema.js` → `./question.js`). All 7 `it` cases have identical assertions and inputs, so no coverage lost.
+4. ✅ `packages/shared/schemas/common.test.js:4-16` covers `percent` (0, 100 ok; -1, 101 rejected) and `objectIdString` (24 hex ok, 16 chars and non-hex rejected).
+
+Seam (`src/features/questions/questionSchema.js:1` re-export): consumers `QuestionForm.jsx:4` and `importQuestions.js:1`. `importQuestions.test.js:68-76` runs `questionSchema` through `mapRows` and asserts "Section is required" and "must be one of MATH, LOGIC", so the re-exported schema is exercised with real messages. `QuestionForm.test.jsx` only imports the module and asserts ids, so `defaultQuestionValues` has no value assertion in the SPA. Non-blocking: the re-export is a static binding, and a missing name would fail at module link time.
+
+Checks:
+- Scope: 303233f touches only `risk.js`, `risk.test.js`, `schemas/common.test.js`, the card, and the deleted test. No `useMemo`/`useCallback`/`memo` in either commit (grep exit 1).
+- Semantics: field names match `context/14-database-schema.md:227` (`tabSwitch`) and `:219` (`questionTimeMs`, ms); weights and thresholds match `context/13-srs.md:113`.
+- `pnpm test` → 29 files, 225 passed. `pnpm test:all` → shared 5 files, 40 passed / 2 todo; server no tests. `pnpm lint` → exit 0, no output. `pnpm build` → exit 0 (existing chunk-size warning only).
+- Not run: no browser needed for this card.
+- Board: the T-034 row in `pm/BOARD.md` is now ✔️ Done. The Summary table counts in `pm/BOARD.md` are not recounted here (outside the reviewer's row); the coordinator should run `/sprint-status`.

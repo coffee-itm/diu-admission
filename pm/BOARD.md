@@ -8,7 +8,7 @@
 ### Summary
 | ✅ Ready | 🔨 In Progress | 👀 Review | ✔️ Done | ⛔ Blocked | Total | Done % |
 |:-:|:-:|:-:|:-:|:-:|:-:|:-:|
-| 6 | 0 | 0 | 11 | 0 | 17 | 65 % |
+| 5 | 0 | 0 | 12 | 0 | 17 | 71 % |
 
 ### Cards
 | ID | Title | Lane | Role | Model | Depends on | Status |
@@ -23,7 +23,7 @@
 | [T-031](./tasks/T-031-missing-interactive-ids.md) | Missing ids on admin elements | W1 | frontend-dev | free-ok | T-025, T-027, T-028, T-029 | ✔️ Done |
 | [T-032](./tasks/T-032-pnpm-workspace.md) | pnpm workspace + empty packages | W2 | devops | lite | T-031 | ✔️ Done |
 | [T-033](./tasks/T-033-shared-scoring-constants.md) | @diu/shared: scoring, constants, shuffle | W2 | frontend-dev | build | T-032 | ✔️ Done |
-| [T-034](./tasks/T-034-shared-risk-schemas.md) | @diu/shared: risk + question schemas | W2 | frontend-dev | lite | T-033 | ✅ Ready |
+| [T-034](./tasks/T-034-shared-risk-schemas.md) | @diu/shared: risk + question schemas | W2 | frontend-dev | lite | T-033 | ✔️ Done |
 | [T-035](./tasks/T-035-dev-infra-mongo.md) | Mongo 7 replset, .env.example, /api proxy | W2 | devops | lite | T-032 | ✔️ Done |
 | [T-036](./tasks/T-036-fastify-bootstrap.md) | Fastify bootstrap, /health + /ready | W2 | backend-dev | build | T-033, T-035 | ✅ Ready |
 | [T-037](./tasks/T-037-server-test-helpers.md) | Server test helpers + health tests | W2 | test-engineer | build | T-036 | ✅ Ready |
