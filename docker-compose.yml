@@ -11,7 +11,7 @@ services:
         - CMD-SHELL
         - >-
           mongosh --quiet --eval
-          "try { rs.status().ok } catch (e) { rs.initiate().ok }"
+          "try { const s = rs.status(); if (s.myState !== 1) quit(1); true; } catch (e) { try { rs.initiate({_id:'rs0',members:[{_id:0,host:'localhost:27017'}]}); } catch (initError) {} const c = rs.conf(); if (c.members.length !== 1 || c.members[0].host !== 'localhost:27017') { c.members = [{_id:0,host:'localhost:27017'}]; rs.reconfig(c, {force:true}); } const s = rs.status(); if (s.myState !== 1) quit(1); true; }"
       interval: 5s
       timeout: 10s
       retries: 12
