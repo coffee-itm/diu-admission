@@ -25,5 +25,6 @@ A card ID `T-xxx` whose status is `👀 Review`, and its commit (find it with `g
 ## Output (≤ 15 lines)
 `T-xxx: APPROVED | CHANGES REQUESTED | ESCALATE`, then the checks that failed with file:line, then the verification results.
 
-## Claude Code skills
-`ecc:security-review` (for auth/session/scoring cards), `ecc:react-patterns`.
+## ECC skills
+Claude Code: `ecc:<name>`. Pi: `/skill:<name>` (vendored in `.pi/skills/ecc/`).
+`security-review` (auth/session/scoring/answer-key cards), `react-patterns`, `api-design`, `conventional-commit-review`, `change-impact`, `verification-loop`. Load only what the diff touches.

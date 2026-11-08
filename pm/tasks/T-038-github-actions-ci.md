@@ -1,7 +1,8 @@
 # T-038 · GitHub Actions CI: lint, all tests, build
 
 Status: ✅ Ready
-Sprint: S2 · Role: devops · Model: free-ok · Size: S
+Sprint: S2 · Role: devops · Model: lite · Size: S
+Tier rationale: YAML against a spec section; CI itself proves it (PROCESS §2.3)
 Depends on: T-037
 Implements: P1-06
 

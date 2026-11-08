@@ -1,7 +1,8 @@
 # T-035 · Dev infra: Mongo 7 replica set, `server/.env.example`, Vite `/api` proxy
 
 Status: ✅ Ready
-Sprint: S2 · Role: devops · Model: free-ok · Size: S
+Sprint: S2 · Role: devops · Model: lite · Size: S
+Tier rationale: compose file, .env.example and a Vite proxy; all verifiable by one command (PROCESS §2.3)
 Depends on: T-032 (can run in parallel with T-033/T-034; it touches different files)
 Implements: P1-05, ADR-013 (MongoDB replica set)
 

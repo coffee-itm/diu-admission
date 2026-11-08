@@ -1,7 +1,8 @@
 # T-032 · pnpm workspace with empty `@diu/shared` and `@diu/server` packages
 
 Status: ✅ Ready
-Sprint: S2 · Role: devops · Model: free-ok · Size: S
+Sprint: S2 · Role: devops · Model: lite · Size: S
+Tier rationale: workspace plumbing; failures are loud (pnpm install / test / build break) (PROCESS §2.3)
 Depends on: T-031 (wave 1 done, so the lockfile doesn't change while frontend cards are running)
 Implements: P1-01, ADR-019
 

@@ -1,0 +1,11 @@
+{
+  "extensions": [
+    "./extensions/subagent"
+  ],
+  "skills": [
+    "./skills"
+  ],
+  "prompts": [
+    "./prompts"
+  ]
+}

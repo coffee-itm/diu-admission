@@ -1,7 +1,8 @@
 # T-037 · Server test helpers (mongodb-memory-server replica set) + health tests
 
 Status: ✅ Ready
-Sprint: S2 · Role: test-engineer · Model: free-ok · Size: S
+Sprint: S2 · Role: test-engineer · Model: build · Size: S
+Tier rationale: test-infra design + mongodb-memory-server replset flakiness (PROCESS §2.3)
 Depends on: T-036
 Implements: P1-04
 

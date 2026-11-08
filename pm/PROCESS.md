@@ -41,44 +41,101 @@ SPEC (Opus writes card) → BUILD (builder agent) → VERIFY (agent runs tests/l
 
 ## 2. Roles and model routing (token policy)
 
-**Rule: Opus thinks, cheaper models type.** Opus never implements a card. Builders never change requirements or architecture.
+**Rule: Opus plans, Sonnet builds hard things, GPT-6 Luna does everything mechanical, and no model reviews its own family.**
+Opus never implements a card. Builders never change requirements or architecture.
 
-| Role | Who | Model | Does | Never does |
+**The verified model list, prices, blocked models, failover pins and the savings analysis live in
+[MODELS.md](./MODELS.md).** This section is the policy; MODELS.md is the data.
+
+### 2.1 The tiers
+
+| Tier | Model | Thinking | Used by |
+|:--|:--|:--|:--|
+| **plan** | `anthropic/claude-opus-5-5` | high | your main session (planning, cards, ADRs, escalations, review/retro, hard debugging) |
+| **build** | `anthropic/claude-sonnet-5-5` | high | `frontend-dev` `backend-dev` `test-engineer` `devops` |
+| **lite** | `openai-codex/gpt-6-luna` | medium | `builder-lite`, `scout` (`low` for `docs-keeper`) |
+| **review** | `anthropic/claude-haiku-5-5` (lite cards) · `openai-codex/gpt-5.6-terra` (build cards) | high | `reviewer` · `reviewer-pro` |
+
+Two providers only, both already authenticated in Pi: **Anthropic** and **OpenAI Codex (Sign in with ChatGPT)**.
+The OpenCode DeepSeek free lane is **retired** — it ran out mid-sprint, could not be driven from Pi or Claude Code, and was
+never allowed to review.
+
+Why this split (full reasoning in MODELS.md §2):
+- `gpt-6-luna` matches Haiku 5.5 at $0.10 / $0.50 but **has no 5× price cliff above 100K input tokens**, and builder sessions
+  cross 100K easily. So the cheap tier is OpenAI.
+- Only Anthropic models declare `promptCache`, so only they benefit from Pi's cache warming. **Long-lived sessions belong on
+  Anthropic (cache pays); one-shot subagents belong on OpenAI (cache cannot pay).**
+- Reasoning tokens bill as output at 5–12× input, so the **thinking level** pinned per agent is as important as the model.
+
+### 2.2 Role → agent → model
+
+| Role | Agent dispatched | Model | Does | Never does |
 |:--|:--|:--|:--|:--|
-| Product owner | You (human) | — | Priorities, answers open questions, approves sprint goals, merges | — |
-| **Planner / architect** | Claude Code main session | **Opus** | Sprint planning, writing task cards, ADRs, resolving escalations, sprint review/retro, hard debugging after 2 failed builder attempts | Writing feature code |
-| `frontend-dev` | Claude Code subagent / OpenCode agent | Sonnet / free | React pages, hooks, stores, UI | Change specs/contracts |
-| `backend-dev` | Claude Code subagent / OpenCode agent | Sonnet / free | Fastify modules, Mongoose models, jobs, seed | Change specs/contracts |
-| `test-engineer` | Claude Code subagent / OpenCode agent | Sonnet / free | Test harness, unit/integration/E2E tests | Change behavior to make tests pass |
-| `reviewer` | Claude Code subagent / OpenCode agent | Haiku / free | Reviews a finished card against acceptance criteria and the specs; read-only | Edit code |
-| `devops` | Claude Code subagent / OpenCode agent | Sonnet / free | CI, Docker, workspace, deploy configs | Feature code |
-| `docs-keeper` | Claude Code subagent / OpenCode agent | Haiku / free | Updates board, defect register, roadmap ticks, README/AGENTS after a sprint | Code |
+| Product owner (you) | — | — | Priorities, open questions, sprint goals, merges | — |
+| Planner / architect | main session | Opus 5.5 | Planning, cards, ADRs, escalations, retro | Writing feature code |
+| `frontend-dev` | `frontend-dev` | Sonnet 5.5 | React pages, hooks, stores, UI | Change specs/contracts |
+| `backend-dev` | `backend-dev` | Sonnet 5.5 | Fastify modules, Mongoose models, jobs, seed | Change specs/contracts |
+| `test-engineer` | `test-engineer` | Sonnet 5.5 | Test harness, unit/integration/E2E tests | Change behavior to pass tests |
+| `devops` | `devops` | Sonnet 5.5 | CI, Docker, workspace, deploy configs | Feature code |
+| any role, `lite` card | **`builder-lite`** | GPT-6 Luna | Reads the card's `Role:` line and obeys that role file | Judgement calls — it hands back |
+| review (lite card) | `reviewer` | Haiku 5.5 | Acceptance-criteria review, read-only on source | Edit code |
+| review (build card) | **`reviewer-pro`** | GPT-5.6 Terra | Invariant-attacking review of auth/session/scoring/key/anti-cheat diffs | Edit code |
+| `docs-keeper` | `docs-keeper` | GPT-6 Luna (low) | Board, defect register, roadmap ticks, README/AGENTS | Code |
+| recon | `scout` | GPT-6 Luna | Read-only recon before planning | Edit, propose fixes |
 
-Role instructions (single source for both tools): [`pm/agents/*.md`](./agents/).
-Claude Code wiring: `.claude/agents/*.md` (pinned to `model: sonnet`/`haiku`) and `.claude/commands/*.md`.
-OpenCode wiring: [`opencode.json`](../opencode.json) (agents inherit your default model, currently the free `opencode/deepseek-v4.1-flash-free`).
-Zen `*-free` models work only inside the OpenCode app. Claude Code via claude-code-router gets `FreeUsageLimitError` (verified 2026-10-30).
+Role instructions (single source): [`pm/agents/*.md`](./agents/). A card's `Role:` names the rules; its `Model:` tier names the
+**agent process**. Harness support and the inherit-Opus trap: MODELS.md §5. **Run sprints from Pi** — it is the only harness
+that can reach both providers.
 
-### Build routing (from S2)
-The Opus session coordinates. Builders run headless, and you leave any interactive OpenCode pane idle during builds so two agents never edit the same tree.
-1. **Build.** `free-ok` cards: `opencode run -m opencode/deepseek-v4.1-flash-free --agent <role> "Execute task card pm/tasks/T-xxx-….md following pm/AGENT_PLAYBOOK.md"`. `sonnet` cards: the matching Claude Code subagent.
-2. **Verify.** The coordinator runs `pnpm test`, `pnpm lint` (no new warnings) and `pnpm build`, and checks that the diff stays inside the card's Files list.
-3. **Review.** The Claude `reviewer` (Haiku) reviews every card. The free model never reviews.
-4. **Retry.** On rejection, resume the same OpenCode session once with the findings. After a second rejection, Sonnet takes the card, and the sprint file records it.
-5. **Fallback.** If the Zen free limit is hit, the remaining `free-ok` cards go to Sonnet.
+### 2.3 Which tier per card
 
-### Which tier per card
-Each card says `Model: free-ok` or `Model: sonnet`.
-- **free-ok**: mechanical, well-specified, little hidden coupling (data fixes, copy changes, simple utilities, docs).
-- **sonnet**: subtle state/closure/timing logic, security-relevant code, cross-file refactors, test design.
-- **opus**: never for building. Only planning, escalations and reviews of escalations.
+Every card carries `Model: lite | build` (legacy cards may say `free-ok` = `lite`, `sonnet` = `build`) plus a one-line
+`Tier rationale:`. The planner picks with this test — **if any answer is yes, it is `build`:**
 
-### Token-saving rules (apply to every agent)
-1. **One card per session.** Start a fresh session for each card; don't carry history.
-2. **Read only what the card lists** (its "Context to read" section) plus the files you edit. No repo-wide exploration. Use `grep`/`rg` for lookups.
+1. Does it touch closures, timers, async ordering or persisted-state migration?
+2. Is it security-relevant (auth, tokens, answer keys, session authority, anti-cheat)?
+3. Does it move or rename code across more than ~3 files, or change import sites repo-wide?
+4. Does the card design new tests rather than follow a given list?
+5. Is the failure mode *silent* (wrong number, leaked field) rather than loud (build/lint/test breaks)?
+
+Otherwise it is `lite`. Rule of thumb: **loud failures are safe on the cheap tier; silent failures need Sonnet.**
+
+### 2.4 Dispatch (the coordinator does this)
+
+| Card says | Dispatch to | Model it runs on |
+|:--|:--|:--|
+| `Model: build` | the agent named in `Role:` | Sonnet 5.5 (Anthropic) |
+| `Model: lite` | `builder-lite` | GPT-6 Luna (OpenAI) |
+| review of a `lite` card | `reviewer` | Haiku 5.5 (Anthropic) |
+| review of a `build` card, or any diff touching auth / sessions / scoring / answer keys / anti-cheat | `reviewer-pro` | GPT-5.6 Terra (OpenAI) |
+| recon before planning | `scout` | GPT-6 Luna (OpenAI) |
+
+**Cross-provider review rule: a card is never reviewed by the family that built it.** Following this table gives that for free.
+
+Prompt in every case: `Execute task card pm/tasks/<file>. Follow pm/AGENT_PLAYBOOK.md.`
+Pi: `subagent` tool, `agent: "<agent>"`. Claude Code: Agent tool, `subagent_type: "<agent>"` (Anthropic lane only).
+
+Then: **Verify** — the coordinator runs `pnpm lint`, `pnpm test`, `pnpm build` and checks the diff stayed inside the card's
+Files list. **Retry** — on rejection, resume the same builder once with the findings; a second rejection promotes the card one
+tier (`lite` → `build`, `build` → stop for Opus) and the sprint file records it. **Hand-back** — if `builder-lite` reports
+`WRONG TIER`, re-dispatch to the Sonnet role agent and change the card's `Model:` line. **Quota failover** — one-line pin
+swaps, listed in MODELS.md §3.
+
+### 2.5 ECC skills (context budget)
+
+The 16 vendored ECC skills (`.pi/skills/ecc/`, `ecc:*` in Claude Code) cost ~1.1K tokens of descriptions permanently and load
+their bodies only on demand. Each role file lists the 4–7 relevant to it. **Load at most one or two that the card needs**;
+never a set "just in case". Where a skill disagrees with `AGENTS.md`, `context/13-srs.md` or `context/09-adrs.md`, the project
+wins — notably React Compiler bans the manual `useMemo`/`useCallback`/`memo` that ECC's React skills teach.
+
+### 2.6 Token-saving rules (apply to every agent)
+1. **One card per session.** Fresh session each time; don't carry history.
+2. **Read only what the card lists** plus the files you edit. No repo-wide exploration. Use `grep`/`rg` for lookups.
 3. Specs are long. Read **the cited section**, not the whole document.
 4. Report in ≤ 15 lines (template in the playbook). No restating the card.
-5. If stuck after **2 verification failures**, stop and escalate (§6). Don't loop.
+5. Stuck after **2 verification failures** → stop and escalate (§6). Don't loop.
+6. Cheap work belongs on the cheap model: board recounts, `/sprint-status`, docs sync and recon never run on Opus or Sonnet.
+7. Thinking level is a cost dial: `low` for docs, `medium` for mechanical builds and recon, `high` only for build and review.
 
 ## 3. Work item types and IDs
 

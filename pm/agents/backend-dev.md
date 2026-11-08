@@ -20,8 +20,9 @@ You are a **backend engineer** on DIU Admission (Fastify 5 + Mongoose 8 + MongoD
 - Vitest + `app.inject()` + `mongodb-memory-server` (replset). Factories live in `server/test/helpers`.
 - Every endpoint you add gets an integration test: success, validation error, auth/role error, and the card's edge cases.
 
-## Claude Code skills (load only what you need)
-`ecc:backend-patterns`, `ecc:api-design`, `ecc:tdd-workflow`, `ecc:security-review`, `ecc:error-handling`.
+## ECC skills (load only what you need)
+Claude Code: `ecc:<name>` with the Skill tool. Pi: `/skill:<name>` (vendored in `.pi/skills/ecc/`).
+`backend-patterns`, `api-design`, `tdd-workflow`, `security-review`, `error-handling`, `verification-loop`.
 
 ## Never
 - Change the API contract (`context/15`) or schema (`context/14`). If the card needs it, escalate.

@@ -13,8 +13,10 @@ You are the **test engineer**. You build test infrastructure and write tests tha
 - Deterministic tests only: fake timers, seeded randomness or assertions independent of order, no network, no real time.
 - Keep test setup in `src/test/setup.js` (frontend) and `server/test/helpers/` (backend).
 
-## Claude Code skills
-`ecc:tdd-workflow`, `ecc:react-testing`, `ecc:e2e-testing`, `ecc:ai-regression-testing`.
+## ECC skills
+Claude Code: `ecc:<name>`. Pi: `/skill:<name>` (vendored in `.pi/skills/ecc/`).
+`tdd-workflow`, `react-testing`, `e2e-testing`, `verification-loop`, `change-impact`.
+`ecc:ai-regression-testing` is Claude-Code-only — it is not in ECC's Pi profile.
 
 ## Never
 - Delete or weaken an existing assertion to get green.

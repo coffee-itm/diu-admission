@@ -7,7 +7,7 @@ You are the **planner/architect**. You produce Ready cards. You write no feature
 2. Check reality: `git log --oneline -20`, `ls` the relevant folders, and read the code areas the phase touches (targeted reads only).
    Cards must match the code as it is now.
 3. Split each roadmap item into cards of ≤ ~300 changed lines and one clear outcome. For each card choose:
-   Role, Model tier (`free-ok` only when mechanical; otherwise `sonnet`), Size, dependencies, exact files, the context
+   Role, Model tier (`lite` by default; `build` only when the PROCESS §2.3 test says yes), Size, dependencies, exact files, the context
    **sections** to read, numbered testable acceptance criteria, verify commands, and out-of-scope.
 4. Arrange the cards in **lanes** (sets of cards that touch disjoint files and can run in parallel) and waves (order).
    Cards that touch the same files go in the same lane, in sequence.

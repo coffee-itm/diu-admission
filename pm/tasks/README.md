@@ -9,7 +9,8 @@ and executed by builder agents following [../AGENT_PLAYBOOK.md](../AGENT_PLAYBOO
 # T-xxx · <imperative title>
 
 Status: ✅ Ready
-Sprint: S<n> · Role: <frontend-dev|backend-dev|test-engineer|devops|docs-keeper> · Model: <free-ok|sonnet> · Size: <S|M>
+Sprint: S<n> · Role: <frontend-dev|backend-dev|test-engineer|devops|docs-keeper> · Model: <lite|build> · Size: <S|M>
+Tier rationale: <one line, per PROCESS §2.3>
 Depends on: <T-yyy, … | none>
 Implements: <FR-…, D-…, P0-…>
 

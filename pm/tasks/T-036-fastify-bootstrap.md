@@ -1,7 +1,8 @@
 # T-036 · Fastify 5 server bootstrap with `/health` and `/ready`
 
 Status: ✅ Ready
-Sprint: S2 · Role: backend-dev · Model: sonnet · Size: M
+Sprint: S2 · Role: backend-dev · Model: build · Size: M
+Tier rationale: server bootstrap, config validation, error envelope, shutdown semantics (PROCESS §2.3)
 Depends on: T-033, T-035
 Implements: P1-03, ADR-014
 

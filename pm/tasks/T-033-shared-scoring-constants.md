@@ -1,7 +1,8 @@
 # T-033 · Move scoring, domain constants and shuffle into `@diu/shared`
 
 Status: ✅ Ready
-Sprint: S2 · Role: frontend-dev · Model: sonnet · Size: M
+Sprint: S2 · Role: frontend-dev · Model: build · Size: M
+Tier rationale: cross-package move touching ~43 import sites; silent-failure risk in scoring (PROCESS §2.3)
 Depends on: T-032
 Implements: P1-02 (part 1), ADR-019, FR-SCORE-04
 

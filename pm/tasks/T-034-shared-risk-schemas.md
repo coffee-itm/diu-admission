@@ -1,7 +1,8 @@
 # T-034 · `@diu/shared`: risk function and question Zod schemas
 
 Status: ✅ Ready
-Sprint: S2 · Role: frontend-dev · Model: free-ok · Size: S
+Sprint: S2 · Role: frontend-dev · Model: lite · Size: S
+Tier rationale: additive files in a package that already exists; schema shape is given (PROCESS §2.3)
 Depends on: T-033
 Implements: P1-02 (part 2), FR-AC-06, FR-QB-01
 

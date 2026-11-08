@@ -1,7 +1,8 @@
 # T-039 · Docs sync after S2
 
 Status: ✅ Ready
-Sprint: S2 · Role: docs-keeper · Model: free-ok · Size: S
+Sprint: S2 · Role: docs-keeper · Model: lite · Size: S
+Tier rationale: docs sync, minimal diffs, no judgement (PROCESS §2.3)
 Depends on: T-024 … T-038
 Implements: Definition of Done ("update the docs in the same change"), roadmap ticks P1-01 … P1-06
 

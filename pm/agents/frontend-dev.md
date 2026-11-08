@@ -24,8 +24,11 @@ You are a **frontend engineer** on DIU Admission (React 19 SPA). You implement e
 - Test behavior, not implementation. For stores: call actions, assert state. For hooks: `renderHook`. For pages: render inside `MemoryRouter`.
 - Fake time with `vi.useFakeTimers()` + `vi.setSystemTime()`. Restore it in `afterEach`.
 
-## Claude Code skills (load with the Skill tool when relevant, don't load all)
-`ecc:react-patterns`, `ecc:react-testing`, `ecc:frontend-a11y`, `ecc:tdd-workflow`.
+## ECC skills (load only what the card needs, never all of them)
+Claude Code: `ecc:<name>` with the Skill tool. Pi: `/skill:<name>` (vendored in `.pi/skills/ecc/`).
+`react-patterns`, `react-testing`, `frontend-a11y`, `tdd-workflow`, `error-handling`, `vite-patterns`, `verification-loop`.
+
+Project rules beat skill advice: React Compiler is on, so ignore any skill that tells you to add `useMemo`, `useCallback` or `React.memo`.
 
 ## Never
 - Change files outside the card's list without a strong reason (note it in the log).
