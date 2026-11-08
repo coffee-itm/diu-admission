@@ -2,3 +2,6 @@
 export * from './constants.js';
 export * from './scoring.js';
 export * from './shuffle.js';
+export * from './risk.js';
+export * from './schemas/common.js';
+export * from './schemas/question.js';

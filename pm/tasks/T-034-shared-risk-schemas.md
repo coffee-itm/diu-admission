@@ -1,6 +1,6 @@
 # T-034 · `@diu/shared`: risk function and question Zod schemas
 
-Status: ✅ Ready
+Status: 👀 Review
 Sprint: S2 · Role: frontend-dev · Model: lite · Size: S
 Tier rationale: additive files in a package that already exists; schema shape is given (PROCESS §2.3)
 Depends on: T-033
@@ -37,5 +37,9 @@ pnpm test:all && pnpm lint && pnpm build
 - Wiring `computeRisk` into the UI (S5/S6). Auth, cycle and session schemas (added with their modules in S3–S5).
 
 ## Agent log
+- Added FR-AC-06 weighted risk scoring and fast-answer detection, plus shared percent, ObjectId, and question schemas.
+- Moved question schema tests into `packages/shared/schemas`; frontend re-export keeps existing consumers working.
+- `pnpm test`: 232 passed; `pnpm test:all`: 38 passed, 2 todo (server has no tests yet).
+- `pnpm lint` and `pnpm build` passed; build reports existing large-chunk warning.
 
 ## Review
