@@ -1,6 +1,6 @@
 # T-046 · Auth routes: register, login, refresh, logout, me
 
-Status: 👀 Review
+Status: ✔️ Done
 Sprint: S3 · Role: backend-dev · Model: build · Size: M
 Tier rationale: public attack surface — cookie flags, generic errors, throttling; silent failure modes (PROCESS §2.3)
 Depends on: T-045
@@ -117,3 +117,35 @@ The gap is about 9 ms (~30%), the distributions do not overlap (every p90 of the
 - Not touched, per instructions: `trustProxy`, refresh 5xx clearing the cookie, `Origin` vs `CORS_ORIGINS`.
 - Verify: `pnpm --filter @diu/server test` 130 passed; `pnpm lint` clean; `pnpm test:all` root 225, shared 40 (2 todo), server 130; `pnpm build` ok (pre-existing chunk-size warning).
 - **For the planner:** (a) new collection `loginTimingDecoy` (one row, upserted) is not in `context/14`; say if you want it documented there. (b) a decoy row is a shared hot document: concurrent failed logins on unknown emails serialise on it (cheap, but worth a glance in the load test).
+
+## Re-review (reviewer-pro, commit a7d84db, main tree, scratch DB `diu_review_t046`, dropped afterwards)
+**Verdict: APPROVED.** The one required change (timing oracle) is closed to the point where it is not usable; nothing regressed.
+
+**1. Timing, my own harness** (`/tmp/t046b/timing.mjs`; full HTTP `POST /auth/login` via `app.inject`, 5 cases interleaved with rotating order, 10 warm-ups, **no counter reset between samples**: every wrong-password sample uses its own pre-made account, `wrong_fresh` count 0→1 and `wrong_count4` count 3→4; the locked account is never touched, its count stayed 5; all responses had one distinct status+body). ms, p10 / median / p90:
+
+| case (N=400 each) | p10 | median | p90 | P(wrong_fresh > case) |
+|:--|--:|--:|--:|--:|
+| wrong pw, fresh (0→1) | 34.3 | 37.5 | 39.8 | - |
+| wrong pw, count 3→4 | 33.9 | 37.4 | 40.0 | 0.51 |
+| unknown email | 32.9 | 36.1 | 38.6 | 0.69 |
+| locked + correct pw | 34.0 | 36.3 | 39.2 | 0.64 |
+| disabled + correct pw | 31.7 | 36.1 | 38.7 | 0.69 |
+
+N=200 run: medians 38.0 / 38.1 vs 36.4 / 37.2 / 37.2, same shape. **The distributions overlap:** wrong-password p10 sits below every other case's p90 and the p10–p90 spans (~6-7 ms) are 4-5× the median gap (1.2-1.4 ms). Harness sensitivity check (reverted mutation: decoy write commented out in `service.js`, N=150): medians 42.7/39.0 vs 29.2/30.3/30.0, p90 of the others (31.7) below the wrong-pw p10 (35.8-37.2), AUC 0.94-0.98, so my harness does detect the original ~9-13 ms oracle. The fix moves AUC from ~0.97 to ~0.65-0.70 (0.5 = identical).
+
+**2. Decoy write is real, non-real paths touch no user** (`service.js:236-243`). Collection dropped first, then 30 concurrent unknown-email logins (first-ever upsert race): all 401, one decoy row, no E11000/500. The row `{_id:'login-timing', at, count}` advanced (30 → 34 after 4 more calls, `at` moved). The `users` collection serialised before/after unknown + locked + disabled + locked-wrong logins is **byte-identical**, user count unchanged. Wrong password on an active account changes only its own row (`count` 1, `lastFailedAt` set). Mutations (reverted): removing the decoy write fails 4 tests (3 per-path + "really modifies a document"); the window cutoff replaced with epoch fails the window test.
+
+**3. 15-minute window** (`service.js:171-212`), service level against the DB: count 4 + `lastFailedAt` 16 min old → count 1, no lock; 14 min old → 5, locked; count 4 with no timestamp (legacy) → 1; **active lock + 60-min-old timestamp → `lockedUntil` unchanged** (not shortened, not extended); expired lock → 1 and the lock is removed (with a stale or fresh timestamp); success clears (`failedLogins` → `{count:0}`, `lastFailedAt` and `lockedUntil` unset). Over HTTP: attempts 5/6/7 → 401, `lockedUntil` identical across all three, count stays 5, correct password during the lock → 401; 4 stale failures + 1 now → count 1, not locked.
+
+**4. No regression.** Register with `role:'admin'` → 201 `candidate`; cookie `HttpOnly`, `SameSite=Strict`, `Path=/api/v1/auth`; no `argon2`/`passwordHash` in register, login, `/me`, refresh bodies; `/me` 200; refresh 200; replay of the old cookie → 401 and the newest token → 401, with the 2 family rows `revokedAt` set (the other 2 families live); wrong-pw and unknown 401 byte-identical (body `{"error":{"code":"INVALID_CREDENTIALS",...}}`, same headers apart from request-id/date/ratelimit). `COOKIE_SECURE`, `toPublicUser` mutations etc. are covered by the committed suite (130 pass), and `git diff fd6f6b8..a7d84db` does not touch `routes.js`, `toPublicUser.js` or the cookie code.
+
+**5. Residual 0.5-2 ms gap: noise in practice, not exploitable.** (a) Over a network, jitter is typically 1-10+ ms per request, i.e. at or above the whole 1.3 ms median gap, and the per-request spread here (~6 ms p10-p90) is already 4-5× it; one sample classifies at barely above chance (AUC 0.65-0.70 only with hundreds of samples). (b) The attacker's sample budget is tiny: wrong-password samples on a real account are capped at 4 per 15 min before it becomes a "locked" account that is deliberately indistinguishable from unknown, and 10 login attempts/min/IP. Telling one email apart at this effect size would need orders of magnitude more samples than that budget allows. (c) The remaining difference is likely real-row vs decoy-row work (index lookup + document size). It is detectable only in-process on one host with hundreds of samples, which is exactly how I found it. Residual risk: low, accepted; if wanted later, the cheap hardening is a random 0-3 ms jitter or making the decoy a 5-field doc like a user's `failedLogins`.
+
+**Non-blocking notes**
+- The window is sliding on the last failure (`lastFailedAt`), not fixed from the first: failures spaced 14 min apart still reach 5 and lock. Conservative (over-locks) and matches the card wording ("a failure older than 15 min restarts the count"); noting it for T-053.
+- `registerFailedLogin` called directly while locked still increments `count` (6); unreachable via login (locked path never calls it), `lockedUntil` unaffected.
+- Carried unchanged from round 1: refresh `catch` clears the cookie on a 5xx; `checkOrigin` vs same-origin deployment; `trustProxy` unset. Planner accepted `lastFailedAt` and `loginTimingDecoy` (T-053 documents; S8 load test checks the hot row).
+
+**Verification (main tree):** `pnpm --filter @diu/server test` 130 passed; `pnpm lint` clean; `pnpm test:all` root 225, shared 40 (2 todo), server 130; `pnpm build` ok (pre-existing chunk-size warning). Both mutations reverted with `git checkout`; `git status` clean before my card/board edits. Scratch scripts in `/tmp/t046b`.
+
+**Not proven:** timing over a real network (in-process `app.inject` against the docker Mongo on one host; this over-estimates the attacker's resolution, so it is conservative); cookie enforcement in a real browser (⚠️ not verified, no browser).
