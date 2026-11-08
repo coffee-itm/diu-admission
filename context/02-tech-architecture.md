@@ -30,6 +30,10 @@
 
 Compiler rule: **no manual `React.memo` / `useMemo` / `useCallback`**.
 
+### Workspace (added in S2)
+
+The repository is a pnpm workspace: root SPA (`diu-admission`), `packages/shared` (`@diu/shared`), and `server` (`@diu/server`). Shared scoring, domain constants and shuffle have root `src/lib/*` re-export shims; shared also contains risk and common/question Zod schemas. The server is Fastify 5 with health/readiness routes. Local Mongo 7 replica-set setup is in `docker-compose.yml`; CI is in `.github/workflows/ci.yml`.
+
 ### Directory layout (actual)
 
 ```
@@ -160,5 +164,5 @@ pnpm lint
 pnpm test           # frontend tests (after P0-01)
 pnpm test:all       # all workspace packages
 pnpm build
-pnpm seed           # seed MongoDB from src/data (after P3-04)
+pnpm seed           # seed MongoDB (server seed script)
 ```

@@ -41,6 +41,14 @@
 | D-28 | P2 | Hygiene | Storage keys still `itm-auth`, `itm-test-session`, `itm-anti-cheat`, `itm-exam-config`, `itm-results`, `itm-lang` (only `diu-candidates` was renamed in the pivot) | `src/store/*.js`, `testService.js`, `LanguageToggle.jsx` | P0-13 · ✅ Fixed (T-018) |
 | D-29 | P1 | UX | Bilingual EN/BN (PRD Must) and dark mode are not implemented. `LanguageToggle` exists but isn't rendered anywhere | `src/components/ui/LanguageToggle.jsx`, `src/index.css:50` | P7-01…04 |
 
+### S1 carry-over closed in S2
+
+- Logout clears the test session for privacy (T-024).
+- Exam-config input validation (T-025); fullscreen resume prompt and false tab-switch correction (T-026).
+- Merit-list eligibility filter (T-027); small UI/redirect/chart fixes (T-028).
+- CSV import hardening (T-029); TestPage exhaustive-deps warning removed (T-030; lint 0 warnings).
+- Missing admin interactive IDs added (T-031).
+
 ## 2. Doc-vs-code gaps
 
 Files listed in `AGENTS.md` that **don't exist**:

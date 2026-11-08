@@ -312,15 +312,16 @@ prototype/
 └── README.md
 ```
 
-> **Reality check (2026-10-29):** `services/api.js`, `services/questionService.js`, `features/scoring/useScoring.js`,
+> **Reality check (2026-11-08):** `services/api.js`, `services/questionService.js`, `features/scoring/useScoring.js`,
 > `hooks/` and `public/fonts/` do **not** exist yet. `lib/csvExport.js` now exists (T-015), as do `lib/csvParse.js`,
 > `lib/meritCsv.js`, `lib/fullscreen.js`, `lib/storageMigration.js`, `lib/runStorageMigration.js` and
 > `features/questions/importQuestions.js` (S1). `store/antiCheatStore.js`,
 > `features/test/useAntiCheat.js` and `features/test/SecurityWarningModal.jsx` exist but are not listed above.
 > See `context/02-tech-architecture.md` for the actual tree and `context/06-open-issues-doc-gaps.md` for known defects.
 >
-> **Target additions** (R2, see `context/16-backend-architecture.md`): `packages/shared/` (`@diu/shared`),
-> `server/` (`@diu/server`: `src/{app,server,config}.js`, `plugins/`, `modules/<domain>/{model,routes,service}.js`, `jobs/`),
+> **Now present (S2):** `packages/shared/` (`@diu/shared`), `server/` (`@diu/server`, Fastify 5 bootstrap and health module),
+> `docker-compose.yml` (Mongo 7 replica set), and `.github/workflows/ci.yml`. `src/lib/*` retains re-export shims for shared logic.
+> **Target additions** (R2, see `context/16-backend-architecture.md`): `server/modules/<domain>/{model,routes,service}.js`, `jobs/`,
 > `e2e/` (Playwright), `load/` (k6), `pnpm-workspace.yaml` packages `['.', 'server', 'packages/*']`.
 
 ---
@@ -501,6 +502,15 @@ Create **15–20 mock candidates** with varied profiles and results.
 ```bash
 # Start dev server
 pnpm dev
+
+# Start the backend (requires local Mongo; see README)
+pnpm dev:server
+
+# Run all workspace tests
+pnpm test:all
+
+# Start MongoDB replica set
+docker compose up -d mongo
 
 # Build for production
 pnpm build

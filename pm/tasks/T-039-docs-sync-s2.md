@@ -1,6 +1,6 @@
 # T-039 · Docs sync after S2
 
-Status: ✅ Ready
+Status: 👀 Review
 Sprint: S2 · Role: docs-keeper · Model: lite · Size: S
 Tier rationale: docs sync, minimal diffs, no judgement (PROCESS §2.3)
 Depends on: T-024 … T-038
@@ -36,5 +36,10 @@ git diff --stat && pnpm test:all
 - Rewriting specs. Gaps found go to `pm/ESCALATIONS.md`.
 
 ## Agent log
+
+- Synced workspace/backend commands and architecture/reality-check docs; recorded S2 carry-over fixes and legacy anti-cheat key migration.
+- Ticked P1-01…P1-06 (each corresponding card status verified ✔️ Done); noted coverage deferral to S3.
+- Verify: `pnpm test:all` passed (270 tests, 2 todo); `pnpm lint` clean; `pnpm test` 225 passed; `pnpm build` passed (known 1.46 MB chunk advisory); `git diff --check` clean.
+- README backend commands documented; full live Mongo/server invocation not run in this verification.
 
 ## Review

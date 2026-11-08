@@ -1,5 +1,7 @@
 # Anti-Cheat System — Implementation Guide
 
+> Storage now uses `diu-anti-cheat`; the legacy `itm-anti-cheat` key is migrated by T-018.
+
 > **Purpose:** Step-by-step instructions for implementing 10 anti-cheat features into the existing prototype. Each feature lists the exact files to create/modify with complete code.
 
 ---
@@ -196,6 +198,7 @@ export const useAntiCheatStore = create(
         questionTimeMap: {}, currentQuestionId: null, currentQuestionEnteredAt: null,
       }),
     }),
+    // Legacy key: migrated to the current diu-anti-cheat key by T-018.
     { name: 'itm-anti-cheat' }
   )
 );
