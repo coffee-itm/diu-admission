@@ -1,6 +1,6 @@
 # T-039 · Docs sync after S2
 
-Status: 👀 Review
+Status: ✔️ Done
 Sprint: S2 · Role: docs-keeper · Model: lite · Size: S
 Tier rationale: docs sync, minimal diffs, no judgement (PROCESS §2.3)
 Depends on: T-024 … T-038
@@ -89,3 +89,49 @@ git diff --stat && pnpm test:all
 
 ### Next step
 Builder applies R1-R7 (R8 optional). Re-review after the fix commit. Board row set to 🔨 In Progress.
+
+## Re-review (commit c7cb013): CHANGES REQUESTED
+
+Docs-only confirmed: `git diff 3ee12fb HEAD --name-only` lists 8 `.md` files, no code. `git diff --check` clean.
+
+### Fix status
+- **Finding 1 (P1-02 classify): fixed.** `context/19:55` amends the text. `grep -rn classify packages/ src/ server/` finds nothing. `resolveThresholds` is exported (`packages/shared/scoring.js:14`, re-exported by `index.js:3`). Eligibility is inline at `scoring.js:74-85`. Deferral to P4-05 matches `context/19:83`. TRUE.
+- **Finding 2 (pnpm seed): fixed.** `context/02:171` and `context/19:54` say not runnable. Root `package.json:18` delegates to `@diu/server seed`. `server/package.json` has no `seed`. `pnpm seed` re-run: exit 1, `ERR_PNPM_RECURSIVE_RUN_NO_SCRIPT`. P3-04 is the seed card (`context/19:74`). TRUE.
+- **Finding 3 (coverage note adjacency): fixed.** Note moved onto the CI line at `context/18:125`. Old note removed (no dangling reference: grep finds no other `coverage` mention in `context/18`). Re-ran `pnpm test:all -- --coverage`: exit 0, output `pnpm test && pnpm -r test -- --coverage`, no coverage report, no `coverage/` dir, no `@vitest/coverage-v8` under `node_modules`. TRUE.
+- **Finding 4 (AGENTS pnpm-workspace listed as target): fixed.** `AGENTS.md:322-325` now lists it under "Now present (S2)". `pnpm-workspace.yaml` content matches `['.', 'server', 'packages/*']`. TRUE.
+- **Finding 5 (Directory layout SPA-only): PARTIAL.** Workspace entries are added (`context/02:63-67`), but the placement is malformed; see R9.
+- **Finding 6 (shuffle shim claim): fixed.** `context/02:35` now says `shuffleArray` in `src/lib/utils.js`. `src/lib/utils.js:14-15` wraps `@diu/shared/shuffle`. No `src/lib/shuffle*` exists. The shims `src/lib/constants.js:4` and `src/lib/scoring.js:2` are real. TRUE.
+- **Finding 7 (P1-01 / P1-06 notes): fixed.** P1-01 `context/19:54` (seed caveat). P1-06 `context/19:59`: `ci.yml` has lint, `test:all`, build, and no e2e job. S2 defers the e2e job (`pm/sprints/S2.md:88`). TRUE.
+- **R8 (`dev:server (after P1)`): fixed** (`context/02:165`).
+
+### Required changes
+- **R9** `context/02-tech-architecture.md:61-67`: the new workspace lines sit after `└── lib/` inside the `src/` block, with no root node, at the same column as `src/`. The tree is ambiguous (the reader cannot tell whether `packages/` is inside `src/`). Fix: wrap the whole block in a `diu-admission/` root and nest `src/` as a child (`├── src/`). Keep the entries listed.
+
+### Optional (non-blocking)
+- **O1** `context/18-testing-strategy.md:113-127`: the yaml is the target spec under a heading that names `ci.yml`. The real `ci.yml` has no coverage flag and no e2e job. The annotation is accurate for the command, but a reader may take it as present in CI. Suggest adding "(target spec; `ci.yml` today runs `pnpm test:all` with no flag and has no `e2e` job)" to the heading or to the fence comment.
+- **O2** `context/02:40-66`: the `src/lib` list omits `examConfigValidation.js` and `instructionRules.js` (pre-existing, not introduced by the fix).
+
+### Gates (reviewer, main tree, after c7cb013)
+- `pnpm lint` exit 0 (`eslint .`).
+- `pnpm test` exit 0: 29 files, 225 passed.
+- `pnpm build` exit 0 (chunk-size advisory only).
+- `pnpm test:all` exit 0: root 225; `@diu/shared` 40 passed + 2 todo; `@diu/server` 5 passed.
+
+### Next step
+Builder applies R9 (O1, O2 optional) in one docs commit. Re-review after that commit. Board row stays 🔨 In Progress.
+
+## Final re-review (commit c9b83cf): APPROVED
+
+Scope: R9 only, plus the gates. Docs-only confirmed: `git diff 3ee12fb HEAD --name-only` lists 8 `.md` files, no code. `git diff --check` clean. `c9b83cf` touches only `context/02-tech-architecture.md`.
+
+- **R9 (tree rooting): fixed.** `context/02:40` roots the tree at `diu-admission/`. `src/` is a child at `:41`. `packages/shared/` (`:66`), `server/` (`:67`), `docker-compose.yml` (`:69`), `pnpm-workspace.yaml` (`:70`) and `.github/workflows/ci.yml` (`:71`) are siblings of `src/` at the root level. TRUE.
+- **(b) Paths named in the block: all exist.** Checked by `ls`/`test -e`. Covered: `src/` top files, all `components/{ui,layout,charts}`, `pages/{public,candidate,admin}`, `features/{auth,test,questions,scoring}` (including `resolvePostLoginPath.js`, `SecurityWarningModal.jsx`, `importQuestions.js`, `questionSchema.js`, `scoringConfig.js`), `store/*` (incl. `antiCheatStore.js`), `services/{auth,test,result,analytics}Service.js`, `data/*`, `test/setup.js`, `packages/shared/*` (incl. `schemas/{common,question}.js`), `server/{package.json,src/app.js,src/config.js,src/server.js,src/lib,src/modules/health,src/plugins/{errors,mongoose,security,zod}.js,test/health.test.js,test/helpers}`, `docker-compose.yml`, `pnpm-workspace.yaml`, `.github/workflows/ci.yml`. `StatCard` is exported at `src/components/ui/Card.jsx:38`. Absent names stay absent: `services/api.js`, `services/questionService.js`, `lib/shuffle.js`, `useScoring.js`, `hooks/`.
+- **(c) `src/lib/` line (`:63-65`): matches.** Real non-test files (12): `constants, scoring, utils, pdfGenerator, csvExport, csvParse, meritCsv, examConfigValidation, instructionRules, fullscreen, storageMigration, runStorageMigration`. The block lists the same 12, none invented. `*.test.js` files are omitted, which is the convention for the whole block (no `components/` or `pages/` entry lists tests either).
+- **Non-blocking, not required by R9:** the `server/` line (`:67-68`) omits `.env.example`, `vitest.config.js`, `src/modules/health/service.js` and `test/helpers/{app,factories}.js`. The block is a summary, and the criterion only requires named paths to exist.
+
+### Gates (reviewer, main tree, after c9b83cf)
+- `pnpm lint` exit 0.
+- `pnpm test:all` exit 0: `Test Files 29 passed (29)`, `Tests 225 passed (225)` (root); `@diu/shared` 40 passed + 2 todo; `@diu/server` 5 passed.
+- `pnpm build` exit 0 (`✓ built in 5.54s`).
+
+Board row set to ✔️ Done.

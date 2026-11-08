@@ -8,7 +8,7 @@
 ### Summary
 | ✅ Ready | 🔨 In Progress | 👀 Review | ✔️ Done | ⛔ Blocked | Total | Done % |
 |:-:|:-:|:-:|:-:|:-:|:-:|:-:|
-| 2 | 0 | 0 | 15 | 0 | 17 | 88 % |
+| 1 | 0 | 0 | 16 | 0 | 17 | 94 % |
 
 ### Cards
 | ID | Title | Lane | Role | Model | Depends on | Status |
@@ -28,7 +28,7 @@
 | [T-036](./tasks/T-036-fastify-bootstrap.md) | Fastify bootstrap, /health + /ready | W2 | backend-dev | build | T-033, T-035 | ✔️ Done |
 | [T-037](./tasks/T-037-server-test-helpers.md) | Server test helpers + health tests | W2 | test-engineer | build | T-036 | ✔️ Done |
 | [T-038](./tasks/T-038-github-actions-ci.md) | GitHub Actions CI | W2 | devops | lite | T-037 | ✔️ Done |
-| [T-039](./tasks/T-039-docs-sync-s2.md) | Docs sync after S2 | Z | docs-keeper | lite | T-024…T-038 | ✅ Ready |
+| [T-039](./tasks/T-039-docs-sync-s2.md) | Docs sync after S2 | Z | docs-keeper | lite | T-024…T-038 | ✔️ Done |
 | [T-040](./tasks/T-040-s2-qa.md) | Sprint 2 QA smoke | Z | reviewer | build | T-039 | ✅ Ready |
 
 Lanes: **A** engine · **B** admin · **C** small · **W1** closes wave 1 (alone) · **W2** server skeleton (see the S2 waves) · **Z** closing.
