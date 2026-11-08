@@ -1,11 +1,12 @@
 import { createHash } from 'node:crypto'
-import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import { createSigner } from 'fast-jwt'
 import { startTestApp } from './helpers/app.js'
 import { createUser, TEST_PASSWORD } from './helpers/factories.js'
 import { loadConfig } from '../src/config.js'
 import { User } from '../src/modules/users/model.js'
 import { RefreshToken } from '../src/modules/auth/refreshToken.model.js'
+import { LoginDecoy } from '../src/modules/auth/loginDecoy.model.js'
 import {
   hashPassword,
   verifyPassword,
@@ -18,6 +19,7 @@ import {
   registerFailedLogin,
   clearFailedLogins,
   isLocked,
+  loginWithPassword,
 } from '../src/modules/auth/service.js'
 
 const config = loadConfig({
@@ -43,7 +45,7 @@ describe('auth service (T-045)', () => {
     await ctx?.stop()
   })
   beforeEach(async () => {
-    await Promise.all([User.deleteMany({}), RefreshToken.deleteMany({})])
+    await Promise.all([User.deleteMany({}), RefreshToken.deleteMany({}), LoginDecoy.deleteMany({})])
   })
 
   describe('refresh-token reuse detection (criterion 3)', () => {
@@ -387,6 +389,101 @@ describe('auth service (T-045)', () => {
       const stored = await User.findById(user._id)
       expect(stored.failedLogins.count).toBe(5)
       expect(isLocked(stored)).toBe(true)
+    })
+
+    it('restarts the count when the previous failure is older than the 15-minute window (FR-AUTH-02)', async () => {
+      const stale = await createUser({ failedLogins: { count: 4, lastFailedAt: new Date(Date.now() - 16 * 60_000) } })
+      const r = await registerFailedLogin(stale)
+      expect(r.count).toBe(1)
+      expect(r.lockedUntil).toBeUndefined()
+      expect((await User.findById(stale._id)).failedLogins.lastFailedAt.getTime()).toBeGreaterThan(Date.now() - 5_000)
+
+      // Four stale failures + one fresh one must not lock; four fresh + one fresh must.
+      const fresh = await createUser({ failedLogins: { count: 4, lastFailedAt: new Date(Date.now() - 14 * 60_000) } })
+      const r2 = await registerFailedLogin(fresh)
+      expect(r2.count).toBe(5)
+      expect(r2.lockedUntil).toBeInstanceOf(Date)
+    })
+
+    it('treats a counter with no timestamp (pre-window data) as stale', async () => {
+      const legacy = await createUser({ failedLogins: { count: 4 } })
+      expect((await registerFailedLogin(legacy)).count).toBe(1)
+    })
+
+    it('an old failure never shortens or clears a lock that is still active', async () => {
+      const lockedUntil = new Date(Date.now() + 10 * 60_000)
+      const user = await createUser({
+        failedLogins: { count: 5, lockedUntil, lastFailedAt: new Date(Date.now() - 20 * 60_000) },
+      })
+      const r = await registerFailedLogin(user)
+      expect(r.count).toBe(6)
+      expect(r.lockedUntil.getTime()).toBe(lockedUntil.getTime())
+    })
+
+    it('a success also clears the window timestamp', async () => {
+      const user = await createUser()
+      await registerFailedLogin(user)
+      await clearFailedLogins(user)
+      expect((await User.findById(user._id)).failedLogins.lastFailedAt).toBeUndefined()
+    })
+  })
+
+  describe('login timing equalisation (T-046 review)', () => {
+    // Timing itself is flaky to assert in CI, so assert the cause of the old gap instead: every failing
+    // path issues exactly one awaited, genuinely modifying write. Only the real-account path touches a
+    // real user row; the other three write the decoy row.
+    afterEach(() => vi.restoreAllMocks())
+    const spies = () => ({
+      user: vi.spyOn(User, 'findByIdAndUpdate'),
+      decoy: vi.spyOn(LoginDecoy, 'findByIdAndUpdate'),
+    })
+
+    it('wrong password on an active account: one write, on that account, none on the decoy', async () => {
+      const user = await createUser()
+      const { user: userWrite, decoy } = spies()
+      await expect(loginWithPassword({ email: user.email, password: 'wrong-Password1' }, 'ua', config)).rejects.toMatchObject({ status: 401 })
+      expect(userWrite).toHaveBeenCalledTimes(1)
+      expect(String(userWrite.mock.calls[0][0])).toBe(String(user._id))
+      expect(decoy).not.toHaveBeenCalled()
+      expect((await User.findById(user._id)).failedLogins.count).toBe(1)
+    })
+
+    it.each([
+      ['unknown email', async () => ({ email: 'nobody@example.com', password: TEST_PASSWORD })],
+      ['locked account + correct password', async () => {
+        const u = await createUser({ failedLogins: { count: 5, lockedUntil: new Date(Date.now() + 10 * 60_000), lastFailedAt: new Date() } })
+        return { email: u.email, password: TEST_PASSWORD }
+      }],
+      ['disabled account + correct password', async () => {
+        const u = await createUser({ status: 'disabled' })
+        return { email: u.email, password: TEST_PASSWORD }
+      }],
+    ])('%s: one equivalent write (on the decoy row), no real user touched', async (_name, setup) => {
+      const creds = await setup()
+      const usersBefore = await User.find({}).lean()
+      const { user: userWrite, decoy } = spies()
+      await expect(loginWithPassword(creds, 'ua', config)).rejects.toMatchObject({ status: 401, code: 'INVALID_CREDENTIALS' })
+      expect(decoy).toHaveBeenCalledTimes(1)
+      expect(userWrite).not.toHaveBeenCalled()
+      expect(await User.find({}).lean()).toEqual(usersBefore) // no user created or modified
+      expect(await LoginDecoy.countDocuments()).toBe(1) // upsert of one fixed row, never grows
+    })
+
+    it('the decoy write really modifies a document each time (a no-op write would be cheaper)', async () => {
+      const attempt = () => loginWithPassword({ email: 'nobody@example.com', password: TEST_PASSWORD }, 'ua', config).catch(() => {})
+      await attempt()
+      const first = (await LoginDecoy.findById('login-timing').lean()).at
+      await new Promise((r) => setTimeout(r, 5))
+      await attempt()
+      expect((await LoginDecoy.findById('login-timing').lean()).at.getTime()).toBeGreaterThan(first.getTime())
+    })
+
+    it('the successful path is unchanged: no failed-login write of either kind', async () => {
+      const user = await createUser()
+      const { user: userWrite, decoy } = spies()
+      await loginWithPassword({ email: user.email, password: TEST_PASSWORD }, 'ua', config)
+      expect(userWrite).not.toHaveBeenCalled()
+      expect(decoy).not.toHaveBeenCalled()
     })
   })
 })

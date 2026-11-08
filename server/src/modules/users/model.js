@@ -12,7 +12,7 @@ const UserSchema = new Schema({
   phoneVerifiedAt: { type: Date, default: null },
   status: { type: String, enum: ['active', 'disabled'], default: 'active' },
   lastLoginAt: Date,
-  failedLogins: { count: { type: Number, default: 0 }, lockedUntil: Date },
+  failedLogins: { count: { type: Number, default: 0 }, lockedUntil: Date, lastFailedAt: Date },
 
   // candidate-only
   candidate: {

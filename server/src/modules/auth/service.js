@@ -10,6 +10,7 @@ import { httpError } from '../../lib/httpError.js'
 import { User } from '../users/model.js'
 import { Program } from '../programs/model.js'
 import { RefreshToken } from './refreshToken.model.js'
+import { LoginDecoy } from './loginDecoy.model.js'
 
 // §5. The ONLY definition of the password cost in the codebase (seed.js and tests go through hashPassword).
 const ARGON2_OPTIONS = Object.freeze({ type: argon2.argon2id, memoryCost: 19456, timeCost: 2 })
@@ -167,30 +168,32 @@ export function isLocked(user, now = new Date()) {
   return Boolean(until) && until.getTime() > now.getTime()
 }
 
+// A failure older than this no longer counts toward the lock (FR-AUTH-02: "5 failed attempts per email per 15 min").
+const FAIL_WINDOW_MS = 15 * 60_000
+
 /**
- * Count a failed login; the 5th consecutive one locks the account for 15 minutes.
- * One atomic pipeline update, so concurrent attempts cannot under-count. A lock that has already
- * expired restarts the count at 1; failures made while locked do not extend the lock.
- * @returns {Promise<{ count: number, lockedUntil?: Date }>}
+ * The one atomic pipeline update behind a real failed-login write.
+ * The count restarts at 1 when the lock has expired OR (with no active lock) the previous failure is
+ * older than FAIL_WINDOW_MS, or has no timestamp (data from before the window existed).
  */
-export async function registerFailedLogin(user) {
-  const now = new Date()
-  const lockExpired = {
-    $and: [
-      { $ne: [{ $type: '$failedLogins.lockedUntil' }, 'missing'] },
-      { $ne: ['$failedLogins.lockedUntil', null] },
-      { $lte: ['$failedLogins.lockedUntil', now] },
-    ],
-  }
-  const updated = await User.findByIdAndUpdate(
-    userId(user),
+function applyFailedLogin(id, now = new Date()) {
+  const cutoff = new Date(now.getTime() - FAIL_WINDOW_MS)
+  const lockedUntil = { $ifNull: ['$failedLogins.lockedUntil', null] }
+  const lockExpired = { $and: [{ $ne: [lockedUntil, null] }, { $lte: [lockedUntil, now] }] }
+  const lockActive = { $gt: [lockedUntil, now] }
+  // $lte treats a missing lastFailedAt as older than any date.
+  const windowExpired = { $and: [{ $not: [lockActive] }, { $lte: ['$failedLogins.lastFailedAt', cutoff] }] }
+  const restart = { $or: [lockExpired, windowExpired] }
+  return User.findByIdAndUpdate(
+    id,
     [
       {
         $set: {
           'failedLogins.count': {
-            $cond: [lockExpired, 1, { $add: [{ $ifNull: ['$failedLogins.count', 0] }, 1] }],
+            $cond: [restart, 1, { $add: [{ $ifNull: ['$failedLogins.count', 0] }, 1] }],
           },
           'failedLogins.lockedUntil': { $cond: [lockExpired, '$$REMOVE', '$failedLogins.lockedUntil'] },
+          'failedLogins.lastFailedAt': now,
         },
       },
       {
@@ -207,16 +210,48 @@ export async function registerFailedLogin(user) {
     ],
     { new: true, updatePipeline: true },
   )
+}
+
+/**
+ * Count a failed login; the 5th failure within 15 minutes locks the account for 15 minutes.
+ * One atomic pipeline update, so concurrent attempts cannot under-count. The count restarts when a lock
+ * has expired or the previous failure is older than the 15-minute window; failures made while locked
+ * do not extend the lock.
+ * @returns {Promise<{ count: number, lockedUntil?: Date }>}
+ */
+export async function registerFailedLogin(user) {
+  const updated = await applyFailedLogin(userId(user))
   if (!updated) throw unauthenticated()
   const { count, lockedUntil } = updated.failedLogins
   return lockedUntil ? { count, lockedUntil } : { count }
 }
 
+const DECOY_ID = 'login-timing'
+
+/**
+ * Timing equaliser for the login paths that must NOT touch a real account (unknown email, locked,
+ * disabled). The wrong-password path awaits `registerFailedLogin`, a real replicated write (~7 ms with
+ * majority write concern). If these paths skipped it, their response would be measurably faster and
+ * "registered and unlocked" would be observable (T-046 review: ~10 ms gap, non-overlapping
+ * distributions). An update that matches no document is NOT equivalent: it appends nothing to the
+ * oplog and measured ~3 ms vs ~7.5 ms, leaving a ~6 ms gap. So these paths perform a genuine
+ * findAndModify that changes a document: they bump the timestamp on one fixed decoy row, which
+ * touches no user data.
+ */
+async function dummyFailedLoginWrite() {
+  const now = new Date()
+  await LoginDecoy.findByIdAndUpdate(
+    DECOY_ID,
+    [{ $set: { at: now, count: { $add: [{ $ifNull: ['$count', 0] }, 1] } } }, { $set: { count: { $mod: ['$count', 1_000_000] } } }],
+    { upsert: true, new: true, updatePipeline: true },
+  )
+}
+
 /** Successful login: reset the counter and any lock. */
 export async function clearFailedLogins(user) {
   await User.updateOne(
-    { _id: userId(user), $or: [{ 'failedLogins.count': { $gt: 0 } }, { 'failedLogins.lockedUntil': { $exists: true } }] },
-    { $set: { 'failedLogins.count': 0 }, $unset: { 'failedLogins.lockedUntil': 1 } },
+    { _id: userId(user), $or: [{ 'failedLogins.count': { $gt: 0 } }, { 'failedLogins.lockedUntil': { $exists: true } }, { 'failedLogins.lastFailedAt': { $exists: true } }] },
+    { $set: { 'failedLogins.count': 0 }, $unset: { 'failedLogins.lockedUntil': 1, 'failedLogins.lastFailedAt': 1 } },
   )
 }
 
@@ -284,7 +319,9 @@ export async function registerCandidate(input, userAgent, config) {
 export async function loginWithPassword({ email, password }, userAgent, config) {
   const user = await User.findOne({ email }).select('+passwordHash')
   if (!user || user.status !== 'active' || isLocked(user)) {
-    await verifyPassword(await getDummyHash(), password) // keep the cost of a failure uniform
+    // Keep the cost of every failure uniform: one argon2 verify AND one awaited failed-login write.
+    await verifyPassword(await getDummyHash(), password)
+    await dummyFailedLoginWrite()
     throw invalidCredentials()
   }
   if (!(await verifyPassword(user.passwordHash, password))) {
