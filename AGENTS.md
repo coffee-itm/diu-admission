@@ -320,9 +320,9 @@ prototype/
 > See `context/02-tech-architecture.md` for the actual tree and `context/06-open-issues-doc-gaps.md` for known defects.
 >
 > **Now present (S2):** `packages/shared/` (`@diu/shared`), `server/` (`@diu/server`, Fastify 5 bootstrap and health module),
-> `docker-compose.yml` (Mongo 7 replica set), and `.github/workflows/ci.yml`. `src/lib/*` retains re-export shims for shared logic.
+> `docker-compose.yml` (Mongo 7 replica set), `.github/workflows/ci.yml`, and `pnpm-workspace.yaml` (`['.', 'server', 'packages/*']`). `src/lib/*` retains re-export shims for shared logic.
 > **Target additions** (R2, see `context/16-backend-architecture.md`): `server/modules/<domain>/{model,routes,service}.js`, `jobs/`,
-> `e2e/` (Playwright), `load/` (k6), `pnpm-workspace.yaml` packages `['.', 'server', 'packages/*']`.
+> `e2e/` (Playwright), `load/` (k6).
 
 ---
 

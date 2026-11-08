@@ -32,7 +32,7 @@ Compiler rule: **no manual `React.memo` / `useMemo` / `useCallback`**.
 
 ### Workspace (added in S2)
 
-The repository is a pnpm workspace: root SPA (`diu-admission`), `packages/shared` (`@diu/shared`), and `server` (`@diu/server`). Shared scoring, domain constants and shuffle have root `src/lib/*` re-export shims; shared also contains risk and common/question Zod schemas. The server is Fastify 5 with health/readiness routes. Local Mongo 7 replica-set setup is in `docker-compose.yml`; CI is in `.github/workflows/ci.yml`.
+The repository is a pnpm workspace: root SPA (`diu-admission`), `packages/shared` (`@diu/shared`), and `server` (`@diu/server`). Shared scoring and domain constants have root `src/lib/*` re-export shims; shuffle is exposed in the SPA through `shuffleArray` in `src/lib/utils.js`, not a re-export shim. Shared also contains risk and common/question Zod schemas. The server is Fastify 5 with health/readiness routes. Local Mongo 7 replica-set setup is in `docker-compose.yml`; CI is in `.github/workflows/ci.yml`.
 
 ### Directory layout (actual)
 
@@ -60,6 +60,11 @@ src/
 ├── test/          setup.js (Vitest setup)
 └── lib/           constants.js, scoring.js, utils.js, pdfGenerator.js, csvExport.js, csvParse.js, meritCsv.js,
                    fullscreen.js, storageMigration.js, runStorageMigration.js
+├── packages/shared/ constants.js, index.js, risk.js, scoring.js, shuffle.js, schemas/
+├── server/        package.json, src/ (app.js, config.js, server.js, lib/, modules/health/, plugins/), test/
+├── docker-compose.yml
+├── pnpm-workspace.yaml
+└── .github/workflows/ci.yml
 ```
 
 ### Data flow (actual)
@@ -131,8 +136,7 @@ diu-admission/
 ├── server/              # @diu/server (Fastify)
 ├── e2e/                 # Playwright
 ├── load/                # k6
-├── context/             # these docs
-└── pnpm-workspace.yaml  # packages: ['.', 'server', 'packages/*']
+└── context/             # these docs (workspace and CI files already exist; see actual layout above)
 ```
 
 ### What moves where
@@ -158,11 +162,11 @@ Inter / JetBrains Mono. Dark mode and i18n: [17 §6–7](./17-frontend-spec.md#6
 
 ```bash
 pnpm dev            # frontend :5173
-pnpm dev:server     # API :4000 (after P1)
+pnpm dev:server     # API :4000
 pnpm dev:all        # both
 pnpm lint
 pnpm test           # frontend tests (after P0-01)
 pnpm test:all       # all workspace packages
 pnpm build
-pnpm seed           # seed MongoDB (server seed script)
+pnpm seed           # not yet runnable: delegates to missing @diu/server seed; target P3-04
 ```

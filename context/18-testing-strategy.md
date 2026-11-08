@@ -110,10 +110,6 @@ Pass criteria: autosave p95 < 300 ms, error rate < 0.1 %, no lost answers (compa
 
 ## 5. CI (GitHub Actions, `.github/workflows/ci.yml`)
 
-> **Coverage deferred to S3:** `pnpm test:all -- --coverage` is currently a no-op for coverage.
-> pnpm forwards the flag only to `pnpm -r test`, and `@vitest/coverage-v8` is not installed.
-> S3 will add coverage support in its own task card.
-
 ```yaml
 on: [push, pull_request]
 jobs:
@@ -126,7 +122,7 @@ jobs:
         with: { node-version: 22, cache: pnpm }
       - run: pnpm install --frozen-lockfile
       - run: pnpm lint
-      - run: pnpm test:all -- --coverage
+      - run: pnpm test:all -- --coverage  # no-op for coverage until S3; pnpm forwards the flag only to pnpm -r test and @vitest/coverage-v8 is not installed
       - run: pnpm build
   e2e:
     needs: ci
