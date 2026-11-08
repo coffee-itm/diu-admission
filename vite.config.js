@@ -13,6 +13,7 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: ['./src/test/setup.js'],
     restoreMocks: true,
+    include: ['src/**/*.test.{js,jsx}'],
   },
   server: {
     port: 5173,

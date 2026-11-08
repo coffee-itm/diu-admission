@@ -1,6 +1,6 @@
 # T-032 · pnpm workspace with empty `@diu/shared` and `@diu/server` packages
 
-Status: ✅ Ready
+Status: 👀 Review
 Sprint: S2 · Role: devops · Model: lite · Size: S
 Tier rationale: workspace plumbing; failures are loud (pnpm install / test / build break) (PROCESS §2.3)
 Depends on: T-031 (wave 1 done, so the lockfile doesn't change while frontend cards are running)
@@ -38,5 +38,11 @@ pnpm install && pnpm test && pnpm test:all && pnpm lint && pnpm build
 - Moving any code into `@diu/shared` (T-033/T-034). Server source files (T-036). Docker (T-035).
 
 ## Agent log
+- Added root pnpm workspace with `@diu/shared` and `@diu/server`; regenerated `pnpm-lock.yaml`.
+- Scoped root Vitest to `src/`; added Node >=22 and workspace scripts/dependencies.
+- `pnpm install`, workspace listing, and root import resolution passed.
+- `pnpm test`: 31 files / 245 passed (2 todo); `pnpm test:all` passed (no package tests yet).
+- `pnpm lint` and `pnpm build` passed; existing large-chunk build warning remains.
+- Shared test script uses `--passWithNoTests` so `pnpm test:all` succeeds before package tests exist.
 
 ## Review

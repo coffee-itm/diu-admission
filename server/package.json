@@ -1,0 +1,16 @@
+{
+  "name": "@diu/server",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "@diu/shared": "workspace:*"
+  },
+  "scripts": {
+    "test": "vitest run --passWithNoTests",
+    "dev": "node src/server.js",
+    "start": "node src/server.js"
+  }
+}
