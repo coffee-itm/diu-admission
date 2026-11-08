@@ -18,7 +18,8 @@ The five core auth endpoints under `/api/v1/auth`, matching `context/15` §2 exa
 - `server/src/modules/auth/routes.js` (create): `POST /auth/register`, `POST /auth/login`, `POST /auth/refresh`, `POST /auth/logout`, `GET /auth/me`.
 - `server/src/modules/auth/schemas.js` (create): Zod request/response schemas. Registration validation must match **FR-AUTH-01 exactly** — name 3–100, lowercased unique email, BD phone `^(\+?880)?1[3-9]\d{8}$` normalised to `+8801XXXXXXXXX`, `programCode` an active program, GPAs 0–5, `hscGroup` enum, password ≥ 8 with a letter and a digit.
 - `server/src/app.js` (modify): register the auth module; add `@fastify/cookie`; per-route rate limit on login.
-- `server/package.json` (modify): `@fastify/cookie`, `jsonwebtoken` (or `@fastify/jwt` — pick one and say why in the log).
+- `server/package.json` (modify): `@fastify/cookie`. **JWT: use the `fast-jwt` verifier already wired into `server/src/modules/auth/service.js` by T-045** — do not add a second JWT library, and do not re-read the secret anywhere else.
+- Note from the T-045 log: check `isLocked` **before** verifying the password, so a locked account cannot be probed.
 - `server/test/auth.routes.test.js` (create).
 
 ## Acceptance criteria

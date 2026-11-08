@@ -18,6 +18,7 @@ Make the docs describe the system as it is after S3: a real auth API, the SPA ab
 - `context/06-open-issues-doc-gaps.md`: **D-22 (plaintext passwords)** → mark fixed server-side with the card id, and state precisely what remains (mock mode still compares plaintext). Update the D-27 row (react-query is now used).
 - `context/02-tech-architecture.md`: the real tree and data flow — the SPA now has `services/api.js`, `services/mock/`, and the server has auth/users/audit modules.
 - `AGENTS.md`: the "Reality check" block and the directory tree.
+- `context/16-backend-architecture.md` §2: the dependency table says `@fastify/jwt`; the server actually uses **`fast-jwt`** (accepted deviation, rationale in `pm/sprints/S3.md` Sprint notes). Also add `argon2` if missing.
 - `context/14-database-schema.md`: §3.1 still points at `src/lib/constants.js` for the program seed (they now live in `@diu/shared`), and §5 says `--force` where `server/scripts/seed.js` actually uses `SEED_ALLOW_PROD=true`. Both found by the T-044 review.
 - `README.md`: how to run against the real backend (`docker compose up -d mongo`, `pnpm seed`, `pnpm dev:server`, `VITE_USE_MOCKS=false pnpm dev`) and the demo credentials note.
 

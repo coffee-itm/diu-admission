@@ -14,7 +14,7 @@
 | ID | Title | Lane | Role | Model | Depends on | Status |
 |:--|:--|:-:|:--|:--|:--|:--|
 | [T-044](./tasks/T-044-user-program-models-seed.md) | `programs` + `users` models, indexes, seed | S | backend-dev | lite | — | ✔️ Done |
-| [T-045](./tasks/T-045-auth-core-tokens.md) | Auth core: argon2id, JWT, refresh rotation + reuse detection | S | backend-dev | build | T-044 | ✅ Ready |
+| [T-045](./tasks/T-045-auth-core-tokens.md) | Auth core: argon2id, JWT, refresh rotation + reuse detection | S | backend-dev | build | T-044 | 👀 Review |
 | [T-046](./tasks/T-046-auth-routes.md) | Auth routes: register/login/refresh/logout/me | S | backend-dev | build | T-045 | ✅ Ready |
 | [T-047](./tasks/T-047-rbac-helpers.md) | RBAC helpers + matrix test | S | backend-dev | build | T-046 | ✅ Ready |
 | [T-048](./tasks/T-048-admin-users-endpoints.md) | Admin user management + audit log | S | backend-dev | build | T-047 | ✅ Ready |
