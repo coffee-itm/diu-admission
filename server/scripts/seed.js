@@ -6,17 +6,15 @@
  * Re-running is safe: programs are upserted; the admin is created only when missing (its password is not rotated).
  */
 import { pathToFileURL } from 'node:url'
-import argon2 from 'argon2'
 import mongoose from 'mongoose'
 import { loadConfig } from '../src/config.js'
 import { Program } from '../src/modules/programs/model.js'
 import { User } from '../src/modules/users/model.js'
+import { hashPassword } from '../src/modules/auth/service.js'
 import { PROGRAMS } from '@diu/shared/constants'
 
 export const ADMIN_EMAIL = 'admin@diu.edu'
 const MIN_PASSWORD_LENGTH = 12
-// context/16-backend-architecture.md §5 (argon2id parameters).
-const ARGON2_OPTIONS = { type: argon2.argon2id, memoryCost: 19456, timeCost: 2 }
 
 /**
  * Validate the seed environment. Throws with a readable message; never echoes the password.
@@ -58,7 +56,7 @@ export async function seedDatabase({ adminPassword }) {
       role: 'admin',
       name: 'DIU Administrator',
       email: ADMIN_EMAIL,
-      passwordHash: await argon2.hash(adminPassword, ARGON2_OPTIONS),
+      passwordHash: await hashPassword(adminPassword),
       emailVerifiedAt: new Date(),
       status: 'active',
     })

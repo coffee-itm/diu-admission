@@ -1,6 +1,6 @@
 # T-045 · Auth core: argon2id, access JWT, rotating refresh tokens with reuse detection
 
-Status: ✅ Ready
+Status: 👀 Review
 Sprint: S3 · Role: backend-dev · Model: build · Size: M
 Tier rationale: security-critical, and every failure mode is silent (a weak hash, a non-rotating token, a missed reuse) (PROCESS §2.3)
 Depends on: T-044
@@ -45,5 +45,12 @@ pnpm --filter @diu/server test && pnpm lint && pnpm build
 - Routes, cookies, rate-limit wiring (T-046). OTP and password reset (S5/P6).
 
 ## Agent log
+- `auth/service.js`: hashPassword/verifyPassword (single argon2id m=19456,t=2 definition), signAccessToken/verifyAccessToken, issue/rotate/revokeToken/revokeAllForUser, registerFailedLogin/clearFailedLogins/isLocked. All take `config` (from `loadConfig`) as a trailing arg; no new config keys.
+- Test-first: reuse test written first (module missing), then a rotation stub without family revocation → reuse tests failed on "revokedAt not set"; then implemented. Mutation checks: cost m=1024,t=1 → 4 tests fail; revokeFamily no-op → 5 fail.
+- Seed and `models.test.js` now go through `hashPassword`; `grep memoryCost|timeCost` hits only `service.js`. models.test.js prefix asserts tightened to `m=19456,t=2`.
+- **New dep `fast-jwt`** (not in 16 §2; it is the library `@fastify/jwt` wraps, so T-046 can still use `@fastify/jwt` to verify). Reason: a pure service cannot use the Fastify decorator, and pnpm strict mode hides the transitive copy.
+- Decisions to review: (a) the successor row is inserted BEFORE the old token is claimed, so a concurrent loser's family sweep also revokes the winner's new token (found while tracing the race; test loops 10×); (b) `revokeToken` revokes the whole family (logout via an old token leaves no live successor); (c) refresh expiry slides: each rotation sets now+REFRESH_TTL_DAYS; (d) rotation also revokes the family if the user is missing/disabled; (e) `pc` omitted for reviewers with empty programCodes (= all programs); (f) `replacedBy` stores the successor row `_id`; (g) all failures use 401 `UNAUTHENTICATED` (no new codes).
+- Lock counter is one atomic pipeline update; an expired lock restarts the count at 1; failures while locked don't extend it. `passwordHash` leak paths (`.toObject()`, `+passwordHash`, `.lean()`, aggregate) NOT addressed: T-046 response mapper.
+- Verify: server 41 passed, root 225 passed, shared 40 passed, lint clean, build ok.
 
 ## Review

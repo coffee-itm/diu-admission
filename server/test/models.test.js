@@ -6,15 +6,14 @@ import { User } from '../src/modules/users/model.js'
 import { RefreshToken } from '../src/modules/auth/refreshToken.model.js'
 import { PROGRAMS } from '@diu/shared/constants'
 import { seedDatabase, loadSeedEnv } from '../scripts/seed.js'
-
-const ARGON2_OPTS = { type: argon2.argon2id, memoryCost: 19456, timeCost: 2 }
+import { hashPassword } from '../src/modules/auth/service.js'
 
 async function makeUser(overrides = {}) {
   return new User({
     role: 'candidate',
     name: 'Test User',
     email: `user-${Math.random().toString(36).slice(2)}@example.com`,
-    passwordHash: await argon2.hash('Test@1234', ARGON2_OPTS),
+    passwordHash: await hashPassword('Test@1234'),
     ...overrides,
   })
 }
@@ -38,7 +37,7 @@ describe('models (T-044)', () => {
       const user = await makeUser({ email: 'hash@example.com' })
       await user.save()
       const raw = await User.collection.findOne({ _id: user._id })
-      expect(raw.passwordHash).toMatch(/^\$argon2id\$/)
+      expect(raw.passwordHash).toMatch(/^\$argon2id\$v=19\$m=19456,t=2,p=\d+\$/)
       expect(await argon2.verify(raw.passwordHash, 'Test@1234')).toBe(true)
     })
 
@@ -113,7 +112,7 @@ describe('models (T-044)', () => {
     it('stores the admin password as argon2id, never the literal', async () => {
       await seedDatabase({ adminPassword: SEED_PW })
       const admin = await User.collection.findOne({ email: 'admin@diu.edu' })
-      expect(admin.passwordHash).toMatch(/^\$argon2id\$/)
+      expect(admin.passwordHash).toMatch(/^\$argon2id\$v=19\$m=19456,t=2,p=\d+\$/)
       expect(admin.passwordHash).not.toContain(SEED_PW)
       expect(await argon2.verify(admin.passwordHash, SEED_PW)).toBe(true)
     })

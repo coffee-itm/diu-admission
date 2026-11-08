@@ -1,0 +1,220 @@
+/**
+ * Credentials and tokens (context/16-backend-architecture.md §5, ADR-016). No HTTP in here:
+ * routes (T-046) call these with plain arguments. `config` is the object from `loadConfig()`.
+ */
+import { createHash, randomBytes, randomUUID } from 'node:crypto'
+import argon2 from 'argon2'
+import { createSigner, createVerifier } from 'fast-jwt'
+import { Types } from 'mongoose'
+import { httpError } from '../../lib/httpError.js'
+import { User } from '../users/model.js'
+import { RefreshToken } from './refreshToken.model.js'
+
+// §5. The ONLY definition of the password cost in the codebase (seed.js and tests go through hashPassword).
+const ARGON2_OPTIONS = Object.freeze({ type: argon2.argon2id, memoryCost: 19456, timeCost: 2 })
+
+const MAX_FAILED_LOGINS = 5
+const LOCK_MS = 15 * 60_000
+const DAY_MS = 86_400_000
+
+const sha256 = (value) => createHash('sha256').update(value).digest('hex')
+const unauthenticated = () => httpError(401, 'UNAUTHENTICATED', 'Invalid or expired token')
+
+/** @param {string} plain */
+export function hashPassword(plain) {
+  return argon2.hash(plain, ARGON2_OPTIONS)
+}
+
+/**
+ * Constant-cost check. A malformed or empty stored hash is a failed login, not a 500.
+ * @param {string} hash
+ * @param {string} plain
+ */
+export async function verifyPassword(hash, plain) {
+  if (typeof hash !== 'string' || typeof plain !== 'string' || !hash) return false
+  try {
+    return await argon2.verify(hash, plain)
+  } catch {
+    return false
+  }
+}
+
+// ---------------------------------------------------------------- access token
+
+/**
+ * HS256 JWT `{ sub, role, pc? }`. Nothing else about the user goes in (no email, name, hash).
+ * `pc` is a reviewer's program scope; absent means "all programs" (14 §3.2).
+ * @param {{ id?: string, _id?: unknown, role: string, reviewer?: { programCodes?: string[] } }} user
+ */
+export function signAccessToken(user, config) {
+  const payload = { sub: String(user.id ?? user._id), role: user.role }
+  const pc = user.role === 'reviewer' ? user.reviewer?.programCodes : undefined
+  if (pc?.length) payload.pc = [...pc]
+  const sign = createSigner({ key: config.JWT_ACCESS_SECRET, algorithm: 'HS256', expiresIn: config.JWT_ACCESS_TTL })
+  return sign(payload)
+}
+
+/**
+ * Verify an access token (signature, HS256 only, expiry). Throws 401 UNAUTHENTICATED.
+ * @returns {{ sub: string, role: string, pc?: string[], iat: number, exp: number }}
+ */
+export function verifyAccessToken(token, config) {
+  try {
+    const verify = createVerifier({ key: config.JWT_ACCESS_SECRET, algorithms: ['HS256'] })
+    return verify(token)
+  } catch {
+    throw unauthenticated()
+  }
+}
+
+// ---------------------------------------------------------------- refresh tokens
+
+function newRawToken() {
+  return randomBytes(32).toString('base64url')
+}
+
+const expiryFrom = (now, config) => new Date(now.getTime() + config.REFRESH_TTL_DAYS * DAY_MS)
+
+/**
+ * Start a new rotation family (a login).
+ * @returns {Promise<{ token: string, familyId: string, expiresAt: Date }>} `token` is shown once; only its sha256 is stored.
+ */
+export async function issueRefreshToken(userId, userAgent, config) {
+  const token = newRawToken()
+  const familyId = randomUUID()
+  const expiresAt = expiryFrom(new Date(), config)
+  await RefreshToken.create({ userId, familyId, tokenHash: sha256(token), expiresAt, userAgent })
+  return { token, familyId, expiresAt }
+}
+
+/** Revoke every still-live token of a family (theft response). Idempotent. */
+function revokeFamily(familyId) {
+  return RefreshToken.updateMany({ familyId, revokedAt: null }, { revokedAt: new Date() })
+}
+
+/**
+ * Exchange a refresh token for a new one in the same family. Each token works once.
+ *
+ * Reuse detection: presenting a token that is already rotated (`replacedBy`) or revoked means two
+ * parties hold it, so the WHOLE family is revoked and the call fails. Rotation is claimed with a
+ * single conditional update, so of two concurrent requests with the same token exactly one wins and
+ * the loser is treated as reuse.
+ * @returns {Promise<{ token: string, familyId: string, expiresAt: Date, userId: string }>}
+ */
+export async function rotateRefreshToken(rawToken, userAgent, config) {
+  if (typeof rawToken !== 'string' || !rawToken) throw unauthenticated()
+  const row = await RefreshToken.findOne({ tokenHash: sha256(rawToken) })
+  if (!row) throw unauthenticated()
+  if (row.replacedBy || row.revokedAt) {
+    await revokeFamily(row.familyId)
+    throw unauthenticated()
+  }
+  if (row.expiresAt.getTime() <= Date.now()) throw unauthenticated()
+
+  const user = await User.findById(row.userId).select('status')
+  if (!user || user.status !== 'active') {
+    await revokeFamily(row.familyId)
+    throw unauthenticated()
+  }
+
+  const token = newRawToken()
+  const next = new RefreshToken({
+    userId: row.userId,
+    familyId: row.familyId,
+    tokenHash: sha256(token),
+    expiresAt: expiryFrom(new Date(), config),
+    userAgent,
+  })
+  // Insert the successor BEFORE claiming the old token. If a concurrent request loses the claim it
+  // revokes the family, and that sweep must already see this row, or a live token would survive
+  // in a family where reuse was just detected. (A losing request's own row is swept too.)
+  await next.save()
+  // Claim the old token: only succeeds while it is still unrotated and unrevoked.
+  const claimed = await RefreshToken.findOneAndUpdate(
+    { _id: row._id, replacedBy: null, revokedAt: null },
+    { replacedBy: String(next._id) },
+  )
+  if (!claimed) {
+    await revokeFamily(row.familyId)
+    throw unauthenticated()
+  }
+  return { token, familyId: row.familyId, expiresAt: next.expiresAt, userId: String(row.userId) }
+}
+
+/**
+ * Logout. Revokes the token's whole family (the login it belongs to), even when an older, already
+ * rotated token is presented, so no live successor is left behind. Unknown tokens are a no-op.
+ */
+export async function revokeToken(rawToken) {
+  if (typeof rawToken !== 'string' || !rawToken) return
+  const row = await RefreshToken.findOne({ tokenHash: sha256(rawToken) }).select('familyId')
+  if (row) await revokeFamily(row.familyId)
+}
+
+/** Revoke every live refresh token of a user (password change, account disabled, "log out everywhere"). */
+export async function revokeAllForUser(userId) {
+  await RefreshToken.updateMany({ userId, revokedAt: null }, { revokedAt: new Date() })
+}
+
+// ---------------------------------------------------------------- login throttling
+
+const userId = (user) => user._id ?? new Types.ObjectId(String(user.id))
+
+/** True while `failedLogins.lockedUntil` is in the future. Routes check this before verifying a password. */
+export function isLocked(user, now = new Date()) {
+  const until = user.failedLogins?.lockedUntil
+  return Boolean(until) && until.getTime() > now.getTime()
+}
+
+/**
+ * Count a failed login; the 5th consecutive one locks the account for 15 minutes.
+ * One atomic pipeline update, so concurrent attempts cannot under-count. A lock that has already
+ * expired restarts the count at 1; failures made while locked do not extend the lock.
+ * @returns {Promise<{ count: number, lockedUntil?: Date }>}
+ */
+export async function registerFailedLogin(user) {
+  const now = new Date()
+  const lockExpired = {
+    $and: [
+      { $ne: [{ $type: '$failedLogins.lockedUntil' }, 'missing'] },
+      { $ne: ['$failedLogins.lockedUntil', null] },
+      { $lte: ['$failedLogins.lockedUntil', now] },
+    ],
+  }
+  const updated = await User.findByIdAndUpdate(
+    userId(user),
+    [
+      {
+        $set: {
+          'failedLogins.count': {
+            $cond: [lockExpired, 1, { $add: [{ $ifNull: ['$failedLogins.count', 0] }, 1] }],
+          },
+          'failedLogins.lockedUntil': { $cond: [lockExpired, '$$REMOVE', '$failedLogins.lockedUntil'] },
+        },
+      },
+      {
+        $set: {
+          'failedLogins.lockedUntil': {
+            $cond: [
+              { $gte: ['$failedLogins.count', MAX_FAILED_LOGINS] },
+              { $ifNull: ['$failedLogins.lockedUntil', new Date(now.getTime() + LOCK_MS)] },
+              '$failedLogins.lockedUntil',
+            ],
+          },
+        },
+      },
+    ],
+    { new: true, updatePipeline: true },
+  )
+  if (!updated) throw unauthenticated()
+  const { count, lockedUntil } = updated.failedLogins
+  return lockedUntil ? { count, lockedUntil } : { count }
+}
+
+/** Successful login: reset the counter and any lock. */
+export async function clearFailedLogins(user) {
+  await User.updateOne(
+    { _id: userId(user), $or: [{ 'failedLogins.count': { $gt: 0 } }, { 'failedLogins.lockedUntil': { $exists: true } }] },
+    { $set: { 'failedLogins.count': 0 }, $unset: { 'failedLogins.lockedUntil': 1 } },
+  )
+}
