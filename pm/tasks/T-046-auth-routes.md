@@ -23,6 +23,7 @@ The five core auth endpoints under `/api/v1/auth`, matching `context/15` §2 exa
 
 ## Acceptance criteria
 1. [ ] `POST /auth/register` → 201 `{ user, accessToken }` and sets `diu_rt`. The response body contains **no** `passwordHash`.
+1b. [ ] **Do not rely on `toJSON` alone.** The T-044 review proved the hash still escapes through `.toObject()`, `.select('+passwordHash')`, `.select('+passwordHash').lean()` and `User.aggregate()`. Add an explicit response mapper (e.g. `toPublicUser(user)`) used by **every** route in this module, and a test that serialises a doc fetched with `+passwordHash` through it and asserts the hash is gone.
 2. [ ] A `role` field in the register body is **ignored** — the created user is always `candidate` (FR-AUTH-10). Test it explicitly.
 3. [ ] Invalid registration → 422 `VALIDATION_ERROR` with per-field `details[]`; duplicate email → 409.
 4. [ ] `POST /auth/login` with a wrong password and with an unknown email return the **same** 401 code and message (no user enumeration), proven by comparing both responses in a test.

@@ -27,7 +27,8 @@ A pure service layer for credentials and tokens, with no HTTP in it. Routes come
 - `server/test/auth.service.test.js` (create).
 
 ## Acceptance criteria
-1. [ ] A stored hash starts with `$argon2id$` and the plaintext password appears nowhere in the document.
+1. [ ] A stored hash starts with `$argon2id$` **and encodes `m=19456,t=2`** — assert on the encoded parameters, not just the prefix. (The T-044 review proved that weakening the cost to `m=1024,t=1` currently passes every test; close that gap here.) The plaintext password appears nowhere in the document.
+1b. [ ] `server/scripts/seed.js` is refactored to call this module's `hashPassword` instead of calling argon2 itself, so the cost parameters have exactly one definition.
 2. [ ] `rotateRefreshToken` returns a **different** raw token each call, and the old one stops working.
 3. [ ] **Reuse detection:** rotate once, then present the *original* token → it throws, and every row sharing that `familyId` ends up revoked. Assert on the DB rows, not just the thrown error.
 4. [ ] Only the sha256 is stored — a query for the raw token string finds nothing.
