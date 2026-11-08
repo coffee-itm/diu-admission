@@ -3,12 +3,12 @@
 > Source of truth for status = the `Status:` line in each card (`pm/tasks/T-xxx-*.md`). Agents update their own row.
 > Recount with `/sprint-status`. Process: [PROCESS.md](./PROCESS.md) · Playbook: [AGENT_PLAYBOOK.md](./AGENT_PLAYBOOK.md) · Escalations: [ESCALATIONS.md](./ESCALATIONS.md)
 
-## Current sprint: [S2 — Carry-over + workspace & server skeleton](./sprints/S2.md)  ·  🔄 Active (wave 1 ✔️ done · wave 2 re-routed to the lite/build tiers on 2026-11-08 and ready to run)
+## Current sprint: [S2 — Carry-over + workspace & server skeleton](./sprints/S2.md)  ·  ✅ **Complete** — all 17 cards Done (2026-11-08). Awaiting merge into `prototype`.
 
 ### Summary
 | ✅ Ready | 🔨 In Progress | 👀 Review | ✔️ Done | ⛔ Blocked | Total | Done % |
 |:-:|:-:|:-:|:-:|:-:|:-:|:-:|
-| 1 | 0 | 0 | 16 | 0 | 17 | 94 % |
+| 0 | 0 | 0 | 17 | 0 | 17 | 100 % |
 
 ### Cards
 | ID | Title | Lane | Role | Model | Depends on | Status |
@@ -29,10 +29,17 @@
 | [T-037](./tasks/T-037-server-test-helpers.md) | Server test helpers + health tests | W2 | test-engineer | build | T-036 | ✔️ Done |
 | [T-038](./tasks/T-038-github-actions-ci.md) | GitHub Actions CI | W2 | devops | lite | T-037 | ✔️ Done |
 | [T-039](./tasks/T-039-docs-sync-s2.md) | Docs sync after S2 | Z | docs-keeper | lite | T-024…T-038 | ✔️ Done |
-| [T-040](./tasks/T-040-s2-qa.md) | Sprint 2 QA smoke | Z | reviewer | build | T-039 | ✅ Ready |
+| [T-040](./tasks/T-040-s2-qa.md) | Sprint 2 QA smoke | Z | reviewer | build | T-039 | ✔️ Done |
 
 Lanes: **A** engine · **B** admin · **C** small · **W1** closes wave 1 (alone) · **W2** server skeleton (see the S2 waves) · **Z** closing.
 **Model tier** (policy: [PROCESS.md §2](./PROCESS.md#2-roles-and-model-routing-token-policy) · catalogue: [MODELS.md](./MODELS.md)): `build` → the role agent on **Sonnet 5.5** (Anthropic) · `lite` → `builder-lite` on **GPT-6 Luna** (OpenAI Codex). Reviews are cross-family: `reviewer` on **Haiku 5.5** for lite cards, `reviewer-pro` on **GPT-5.6 Terra** for build cards and any auth/session/scoring/answer-key/anti-cheat diff. Planning stays on Opus 5.5 and never builds. The OpenCode free lane is retired.
+
+### S3 backlog (raised by the T-040 QA, 2026-11-08)
+| ID | Title | Role | Model | Sev | Status |
+|:--|:--|:--|:--|:--|:--|
+| [T-041](./tasks/T-041-analytics-recharts-warning.md) | Analytics Recharts width(-1)/height(-1) warning | frontend-dev | lite | Low | 📋 Backlog |
+| [T-042](./tasks/T-042-exam-config-input-guard.md) | Exam config numeric inputs cannot be cleared | frontend-dev | lite | Low | 📋 Backlog |
+| [T-043](./tasks/T-043-admin-nav-ids.md) | ids on admin header/sidebar links | frontend-dev | lite | Low | 📋 Backlog |
 
 ## Upcoming sprints
 | Sprint | Goal | Status |

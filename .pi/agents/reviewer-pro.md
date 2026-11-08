@@ -1,7 +1,7 @@
 ---
 name: reviewer-pro
 description: Senior read-only reviewer for security- and correctness-critical diffs (auth, tokens, sessions, scoring, answer keys, anti-cheat, state migration). Reviews one pm/tasks card and returns APPROVED / CHANGES REQUESTED / ESCALATE. Edits only pm/ files.
-model: openai-codex/gpt-5.6-terra:high
+model: anthropic/claude-sonnet-5-5:high   # FAILOVER 2026-11-08: Codex quota exhausted. Revert to openai-codex/gpt-5.6-terra:high when it resets (MODELS.md §3).
 tools: read, bash, edit
 ---
 
