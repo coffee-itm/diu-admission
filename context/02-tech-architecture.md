@@ -37,32 +37,36 @@ The repository is a pnpm workspace: root SPA (`diu-admission`), `packages/shared
 ### Directory layout (actual)
 
 ```
-src/
-├── main.jsx, App.jsx, index.css, App.css
-├── components/
-│   ├── ui/        Badge, Button, Card(+StatCard), Input, LanguageToggle (unused), Modal, ProgressBar, Spinner, Timer
-│   ├── layout/    AdminLayout, CandidateLayout, Footer, Header, Sidebar
-│   └── charts/    MeritLineChart, ScoreBarChart, SectionPieChart
-├── pages/
-│   ├── public/    LandingPage, LoginPage, NotFoundPage, RegisterPage
-│   ├── candidate/ DashboardPage, InstructionsPage, ResultPage, TestPage
-│   └── admin/     AnalyticsPage, CandidateDetailPage, CandidatesPage, DashboardPage,
-│                  ExamConfigPage, MeritListPage, QuestionBankPage, QuestionFormPage
-├── features/
-│   ├── auth/      AuthProvider.jsx (pass-through), ProtectedRoute.jsx, useAuth.js, resolvePostLoginPath.js
-│   ├── test/      useTestEngine, useTimer, useAutoSave, useAntiCheat,
-│   │              QuestionCard, QuestionNav, SectionHeader, SecurityWarningModal, TestSubmitDialog
-│   ├── questions/ BulkImportModal (CSV import), importQuestions.js, QuestionForm, QuestionTable, questionSchema.js
-│   └── scoring/   EligibilityBadge, ScoreCard, scoringConfig.js (used by scoring.js)
-├── store/         authStore, testStore, questionStore, examConfigStore, antiCheatStore
-├── services/      authService, testService, resultService, analyticsService   (no api.js, no questionService)
-├── data/          mockQuestions (50), mockCandidates (16 + 1 admin), mockResults (15), mockExamConfig
-├── test/          setup.js (Vitest setup)
-└── lib/           constants.js, scoring.js, utils.js, pdfGenerator.js, csvExport.js, csvParse.js, meritCsv.js,
-                   fullscreen.js, storageMigration.js, runStorageMigration.js
-├── packages/shared/ constants.js, index.js, risk.js, scoring.js, shuffle.js, schemas/
-├── server/        package.json, src/ (app.js, config.js, server.js, lib/, modules/health/, plugins/), test/
-├── docker-compose.yml
+diu-admission/                         (pnpm workspace root — the SPA package)
+├── src/
+│   ├── main.jsx, App.jsx, index.css, App.css
+│   ├── components/
+│   │   ├── ui/        Badge, Button, Card(+StatCard), Input, LanguageToggle (unused), Modal, ProgressBar, Spinner, Timer
+│   │   ├── layout/    AdminLayout, CandidateLayout, Footer, Header, Sidebar
+│   │   └── charts/    MeritLineChart, ScoreBarChart, SectionPieChart
+│   ├── pages/
+│   │   ├── public/    LandingPage, LoginPage, NotFoundPage, RegisterPage
+│   │   ├── candidate/ DashboardPage, InstructionsPage, ResultPage, TestPage
+│   │   └── admin/     AnalyticsPage, CandidateDetailPage, CandidatesPage, DashboardPage,
+│   │                  ExamConfigPage, MeritListPage, QuestionBankPage, QuestionFormPage
+│   ├── features/
+│   │   ├── auth/      AuthProvider.jsx (pass-through), ProtectedRoute.jsx, useAuth.js, resolvePostLoginPath.js
+│   │   ├── test/      useTestEngine, useTimer, useAutoSave, useAntiCheat,
+│   │   │              QuestionCard, QuestionNav, SectionHeader, SecurityWarningModal, TestSubmitDialog
+│   │   ├── questions/ BulkImportModal (CSV import), importQuestions.js, QuestionForm, QuestionTable,
+│   │   │              questionSchema.js (re-export of @diu/shared)
+│   │   └── scoring/   EligibilityBadge, ScoreCard, scoringConfig.js (used by scoring.js)
+│   ├── store/         authStore, testStore, questionStore, examConfigStore, antiCheatStore
+│   ├── services/      authService, testService, resultService, analyticsService   (no api.js, no questionService)
+│   ├── data/          mockQuestions (50), mockCandidates (16 + 1 admin), mockResults (15), mockExamConfig
+│   ├── test/          setup.js (Vitest setup)
+│   └── lib/           constants.js, scoring.js (shim), utils.js, pdfGenerator.js, csvExport.js, csvParse.js,
+│                      meritCsv.js, examConfigValidation.js, instructionRules.js, fullscreen.js,
+│                      storageMigration.js, runStorageMigration.js
+├── packages/shared/   @diu/shared — constants.js, index.js, risk.js, scoring.js, shuffle.js, schemas/{common,question}.js
+├── server/            @diu/server — package.json, src/{app,config,server}.js, src/lib/, src/modules/health/,
+│                      src/plugins/{errors,mongoose,security,zod}.js, test/{health.test.js,helpers/}
+├── docker-compose.yml (mongo:7 single-node replica set)
 ├── pnpm-workspace.yaml
 └── .github/workflows/ci.yml
 ```
