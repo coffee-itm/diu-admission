@@ -1,6 +1,6 @@
 # T-035 · Dev infra: Mongo 7 replica set, `server/.env.example`, Vite `/api` proxy
 
-Status: ✅ Ready
+Status: 👀 Review
 Sprint: S2 · Role: devops · Model: lite · Size: S
 Tier rationale: compose file, .env.example and a Vite proxy; all verifiable by one command (PROCESS §2.3)
 Depends on: T-032 (can run in parallel with T-033/T-034; it touches different files)
@@ -35,5 +35,10 @@ docker compose up -d mongo && sleep 20 && docker compose exec mongo mongosh --qu
 - Production compose and Dockerfiles (S8). The server code itself (T-036).
 
 ## Agent log
+- Added MongoDB 7 single-node replica-set Compose service with named `mongo_data` volume and init healthcheck; added the architecture-specified server env template, ignored `server/.env`, and configured Vite `/api` proxy.
+- Files: `docker-compose.yml`, `server/.env.example`, `.gitignore`, `vite.config.js`.
+- Verify: Mongo replica set returned `1` and container became healthy; `pnpm lint` passed; `pnpm test` passed (232 tests); `pnpm build` passed (existing large-chunk warning).
+- `pnpm dev` reached Vite ready at localhost:5173. `docker compose down` preserved `diu-admission_mongo_data`; `git check-ignore server/.env` confirmed ignore.
+- Acceptance: 1 ✅ 2 ✅ 3 ✅ 4 ✅.
 
 ## Review
