@@ -1,11 +1,13 @@
 import { randomUUID } from 'node:crypto'
 import Fastify from 'fastify'
+import cookie from '@fastify/cookie'
 import { loadConfig } from './config.js'
 import zodPlugin from './plugins/zod.js'
 import securityPlugin from './plugins/security.js'
 import errorsPlugin from './plugins/errors.js'
 import mongoosePlugin from './plugins/mongoose.js'
 import healthRoutes from './modules/health/routes.js'
+import authRoutes from './modules/auth/routes.js'
 
 export const API_PREFIX = '/api/v1'
 
@@ -56,7 +58,10 @@ export async function buildApp(opts = {}) {
   await app.register(securityPlugin, { config })
   await app.register(mongoosePlugin, { config, serverSelectionTimeoutMS: opts.mongoServerSelectionTimeoutMS })
 
+  await app.register(cookie)
+
   await app.register(healthRoutes, { prefix: API_PREFIX })
+  await app.register(authRoutes, { prefix: API_PREFIX, config })
 
   return app
 }

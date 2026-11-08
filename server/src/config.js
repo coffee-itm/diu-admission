@@ -12,7 +12,12 @@ const envSchema = z.object({
     .min(1, 'is required')
     .regex(/^mongodb(\+srv)?:\/\//, 'must start with mongodb:// or mongodb+srv://'),
   JWT_ACCESS_SECRET: z.string().min(1).default('change-me-at-least-32-bytes-long-random'),
-  JWT_ACCESS_TTL: z.string().min(1).default('15m'),
+  // A unit is mandatory. fast-jwt reads a bare number as MILLISECONDS (900 -> a 0.9 s token) while most
+  // JWT tooling reads it as seconds, so a bare number is rejected rather than guessed.
+  JWT_ACCESS_TTL: z
+    .string()
+    .regex(/^[1-9]\d*[smhd]$/, 'must be a positive integer with a unit s, m, h or d (e.g. 15m or 900s); a bare number is ambiguous')
+    .default('15m'),
   REFRESH_TTL_DAYS: int(7),
   COOKIE_SECURE: bool.default(false),
   CORS_ORIGINS: z.string().default('http://localhost:5173'),

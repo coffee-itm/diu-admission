@@ -8,6 +8,7 @@ import { createSigner, createVerifier } from 'fast-jwt'
 import { Types } from 'mongoose'
 import { httpError } from '../../lib/httpError.js'
 import { User } from '../users/model.js'
+import { Program } from '../programs/model.js'
 import { RefreshToken } from './refreshToken.model.js'
 
 // §5. The ONLY definition of the password cost in the codebase (seed.js and tests go through hashPassword).
@@ -217,4 +218,95 @@ export async function clearFailedLogins(user) {
     { _id: userId(user), $or: [{ 'failedLogins.count': { $gt: 0 } }, { 'failedLogins.lockedUntil': { $exists: true } }] },
     { $set: { 'failedLogins.count': 0 }, $unset: { 'failedLogins.lockedUntil': 1 } },
   )
+}
+
+// ---------------------------------------------------------------- account flows (used by routes.js)
+
+const invalidCredentials = () => httpError(401, 'INVALID_CREDENTIALS', 'Invalid email or password')
+
+// Verified when the account is missing/locked so every failed login costs one argon2 verify.
+let dummyHash
+const getDummyHash = () => (dummyHash ??= hashPassword(randomBytes(16).toString('hex')))
+
+/** New access token + a new refresh family. `user` is a User document. */
+async function startSession(user, userAgent, config) {
+  const refresh = await issueRefreshToken(user._id, userAgent, config)
+  return { user, accessToken: signAccessToken(user, config), refresh }
+}
+
+/**
+ * Public registration (FR-AUTH-01/10). Always a candidate: `role` is not an input here.
+ * @param {{ name: string, email: string, phone: string, password: string, programCode: string,
+ *           sscGpa: number, hscGpa: number, hscGroup: string }} input already validated and normalised
+ */
+export async function registerCandidate(input, userAgent, config) {
+  const program = await Program.findOne({ _id: input.programCode, active: true }).select('_id').lean()
+  if (!program) {
+    throw httpError(422, 'VALIDATION_ERROR', 'Request validation failed', [
+      { path: 'programCode', message: 'is not an active program' },
+    ])
+  }
+  const passwordHash = await hashPassword(input.password)
+  let user
+  try {
+    user = await User.create({
+      role: 'candidate',
+      name: input.name,
+      email: input.email,
+      phone: input.phone,
+      passwordHash,
+      candidate: { programCode: input.programCode, sscGpa: input.sscGpa, hscGpa: input.hscGpa, hscGroup: input.hscGroup },
+    })
+  } catch (err) {
+    if (err?.code === 11000) {
+      if (err.keyPattern?.phone) {
+        throw httpError(422, 'VALIDATION_ERROR', 'Request validation failed', [
+          { path: 'phone', message: 'is already registered' },
+        ])
+      }
+      throw httpError(409, 'EMAIL_TAKEN', 'An account with this email already exists')
+    }
+    throw err
+  }
+  return startSession(user, userAgent, config)
+}
+
+/**
+ * Email + password login (FR-AUTH-02).
+ *
+ * Every failure is the same 401 (no user enumeration), except the attempt that trips the lock,
+ * which is a 429 (FR-AUTH-02). The lock is checked BEFORE the password is verified: while it is
+ * active a correct password gets the same 401 and the failure counter/lock are left untouched, so
+ * a locked account cannot be probed or have its lock extended.
+ */
+export async function loginWithPassword({ email, password }, userAgent, config) {
+  const user = await User.findOne({ email }).select('+passwordHash')
+  if (!user || user.status !== 'active' || isLocked(user)) {
+    await verifyPassword(await getDummyHash(), password) // keep the cost of a failure uniform
+    throw invalidCredentials()
+  }
+  if (!(await verifyPassword(user.passwordHash, password))) {
+    const { lockedUntil } = await registerFailedLogin(user)
+    if (lockedUntil) throw httpError(429, 'RATE_LIMITED', 'Too many failed login attempts. Try again later.')
+    throw invalidCredentials()
+  }
+  await clearFailedLogins(user)
+  user.lastLoginAt = new Date()
+  await User.updateOne({ _id: user._id }, { $set: { lastLoginAt: user.lastLoginAt } })
+  return startSession(user, userAgent, config)
+}
+
+/** Rotate the refresh cookie and mint a new access token. Reuse of a rotated token revokes the family. */
+export async function refreshSession(rawToken, userAgent, config) {
+  const refresh = await rotateRefreshToken(rawToken, userAgent, config)
+  const user = await User.findById(refresh.userId)
+  if (!user || user.status !== 'active') throw unauthenticated()
+  return { user, accessToken: signAccessToken(user, config), refresh }
+}
+
+/** The signed-in user for `/auth/me`; a deleted or disabled account is unauthenticated. */
+export async function getActiveUser(userId) {
+  const user = Types.ObjectId.isValid(userId) ? await User.findById(userId) : null
+  if (!user || user.status !== 'active') throw unauthenticated()
+  return user
 }

@@ -20,17 +20,18 @@ const TEST_ENV = {
  * Mongoose is a process-wide singleton: call this once at a time per test file (`beforeAll`),
  * and `stop()` before starting another. Vitest isolates files, so parallel files are fine.
  *
+ * @param {{ env?: Record<string, string> }} [opts] `env` overrides individual TEST_ENV values (e.g. COOKIE_SECURE).
  * @returns {Promise<{ app: import('fastify').FastifyInstance, stop: () => Promise<void>, stopDb: () => Promise<void> }>}
  *   `stopDb` stops only the database (to test the DB-down path); `stop` closes the app, then the database. Both are idempotent.
  */
-export async function startTestApp() {
+export async function startTestApp({ env = {} } = {}) {
   const replSet = await MongoMemoryReplSet.create({
     binary: { version: MONGO_VERSION },
     replSet: { count: 1, storageEngine: 'wiredTiger' },
   })
   let app
   try {
-    const config = loadConfig({ ...TEST_ENV, MONGODB_URI: replSet.getUri('diu_test') })
+    const config = loadConfig({ ...TEST_ENV, ...env, MONGODB_URI: replSet.getUri('diu_test') })
     // Fail fast if the DB is stopped mid-test instead of waiting the 5 s default.
     app = await buildApp({ config, logger: false, mongoServerSelectionTimeoutMS: 2000 })
     await app.ready()

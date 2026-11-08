@@ -1,6 +1,6 @@
 # T-046 · Auth routes: register, login, refresh, logout, me
 
-Status: ✅ Ready
+Status: 👀 Review
 Sprint: S3 · Role: backend-dev · Model: build · Size: M
 Tier rationale: public attack surface — cookie flags, generic errors, throttling; silent failure modes (PROCESS §2.3)
 Depends on: T-045
@@ -44,5 +44,13 @@ pnpm --filter @diu/server test && pnpm lint && pnpm build
 - OTP endpoints, password reset, `PATCH /auth/me` (P6/S5). Admin user management (T-048).
 
 ## Agent log
+- Added `@fastify/cookie`; `auth/{routes,schemas}.js`, `users/toPublicUser.js`; `auth/service.js` gained `registerCandidate`, `loginWithPassword`, `refreshSession`, `getActiveUser` (routes stay Mongoose-free). Same `fast-jwt` verifier/config, no second JWT lib, secret read only in `service.js`.
+- Tests first: criteria 4 and 6 failed with 404 (route missing) before implementing. 97 server tests pass (39 routes, 1 cookie-secure, 15 config). Mutation check: dropping the `isLocked` guard fails the lock tests.
+- 1b: `toPublicUser` is an allow-list; tested on a doc with `+passwordHash`, `.toObject()`, `.lean()`+hash, `aggregate()` (premise asserted: the raw shapes DO contain the hash). Response Zod schemas strip as a 2nd layer.
+- `JWT_ACCESS_TTL`: **rejects bare numbers** (`^[1-9]\d*[smhd]$`). Chose reject over "read as seconds": fast-jwt reads 900 as ms, jsonwebtoken as s; a loud boot failure beats a silent guess.
+- Password capped at 128 (register + login). Lock checked before verify; locked/unknown/disabled all do one dummy argon2 verify.
+- **Spec tension (needs a ruling):** FR-AUTH-02/crit 7 say 5 failures → 429, the T-046 brief says a correct password during a lock → 401. Implemented: the 5th failure (the one that locks) → 429, any attempt during the lock → generic 401. The 429 is itself a weak existence oracle (unknown emails never lock).
+- Other decisions: duplicate phone → 422 on `phone` (no documented 409 code); refresh/logout reject a foreign `Origin` with 403 (16 §5); rate limit 10/min/IP on login+register only, not refresh; failed refresh clears the cookie; `/me` uses a local bearer check until T-047's `authenticate`.
+- FR-AUTH-01's phone regex has no leading `0`, so `01712345678` is rejected (followed the FR exactly). SPA registration form must send `+8801…`/`8801…` or the FR should be widened.
 
 ## Review
