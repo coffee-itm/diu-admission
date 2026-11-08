@@ -8,7 +8,7 @@
 ### Summary
 | ✅ Ready | 🔨 In Progress | 👀 Review | ✔️ Done | ⛔ Blocked | Total | Done % |
 |:-:|:-:|:-:|:-:|:-:|:-:|:-:|
-| 11 | 0 | 0 | 3 | 0 | 14 | 21 % |
+| 10 | 0 | 0 | 4 | 0 | 14 | 29 % |
 
 ### Cards
 | ID | Title | Lane | Role | Model | Depends on | Status |
@@ -16,7 +16,7 @@
 | [T-044](./tasks/T-044-user-program-models-seed.md) | `programs` + `users` models, indexes, seed | S | backend-dev | lite | — | ✔️ Done |
 | [T-045](./tasks/T-045-auth-core-tokens.md) | Auth core: argon2id, JWT, refresh rotation + reuse detection | S | backend-dev | build | T-044 | ✔️ Done |
 | [T-046](./tasks/T-046-auth-routes.md) | Auth routes: register/login/refresh/logout/me | S | backend-dev | build | T-045 | ✔️ Done |
-| [T-047](./tasks/T-047-rbac-helpers.md) | RBAC helpers + matrix test | S | backend-dev | build | T-046 | ✅ Ready |
+| [T-047](./tasks/T-047-rbac-helpers.md) | RBAC helpers + matrix test | S | backend-dev | build | T-046 | ✔️ Done |
 | [T-048](./tasks/T-048-admin-users-endpoints.md) | Admin user management + audit log | S | backend-dev | build | T-047 | ✅ Ready |
 | [T-049](./tasks/T-049-frontend-api-client.md) | services/api.js, react-query, VITE_USE_MOCKS split | F | frontend-dev | build | T-046 | ✅ Ready |
 | [T-050](./tasks/T-050-frontend-auth-on-api.md) | authService on the API, authStore rework | F | frontend-dev | build | T-049 | ✅ Ready |

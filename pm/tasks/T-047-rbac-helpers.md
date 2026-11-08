@@ -1,6 +1,6 @@
 # T-047 · RBAC: `authenticate`, `requireRole`, `programScope` + the matrix test
 
-Status: 👀 Review
+Status: ✔️ Done
 Sprint: S3 · Role: backend-dev · Model: build · Size: S
 Tier rationale: an authorization bug is the definition of a silent, high-cost failure (PROCESS §2.3)
 Depends on: T-046
@@ -74,3 +74,13 @@ candidate `programScope` → `[]` (1 fail); drop `algorithms:['HS256']` (1); dro
 
 **Verification** (main tree): server 179 passed; `pnpm lint` clean; `pnpm test:all` 225 root + 40 shared (2 todo) + 179 server passed; `pnpm build` ok (chunk-size notice only).
 Not proved: behaviour under a real browser (n/a); a `sub` that is a 12-char string is accepted by `ObjectId.isValid`, but I confirmed it still 401s (no such user), and the token is server-signed anyway.
+
+### Re-review (round 2) — commits 3de28a0 (spec), 2616bb7 (fix). **Verdict: APPROVED**
+
+1. ✅ Re-ran the attack with a throwaway POST route (`schema.body` with distinctive field names, deleted afterwards) behind `onRequest: [authenticate, requireRole('admin')]`. Candidate and reviewer, each with empty string, `{}`, wrong types, malformed JSON `{bad` and `[]`: all **403**, body had none of the schema field names, `issues` or `details`. Anon + malformed JSON: 401. Candidate holding a forged `role:'admin'` token + `{}`: 403. Admin + `{}`: 422 (so validation still runs for the right role). 13/13 passed.
+2. ✅ Matrix row is real: `rbac.test.js:22-26` registers a POST probe with `schema.body` (zod `name: string.min(1)`), row at `:52` sends `body: {}`, expects 401/403/403/422, and 401/403 rows are asserted against the exact envelope (`toEqual`, so no schema details can ride along). Mutation A (`requireRole` back to `preHandler`): `reviewer` and `candidate` fail with `expected 422 to be 403` (2 failed, 51 passed). Mutation B (both guards in `preHandler`): anon, candidate, reviewer fail (`expected 422 to be 401/403`) (3 failed). Both reverted by restoring `rbac.test.js` from backup; `git status` shows only the board row.
+3. ✅ `grep -rn preHandler server/src server/test`: only the warning comment at `plugins/auth.js:10`. Only other guard use, `auth/routes.js:72`, is `onRequest: app.authenticate`. `context/16` §4 diagram (`:130`), correction note (`:137-139`) and example (`:156-159`) all show both guards in `onRequest` before validation.
+4. ✅ No regression: the 401 cases (missing, six malformed headers, expired, three wrong-signature variants) are unchanged and pass; forged-admin-claim candidate → 403 (`rbac.test.js` + my probe); `programScope` unchanged by the diff (`git diff 75cc6bc 2616bb7 -- server` touches only the `auth.js` comment, `rbac.test.js` probes/row), its tests still pass (admin `[]`, reviewer own codes, empty = all, candidate 403).
+
+**Verification** (main tree): `pnpm lint` clean; `pnpm test:all` 225 root + 40 shared (2 todo) + 183 server passed; `pnpm build` ok (chunk-size notice only).
+Not proved: real-browser behaviour (n/a). Carry-forward for T-048 (builder note): validate on write that a reviewer's empty `programCodes` (= all programs) is deliberate.
