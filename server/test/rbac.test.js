@@ -1,5 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { createSigner } from 'fast-jwt'
+import { z } from 'zod'
 import { Types } from 'mongoose'
 import { startTestApp } from './helpers/app.js'
 import { createUser } from './helpers/factories.js'
@@ -16,13 +17,19 @@ const config = loadConfig({ NODE_ENV: 'test', MONGODB_URI: 'mongodb://localhost:
 // They exist only in this test app (`extraRoutes`); production never registers them.
 async function probeRoutes(app) {
   const guarded = (path, roles, handler) =>
-    app.get(path, { onRequest: app.authenticate, preHandler: app.requireRole(...roles) }, handler)
+    app.get(path, { onRequest: [app.authenticate, app.requireRole(...roles)] }, handler)
   guarded('/_probe/admin', ['admin'], async () => ({ ok: true }))
   guarded('/_probe/staff', ['reviewer', 'admin'], async () => ({ ok: true }))
   guarded('/_probe/candidate', ['candidate'], async () => ({ ok: true }))
+  // POST with a body schema: the guards must answer BEFORE validation, or a wrong-role caller sees this schema in a 422.
+  app.post(
+    '/_probe/admin-write',
+    { onRequest: [app.authenticate, app.requireRole('admin')], schema: { body: z.object({ name: z.string().min(1) }) } },
+    async () => ({ ok: true }),
+  )
   app.get('/_probe/scope', { onRequest: app.authenticate }, async (req) => ({ programCodes: app.programScope(req) }))
   // Guard without `authenticate` in front of it: must fail closed as 401, never crash or let the request in.
-  app.get('/_probe/no-authenticate', { preHandler: app.requireRole('admin') }, async () => ({ ok: true }))
+  app.get('/_probe/no-authenticate', { onRequest: app.requireRole('admin') }, async () => ({ ok: true }))
 }
 
 // ------------------------------------------------------------------ THE MATRIX
@@ -41,6 +48,8 @@ const MATRIX = [
   { group: 'auth me (any role)', method: 'GET', url: '/auth/me', anon: 401, candidate: 200, reviewer: 200, admin: 200 },
   // role guards (probes stand in until real groups exist)
   { group: 'admin only', method: 'GET', url: '/_probe/admin', anon: 401, candidate: 403, reviewer: 403, admin: 200 },
+  // POST + body schema, sent an empty body: guards run before validation, so only admin reaches the 422
+  { group: 'admin only write (body schema)', method: 'POST', url: '/_probe/admin-write', body: {}, anon: 401, candidate: 403, reviewer: 403, admin: 422 },
   { group: 'staff (reviewer + admin)', method: 'GET', url: '/_probe/staff', anon: 401, candidate: 403, reviewer: 200, admin: 200 },
   { group: 'candidate only', method: 'GET', url: '/_probe/candidate', anon: 401, candidate: 200, reviewer: 403, admin: 403 },
   { group: 'requireRole without authenticate', method: 'GET', url: '/_probe/no-authenticate', anon: 401, candidate: 401, reviewer: 401, admin: 401, noAuth: true },

@@ -4,9 +4,11 @@ import { httpError } from '../lib/httpError.js'
 import { authenticateBearer } from '../modules/auth/service.js'
 
 /**
- * Request guards (context/16 §4–§5). Usage, in a module's routes:
+ * Request guards (context/16 §4–§5). Both run in `onRequest`, in this order, so they answer BEFORE schema validation:
  *   app.addHook('onRequest', app.authenticate)            // 401 unless a valid bearer token of a live, active user
- *   app.addHook('preHandler', app.requireRole('admin'))   // 403 unless req.user.role is allowed
+ *   app.addHook('onRequest', app.requireRole('admin'))    // 403 unless req.user.role is allowed
+ * Never use `preHandler` for either: Fastify validates the body first, so a wrong-role caller would get a 422
+ * that exposes the route's request schema instead of a 403.
  *
  * `req.user` is `{ sub, role, programCodes }`, read from the database by `authenticateBearer`, not copied
  * from the token. Token handling itself stays in `modules/auth/service.js`; this plugin never touches the secret.
