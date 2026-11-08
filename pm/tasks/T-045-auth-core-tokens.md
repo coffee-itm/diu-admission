@@ -1,6 +1,6 @@
 # T-045 · Auth core: argon2id, access JWT, rotating refresh tokens with reuse detection
 
-Status: 👀 Review
+Status: ✔️ Done
 Sprint: S3 · Role: backend-dev · Model: build · Size: M
 Tier rationale: security-critical, and every failure mode is silent (a weak hash, a non-rotating token, a missed reuse) (PROCESS §2.3)
 Depends on: T-044
@@ -55,7 +55,9 @@ pnpm --filter @diu/server test && pnpm lint && pnpm build
 - Review fix (1): added a deterministic ordering guard in `auth.service.test.js`: it spies `RefreshToken.findOneAndUpdate` and, when the claim runs, reads the family from the DB and asserts 2 rows (old + successor) exist, with the old row unclaimed. The 10× race test is kept as a smoke test. Mutation (`next.save()` moved after the claim): new test fails 3/3 ("expected length 2 but got 1"; the 10× loop passed in all 3, confirming it is flaky); reverted: 25/25 pass ×3. `service.js` unchanged.
 
 ## Review
-**Reviewer (reviewer-pro): CHANGES REQUESTED** — implementation is sound; one regression guard is too weak.
+**Re-review (reviewer-pro, after fix daad7ab): APPROVED.** The one required change is fixed. Details are under "Re-review" at the end of this section. The first-round findings below are kept for the record.
+
+**First review: CHANGES REQUESTED** — the implementation was sound; one regression guard was too weak.
 
 **Required change (1)**
 1. `server/test/auth.service.test.js:90` (concurrent-rotation test) does not reliably guard the "insert successor BEFORE claiming" ordering. Mutation: moved `next.save()` after the claim (`service.js:131-133`) → the test failed in only **1 of 3** runs, so a regression would pass CI about two times in three. Add a deterministic test: spy `RefreshToken.findOneAndUpdate` and, inside the spy before delegating, assert `RefreshToken.countDocuments({ familyId })` already includes the successor (2 rows for a first rotation). Keep the 10× race test as a smoke check.
@@ -81,3 +83,11 @@ pnpm --filter @diu/server test && pnpm lint && pnpm build
 
 **Verification (main tree):** `pnpm lint` clean; `pnpm test:all` → root 225 passed, shared 40 passed (2 todo), server 41 passed; `pnpm build` ok (chunk-size warning only). Working tree clean after mutations.
 **Not proved:** nothing browser-related in this card; HTTP-level behaviour (cookies, 429) is T-046.
+
+### Re-review (daad7ab)
+1. **Mutation, 3 runs** (`next.save()` moved after the claim in `service.js`): `inserts the successor row BEFORE claiming the old token` failed in **3 of 3** runs. It was the only failure each time (24 passed). The test is `auth.service.test.js:90`. The old 1-in-3 race test is not the one that catches it now. Reverted, `git status` clean, 3 clean runs (25/25).
+2. **Implementation untouched:** `git show daad7ab --format= -- server/src` → 0 bytes. `git diff 199b4d daad7ab --stat -- server/src packages src` → empty. The fix commit touches only the test file and the card.
+3. **Smoke test kept:** the 10× race test is still at `:129`, renamed "(smoke, 10x)". **Spy is restored in `finally`** (`spy.mockRestore()`, `:111-115`), so it cannot leak if the rotation throws. Isolation runs: smoke test alone 1 passed; the rotation, revocation and throttling groups alone 12 passed.
+4. **Test quality:** the guard reads the family from the DB at the moment the claim is awaited. It asserts that the filter targets the old row, that 2 rows exist, that the successor hash equals the issued token, and that neither row is claimed yet. It is deterministic and does not depend on timing.
+
+**Verification (main tree):** `pnpm lint` clean; `pnpm test` root 225 passed; `pnpm -r test` shared 40 passed (2 todo), server 42 passed; `pnpm build` ok. Mutation reverted. The only change to source was the reverted mutation in `server/src/modules/auth/service.js`.
