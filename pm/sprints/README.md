@@ -3,8 +3,8 @@
 | Sprint | Phase (context/19) | Goal | Status |
 |:--|:--|:--|:--|
 | [S1](./S1.md) | P0 | Prototype correct + test harness | ✔️ Done |
-| [S2](./S2.md) | P1 + S1 carry-over | Carry-over fixes, workspace, shared package, server skeleton, CI | 🔄 Active |
-| S3 | P2 | Auth & users (API + frontend) | 📋 |
+| [S2](./S2.md) | P1 + S1 carry-over | Carry-over fixes, workspace, shared package, server skeleton, CI | ✔️ Done (merged `87d1858`) |
+| [S3](./S3.md) | P2 + S2 carry-over | Auth & users (API + frontend), coverage, CI hardening | ✅ Ready to start |
 | S4 | P3 | Programs, question bank, exam cycles | 📋 |
 | S5 | P4 | Server-authoritative test sessions | 📋 |
 | S6 | P5 | Results, merit list, analytics, security review | 📋 |

@@ -1,6 +1,6 @@
 # T-043 · Add ids to the admin header and sidebar links
 
-Status: 📋 Backlog
+Status: ✅ Ready
 Sprint: S3 · Role: frontend-dev · Model: lite · Size: S
 Tier rationale: mechanical attribute addition verified by grep (PROCESS §2.3)
 Depends on: —

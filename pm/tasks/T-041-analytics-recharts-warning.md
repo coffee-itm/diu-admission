@@ -1,6 +1,6 @@
 # T-041 · Analytics: remove the Recharts width(-1)/height(-1) console warning
 
-Status: 📋 Backlog
+Status: ✅ Ready
 Sprint: S3 · Role: frontend-dev · Model: lite · Size: S
 Tier rationale: single-component sizing fix; the failure mode is a visible console warning (loud) (PROCESS §2.3)
 Depends on: —

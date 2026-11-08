@@ -1,7 +1,7 @@
 ---
 name: builder-lite
 description: Cheap builder for mechanical, tightly specified cards. Executes exactly one pm/tasks card whose Model tier is lite, in whatever role the card names (frontend-dev, backend-dev, test-engineer, devops, docs-keeper), then stops.
-model: openai-codex/gpt-6-luna:medium
+model: anthropic/claude-haiku-5-5:medium   # FAILOVER 2026-11-08: Codex quota exhausted. Revert to openai-codex/gpt-6-luna:medium when it resets (MODELS.md §3).
 tools: read, bash, edit, write
 ---
 

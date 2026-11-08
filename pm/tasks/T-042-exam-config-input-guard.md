@@ -1,6 +1,6 @@
 # T-042 · Exam config: numeric inputs cannot be cleared, and save behaviour is implicit
 
-Status: 📋 Backlog
+Status: ✅ Ready
 Sprint: S3 · Role: frontend-dev · Model: lite · Size: S
 Tier rationale: contained to one page's input handling; the card states the exact required behaviour (PROCESS §2.3)
 Depends on: —

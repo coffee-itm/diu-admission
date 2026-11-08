@@ -3,43 +3,40 @@
 > Source of truth for status = the `Status:` line in each card (`pm/tasks/T-xxx-*.md`). Agents update their own row.
 > Recount with `/sprint-status`. Process: [PROCESS.md](./PROCESS.md) · Playbook: [AGENT_PLAYBOOK.md](./AGENT_PLAYBOOK.md) · Escalations: [ESCALATIONS.md](./ESCALATIONS.md)
 
-## Current sprint: [S2 — Carry-over + workspace & server skeleton](./sprints/S2.md)  ·  ✅ **Complete** — all 17 cards Done (2026-11-08). Awaiting merge into `prototype`.
+## Current sprint: [S3 — Auth & users](./sprints/S3.md)  ·  ✅ Ready to start (branch `sprint/S3-auth`)
 
 ### Summary
 | ✅ Ready | 🔨 In Progress | 👀 Review | ✔️ Done | ⛔ Blocked | Total | Done % |
 |:-:|:-:|:-:|:-:|:-:|:-:|:-:|
-| 0 | 0 | 0 | 17 | 0 | 17 | 100 % |
+| 14 | 0 | 0 | 0 | 0 | 14 | 0 % |
 
 ### Cards
 | ID | Title | Lane | Role | Model | Depends on | Status |
 |:--|:--|:-:|:--|:--|:--|:--|
-| [T-024](./tasks/T-024-header-logout-privacy.md) | Header logout clears test session (privacy) | A | frontend-dev | sonnet | — | ✔️ Done |
-| [T-025](./tasks/T-025-exam-config-validation.md) | Validate exam config inputs | B | frontend-dev | free-ok | — | ✔️ Done |
-| [T-026](./tasks/T-026-fullscreen-resume-unload.md) | Fullscreen prompt on resume, no false tab switch | A | frontend-dev | sonnet | T-024 | ✔️ Done |
-| [T-027](./tasks/T-027-merit-eligibility-filter.md) | Merit list eligibility filter | B | frontend-dev | free-ok | T-025 | ✔️ Done |
-| [T-028](./tasks/T-028-small-ui-fixes.md) | Small UI fixes (ID, auth redirect, tab cue, charts) | C | frontend-dev | free-ok | — | ✔️ Done |
-| [T-029](./tasks/T-029-csv-import-hardening.md) | CSV import hardening | B | frontend-dev | sonnet | T-027 | ✔️ Done |
-| [T-030](./tasks/T-030-testpage-deps-warning.md) | TestPage exhaustive-deps warning | A | frontend-dev | free-ok | T-026 | ✔️ Done |
-| [T-031](./tasks/T-031-missing-interactive-ids.md) | Missing ids on admin elements | W1 | frontend-dev | free-ok | T-025, T-027, T-028, T-029 | ✔️ Done |
-| [T-032](./tasks/T-032-pnpm-workspace.md) | pnpm workspace + empty packages | W2 | devops | lite | T-031 | ✔️ Done |
-| [T-033](./tasks/T-033-shared-scoring-constants.md) | @diu/shared: scoring, constants, shuffle | W2 | frontend-dev | build | T-032 | ✔️ Done |
-| [T-034](./tasks/T-034-shared-risk-schemas.md) | @diu/shared: risk + question schemas | W2 | frontend-dev | lite | T-033 | ✔️ Done |
-| [T-035](./tasks/T-035-dev-infra-mongo.md) | Mongo 7 replset, .env.example, /api proxy | W2 | devops | lite | T-032 | ✔️ Done |
-| [T-036](./tasks/T-036-fastify-bootstrap.md) | Fastify bootstrap, /health + /ready | W2 | backend-dev | build | T-033, T-035 | ✔️ Done |
-| [T-037](./tasks/T-037-server-test-helpers.md) | Server test helpers + health tests | W2 | test-engineer | build | T-036 | ✔️ Done |
-| [T-038](./tasks/T-038-github-actions-ci.md) | GitHub Actions CI | W2 | devops | lite | T-037 | ✔️ Done |
-| [T-039](./tasks/T-039-docs-sync-s2.md) | Docs sync after S2 | Z | docs-keeper | lite | T-024…T-038 | ✔️ Done |
-| [T-040](./tasks/T-040-s2-qa.md) | Sprint 2 QA smoke | Z | reviewer | build | T-039 | ✔️ Done |
+| [T-044](./tasks/T-044-user-program-models-seed.md) | `programs` + `users` models, indexes, seed | S | backend-dev | lite | — | ✅ Ready |
+| [T-045](./tasks/T-045-auth-core-tokens.md) | Auth core: argon2id, JWT, refresh rotation + reuse detection | S | backend-dev | build | T-044 | ✅ Ready |
+| [T-046](./tasks/T-046-auth-routes.md) | Auth routes: register/login/refresh/logout/me | S | backend-dev | build | T-045 | ✅ Ready |
+| [T-047](./tasks/T-047-rbac-helpers.md) | RBAC helpers + matrix test | S | backend-dev | build | T-046 | ✅ Ready |
+| [T-048](./tasks/T-048-admin-users-endpoints.md) | Admin user management + audit log | S | backend-dev | build | T-047 | ✅ Ready |
+| [T-049](./tasks/T-049-frontend-api-client.md) | services/api.js, react-query, VITE_USE_MOCKS split | F | frontend-dev | build | T-046 | ✅ Ready |
+| [T-050](./tasks/T-050-frontend-auth-on-api.md) | authService on the API, authStore rework | F | frontend-dev | build | T-049 | ✅ Ready |
+| [T-041](./tasks/T-041-analytics-recharts-warning.md) | Analytics Recharts width(-1) warning | C | frontend-dev | lite | — | ✅ Ready |
+| [T-042](./tasks/T-042-exam-config-input-guard.md) | Exam config numeric inputs cannot be cleared | C | frontend-dev | lite | — | ✅ Ready |
+| [T-043](./tasks/T-043-admin-nav-ids.md) | ids on admin header/sidebar links | C | frontend-dev | lite | — | ✅ Ready |
+| [T-051](./tasks/T-051-test-coverage.md) | Make --coverage real | C | test-engineer | lite | — | ✅ Ready |
+| [T-052](./tasks/T-052-ci-hardening.md) | CI hardening: pin runner, bump actions | C | devops | lite | — | ✅ Ready |
+| [T-053](./tasks/T-053-docs-sync-s3.md) | Docs sync after S3 | Z | docs-keeper | lite | T-041…T-052 | ✅ Ready |
+| [T-054](./tasks/T-054-s3-qa.md) | Sprint 3 QA smoke | Z | reviewer | build | T-053 | ✅ Ready |
 
-Lanes: **A** engine · **B** admin · **C** small · **W1** closes wave 1 (alone) · **W2** server skeleton (see the S2 waves) · **Z** closing.
-**Model tier** (policy: [PROCESS.md §2](./PROCESS.md#2-roles-and-model-routing-token-policy) · catalogue: [MODELS.md](./MODELS.md)): `build` → the role agent on **Sonnet 5.5** (Anthropic) · `lite` → `builder-lite` on **GPT-6 Luna** (OpenAI Codex). Reviews are cross-family: `reviewer` on **Haiku 5.5** for lite cards, `reviewer-pro` on **GPT-5.6 Terra** for build cards and any auth/session/scoring/answer-key/anti-cheat diff. Planning stays on Opus 5.5 and never builds. The OpenCode free lane is retired.
+Lanes: **S** server (strictly sequential) · **F** frontend (after T-046) · **C** carry-over (independent) · **Z** closing.
+**Model tier** (policy: [PROCESS.md §2](./PROCESS.md#2-roles-and-model-routing-token-policy) · catalogue: [MODELS.md](./MODELS.md)): `build` → the role agent on **Sonnet 5.5** · `lite` → `builder-lite`. Reviews are cross-family by default: `reviewer` (Haiku 5.5) for lite cards, `reviewer-pro` for build cards and any auth/session/scoring/answer-key diff.
+⚠️ **Codex quota exhausted** — the MODELS.md §3 failover is active, so `builder-lite`, `scout`, `docs-keeper` and `reviewer-pro` are temporarily on Anthropic and **cross-family review is suspended**. Revert the pins when it resets.
 
-### S3 backlog (raised by the T-040 QA, 2026-11-08)
-| ID | Title | Role | Model | Sev | Status |
-|:--|:--|:--|:--|:--|:--|
-| [T-041](./tasks/T-041-analytics-recharts-warning.md) | Analytics Recharts width(-1)/height(-1) warning | frontend-dev | lite | Low | 📋 Backlog |
-| [T-042](./tasks/T-042-exam-config-input-guard.md) | Exam config numeric inputs cannot be cleared | frontend-dev | lite | Low | 📋 Backlog |
-| [T-043](./tasks/T-043-admin-nav-ids.md) | ids on admin header/sidebar links | frontend-dev | lite | Low | 📋 Backlog |
+### Completed sprints
+| Sprint | Phase | Cards | Merged |
+|:--|:--|:-:|:--|
+| [S1](./sprints/S1.md) | P0 | 22 | `600c2e7` |
+| [S2](./sprints/S2.md) | P1 | 17 | `87d1858` (PR #1, CI green) |
 
 ## Upcoming sprints
 | Sprint | Goal | Status |

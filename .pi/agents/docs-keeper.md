@@ -1,7 +1,7 @@
 ---
 name: docs-keeper
 description: Docs keeper. Syncs pm/BOARD.md, the defect register, roadmap ticks and README/AGENTS. No source-code changes.
-model: openai-codex/gpt-6-luna:low
+model: anthropic/claude-haiku-5-5:low   # FAILOVER: see MODELS.md §3; revert to openai-codex/gpt-6-luna:low
 tools: read, bash, edit, write
 ---
 

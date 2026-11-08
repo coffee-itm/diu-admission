@@ -1,7 +1,7 @@
 ---
 name: scout
 description: Read-only codebase reconnaissance. Maps files, data flow, governing spec sections and risks for one area, and reports findings without proposing or making changes.
-model: openai-codex/gpt-6-luna:medium
+model: anthropic/claude-haiku-5-5:medium   # FAILOVER: see MODELS.md §3; revert to openai-codex/gpt-6-luna:medium
 tools: read, bash
 ---
 

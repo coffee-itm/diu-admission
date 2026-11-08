@@ -151,6 +151,26 @@ wins — notably React Compiler bans the manual `useMemo`/`useCallback`/`memo` t
 
 ## 4. Git workflow
 
+### Branch model
+
+```
+sprint/S<n>-<topic>   one per sprint, branched from prototype, deleted after merge
+        │  push → PR → CI green → "Merge" on GitHub (merge commit, never squash)
+        ▼
+prototype             the integration branch. Default branch today. Always green
+        │  created once the product is pilot-ready (end of R2/R3)
+        ▼
+main                  release branch. Does not exist yet — deliberately
+```
+
+- **You never run `git merge` on `prototype` locally.** The merge happens on GitHub, on the PR, after CI is green.
+  Merging locally skips CI and review and auto-closes the PR as if it had been reviewed.
+- Per sprint: `git switch -c sprint/S<n>-<topic> prototype` → commit per card → `git push` → the PR updates →
+  CI runs → merge the PR → `git switch prototype && git pull` → delete the branch (local and remote).
+- **`main` is created later, not now.** `prototype` is the integration branch while the product is being built; it
+  carries mock data and an unfinished backend. When the system is feature-complete and pilot-ready (R2 exit, after P5,
+  with E2E and load tests passing per `context/20`), we branch `main` off `prototype`, make it the default, and from then on
+  `prototype` → `main` is a release PR per release. Creating `main` earlier would just be a second name for the same code.
 - One branch per sprint: `sprint/S1-prototype-fixes`, branched from `prototype`.
 - **One commit per card**, Conventional Commits with the card ID:
   `fix(anti-cheat): read fresh counters in handlers [T-004]`
