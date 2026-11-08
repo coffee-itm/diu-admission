@@ -1,6 +1,6 @@
 # T-038 · GitHub Actions CI: lint, all tests, build
 
-Status: ✅ Ready
+Status: 👀 Review
 Sprint: S2 · Role: devops · Model: lite · Size: S
 Tier rationale: YAML against a spec section; CI itself proves it (PROCESS §2.3)
 Depends on: T-037
@@ -31,5 +31,11 @@ python3 -c "import yaml;yaml.safe_load(open('.github/workflows/ci.yml'))" && pnp
 - The `e2e` job (needs Playwright, planned with the E2E suite). Deploy workflows (S8). Branch protection settings (the owner sets these in GitHub).
 
 ## Agent log
+- Added push/PR CI job: checkout, pnpm 11.13.1, Node 22, pnpm/Mongo binary caching, frozen install, lint, all workspace tests, build.
+- YAML parsed with `python3 -c "import yaml;yaml.safe_load(open('.github/workflows/ci.yml'))"` ✅; `actionlint` unavailable.
+- Local workflow sequence: install ✅ (already up to date), lint ✅, test:all ✅ (40 shared + 2 todo; 5 server), build ✅ (Vite 8.00s; existing chunk-size advisory).
+- Full frontend `pnpm test`: 29 files / 225 tests passed. No lint warnings.
+- Acceptance: 1 ✅ 2 ⚠️ not verified (no CI run; coordinator to watch and record URL) 3 ✅.
+- CI run link pending coordinator push.
 
 ## Review
