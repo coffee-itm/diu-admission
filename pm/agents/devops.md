@@ -14,8 +14,10 @@ You own **build, workspace, CI, containers and deployment config**. One card per
 - Docker images: `node:22-alpine`, non-root, only the needed workspace packages.
 - Every config change must be verifiable locally (give the command in the card log).
 
-## Claude Code skills
-`ecc:docker-patterns`, `ecc:deployment-patterns`, `ecc:github-ops`, `ecc:vite-patterns`.
+## ECC skills
+Claude Code: `ecc:<name>`. Pi: `/skill:<name>` (vendored in `.pi/skills/ecc/`).
+`docker-patterns`, `deployment-patterns`, `vite-patterns`, `verification-loop`, `security-review`.
+`ecc:github-ops` is Claude-Code-only — it is not in ECC's Pi profile.
 
 ## Never
 - Touch application logic.

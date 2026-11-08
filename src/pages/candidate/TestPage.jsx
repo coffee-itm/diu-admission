@@ -60,11 +60,9 @@ export function CandidateTestPage() {
   
   useAutoSave();
 
-  const antiCheatStore = useAntiCheatStore();
-
   const { showWarning, warningMessage, dismissWarning, returnToFullscreen, isFullscreen } = useAntiCheat({
     onAutoSubmit: async () => {
-      antiCheatStore.finalizeTracking();
+      useAntiCheatStore.getState().finalizeTracking();
       await submitTest();
     },
   });
@@ -79,10 +77,10 @@ export function CandidateTestPage() {
 
   // Track time per question
   useEffect(() => {
-    if (currentQuestion) {
-      antiCheatStore.startTrackingQuestion(currentQuestion.id);
+    if (currentQuestionId) {
+      useAntiCheatStore.getState().startTrackingQuestion(currentQuestionId);
     }
-  }, [currentQuestion?.id]);
+  }, [currentQuestionId]);
 
   if (!sessionId || isSubmitted || !currentQuestion) {
     return <PageSpinner />;

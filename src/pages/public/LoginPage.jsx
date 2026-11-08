@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router';
+import { Link, Navigate, useNavigate, useLocation } from 'react-router';
 import { Mail, Lock, LogIn } from 'lucide-react';
 import { ROUTES } from '../../lib/constants.js';
 import { useAuth } from '../../features/auth/useAuth.js';
@@ -12,9 +12,13 @@ import { motion } from 'framer-motion';
 export function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const { login, loading } = useAuth();
+  const { login, loading, isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+
+  if (isAuthenticated) {
+    return <Navigate replace to={resolvePostLoginPath(undefined, user?.role)} />;
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault();

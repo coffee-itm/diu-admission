@@ -122,7 +122,7 @@ jobs:
         with: { node-version: 22, cache: pnpm }
       - run: pnpm install --frozen-lockfile
       - run: pnpm lint
-      - run: pnpm test:all -- --coverage
+      - run: pnpm test:all -- --coverage  # no-op for coverage until S3; pnpm forwards the flag only to pnpm -r test and @vitest/coverage-v8 is not installed
       - run: pnpm build
   e2e:
     needs: ci

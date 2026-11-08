@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parseCSV } from './csvParse.js';
+import { parseCSV, parseCSVDetailed } from './csvParse.js';
 
 describe('parseCSV', () => {
   it('parses simple rows with LF and no trailing newline', () => {
@@ -22,5 +22,21 @@ describe('parseCSV', () => {
   });
   it('keeps empty fields and skips blank lines', () => {
     expect(parseCSV('a,,c\n\n1,2,3\n')).toEqual([['a', '', 'c'], ['1', '2', '3']]);
+  });
+});
+
+describe('parseCSVDetailed', () => {
+  it('reports an unterminated quote with its line', () => {
+    const r = parseCSVDetailed('a,"b\n');
+    expect(r.error).toEqual({ line: 1, message: 'Unterminated quoted field' });
+  });
+  it('keeps real line numbers across blank lines and multi-line fields', () => {
+    const r = parseCSVDetailed('h1,h2\n\n"x\ny",z\nlast,row\n');
+    expect(r.error).toBeNull();
+    expect(r.rows.map((x) => x.line)).toEqual([1, 3, 5]);
+  });
+  it('counts CRLF as one line', () => {
+    const r = parseCSVDetailed('a\r\n\r\nb\r\n');
+    expect(r.rows.map((x) => x.line)).toEqual([1, 3]);
   });
 });

@@ -1,4 +1,14 @@
 // App-wide constants
+// Domain constants live in @diu/shared (ADR-019) and are re-exported here for existing imports.
+// UI-only presentation data (labels, Tailwind classes, routes, storage keys) stays in this file.
+import { ELIGIBILITY as ELIGIBILITY_ID, DIFFICULTY as DIFFICULTY_ID } from '@diu/shared/constants';
+
+export {
+  SECTION_ORDER,
+  QUESTION_STATUS,
+  ANTI_CHEAT,
+  SECURITY_EVENT_TYPES,
+} from '@diu/shared/constants';
 
 export const APP_NAME = 'DIU Admission';
 export const APP_ORG = 'Daffodil International University';
@@ -29,16 +39,14 @@ export const SECTIONS = {
   BUSINESS: { id: 'BUSINESS', name: 'Business & Management Aptitude', shortName: 'Business', color: '#be185d', bg: 'bg-pink-100', text: 'text-pink-800' },
 };
 
-export const SECTION_ORDER = ['MATH', 'LOGIC', 'IT', 'ENGLISH', 'BUSINESS'];
-
 export const DIFFICULTY = {
-  easy: { label: 'Easy', color: 'text-green-700', bg: 'bg-green-100' },
-  medium: { label: 'Medium', color: 'text-yellow-700', bg: 'bg-yellow-100' },
-  hard: { label: 'Hard', color: 'text-red-700', bg: 'bg-red-100' },
+  [DIFFICULTY_ID.EASY]: { label: 'Easy', color: 'text-green-700', bg: 'bg-green-100' },
+  [DIFFICULTY_ID.MEDIUM]: { label: 'Medium', color: 'text-yellow-700', bg: 'bg-yellow-100' },
+  [DIFFICULTY_ID.HARD]: { label: 'Hard', color: 'text-red-700', bg: 'bg-red-100' },
 };
 
 export const ELIGIBILITY = {
-  ELIGIBLE: {
+  [ELIGIBILITY_ID.ELIGIBLE]: {
     label: 'Eligible',
     color: 'text-green-700',
     bg: 'bg-green-100',
@@ -46,7 +54,7 @@ export const ELIGIBILITY = {
     icon: 'CheckCircle',
     description: 'Congratulations! You meet all requirements for admission.',
   },
-  CONDITIONALLY_ELIGIBLE: {
+  [ELIGIBILITY_ID.CONDITIONALLY_ELIGIBLE]: {
     label: 'Conditionally Eligible',
     color: 'text-orange-700',
     bg: 'bg-orange-100',
@@ -54,7 +62,7 @@ export const ELIGIBILITY = {
     icon: 'AlertCircle',
     description: 'You may be considered for admission with additional review.',
   },
-  NOT_ELIGIBLE: {
+  [ELIGIBILITY_ID.NOT_ELIGIBLE]: {
     label: 'Not Eligible',
     color: 'text-red-700',
     bg: 'bg-red-100',
@@ -62,13 +70,6 @@ export const ELIGIBILITY = {
     icon: 'XCircle',
     description: 'Unfortunately, you do not meet the minimum requirements.',
   },
-};
-
-export const QUESTION_STATUS = {
-  NOT_VISITED: 'not_visited',
-  ANSWERED: 'answered',
-  SKIPPED: 'skipped',
-  FLAGGED: 'flagged',
 };
 
 export const ROUTES = {
@@ -90,40 +91,6 @@ export const ROUTES = {
 
 export const AUTOSAVE_INTERVAL = 5000; // 5 seconds
 export const TIMER_WARNING_THRESHOLD = 300; // 5 minutes in seconds
-
-// Anti-Cheat Configuration
-export const ANTI_CHEAT = {
-  MAX_TAB_SWITCHES: 5,        // Auto-submit after this many
-  WARNING_AT_SWITCHES: 2,     // Show warning modal after this many
-  MAX_FULLSCREEN_EXITS: 3,    // Auto-submit after this many
-  BLOCKED_KEYS: [
-    { key: 'c', ctrl: true },      // Ctrl+C
-    { key: 'v', ctrl: true },      // Ctrl+V
-    { key: 'a', ctrl: true },      // Ctrl+A
-    { key: 'p', ctrl: true },      // Ctrl+P
-    { key: 'u', ctrl: true },      // Ctrl+U (view source)
-    { key: 's', ctrl: true },      // Ctrl+S
-    { key: 'I', ctrl: true, shift: true },  // DevTools
-    { key: 'J', ctrl: true, shift: true },  // DevTools
-    { key: 'C', ctrl: true, shift: true },  // DevTools
-    { key: 'F12', ctrl: false },            // DevTools
-  ],
-};
-
-export const SECURITY_EVENT_TYPES = {
-  TAB_SWITCH: 'tab_switch',
-  FULLSCREEN_EXIT: 'fullscreen_exit',
-  COPY_ATTEMPT: 'copy_attempt',
-  PASTE_ATTEMPT: 'paste_attempt',
-  RIGHT_CLICK: 'right_click',
-  BLOCKED_KEY: 'blocked_key',
-  DEVTOOLS_OPEN: 'devtools_open',
-  AUTO_SUBMIT_CHEAT: 'auto_submit_cheat',
-  INTEGRITY_AGREED: 'integrity_agreed',
-  FULLSCREEN_ENTERED: 'fullscreen_entered',
-  CUT_ATTEMPT: 'cut_attempt',
-  FULLSCREEN_UNSUPPORTED: 'fullscreen_unsupported',
-};
 
 // Mock credentials
 export const MOCK_ADMIN = { email: 'admin@diu.edu', password: 'Admin@1234' };

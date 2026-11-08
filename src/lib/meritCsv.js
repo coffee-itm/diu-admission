@@ -38,3 +38,25 @@ export function buildMeritRows(meritList, candidates) {
     };
   });
 }
+
+export const MERIT_ELIGIBILITY_FILTERS = [
+  { value: 'eligible_conditional', label: 'Eligible + Conditional' },
+  { value: 'ELIGIBLE', label: 'Eligible only' },
+  { value: 'CONDITIONALLY_ELIGIBLE', label: 'Conditionally eligible only' },
+  { value: 'NOT_ELIGIBLE', label: 'Not eligible only' },
+  { value: 'all', label: 'All candidates' },
+];
+
+export const DEFAULT_MERIT_FILTER = 'eligible_conditional';
+
+/**
+ * Hide rows the admin doesn't want to see. Ranks were computed on the full list,
+ * so filtering never re-ranks: a row keeps its original rank number.
+ */
+export function filterMeritByEligibility(list, filter = DEFAULT_MERIT_FILTER) {
+  if (filter === 'all') return list;
+  if (filter === DEFAULT_MERIT_FILTER || !filter) {
+    return list.filter((r) => r.eligibility === 'ELIGIBLE' || r.eligibility === 'CONDITIONALLY_ELIGIBLE');
+  }
+  return list.filter((r) => r.eligibility === filter);
+}

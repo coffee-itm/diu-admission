@@ -51,12 +51,12 @@
 
 ## P1 — Workspace & server skeleton
 
-- [ ] **P1-01 Workspace.** `pnpm-workspace.yaml` gets `packages: ['.', 'server', 'packages/*']` (keep `allowBuilds`). Create `packages/shared` (`@diu/shared`) and `server` (`@diu/server`) package.json files. Add the root scripts per [16 §1](./16-backend-architecture.md#1-repository-layout-pnpm-workspace). (ADR-019)
-- [ ] **P1-02 Shared package.** Move `scoring.js` into `packages/shared` with `classify`/`resolveThresholds`. Add `risk.js`, `shuffle.js`, `constants.js` (moved from `src/lib/constants.js` where domain-level), and Zod schemas. The frontend imports from `@diu/shared`. Tests move with the code. *Done when* frontend tests and build still pass.
-- [ ] **P1-03 Server bootstrap.** `app.js`/`server.js`/`config.js`, plugins (mongoose, security, errors, zod), `/health` + `/ready`, pino logging, graceful shutdown. *Done when* `pnpm dev:server` starts and `GET /api/v1/ready` reports `db: ok` against a local replset.
-- [ ] **P1-04 Test helpers.** `server/test/helpers/app.js` with `mongodb-memory-server` replset plus factories. One passing `/health` test.
-- [ ] **P1-05 Dev infra.** `docker-compose.yml` with `mongo:7` as a single-node replset (`--replSet rs0` + init script). `server/.env.example`. Vite proxy `/api`.
-- [ ] **P1-06 CI.** `.github/workflows/ci.yml` per [18 §5](./18-testing-strategy.md#5-ci-github-actions-githubworkflowsciyml).
+- [x] **P1-01 Workspace.** `pnpm-workspace.yaml` gets `packages: ['.', 'server', 'packages/*']` (keep `allowBuilds`). Create `packages/shared` (`@diu/shared`) and `server` (`@diu/server`) package.json files. Add the root scripts per [16 §1](./16-backend-architecture.md#1-repository-layout-pnpm-workspace). The root `seed` script delegates to `@diu/server seed`, but the server seed script is not yet implemented; it lands in P3-04, so `pnpm seed` is not yet runnable. (ADR-019)
+- [x] **P1-02 Shared package.** Move `scoring.js` into `packages/shared`; `resolveThresholds` is exported, while eligibility tiers remain inline in `calculateScore` (there is no standalone `classify`). Extracting `classify` is deferred to P4-05, when the server scores sessions. Add `risk.js`, `shuffle.js`, `constants.js` (moved from `src/lib/constants.js` where domain-level), and Zod schemas. The frontend imports from `@diu/shared`. Tests move with the code. *Done when* frontend tests and build still pass.
+- [x] **P1-03 Server bootstrap.** `app.js`/`server.js`/`config.js`, plugins (mongoose, security, errors, zod), `/health` + `/ready`, pino logging, graceful shutdown. *Done when* `pnpm dev:server` starts and `GET /api/v1/ready` reports `db: ok` against a local replset.
+- [x] **P1-04 Test helpers.** `server/test/helpers/app.js` with `mongodb-memory-server` replset plus factories. One passing `/health` test.
+- [x] **P1-05 Dev infra.** `docker-compose.yml` with `mongo:7` as a single-node replset (`--replSet rs0` + init script). `server/.env.example`. Vite proxy `/api`.
+- [x] **P1-06 CI.** `.github/workflows/ci.yml` runs lint, tests and build per [18 §5](./18-testing-strategy.md#5-ci-github-actions-githubworkflowsciyml); it has no `e2e` job yet, deferred per S2 until the Playwright suite lands.
 
 ## P2 — Auth & users
 

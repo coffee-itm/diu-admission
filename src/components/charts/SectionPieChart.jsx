@@ -5,8 +5,8 @@ export function SectionPieChart({ data }) {
   const total = data.reduce((sum, entry) => sum + entry.value, 0);
   
   return (
-    <div className="h-64 w-full">
-      <ResponsiveContainer width="100%" height="100%">
+    <div className="h-64 min-h-64 w-full min-w-0">
+      <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={256}>
         <PieChart>
           <Pie
             data={data}

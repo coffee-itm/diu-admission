@@ -30,7 +30,7 @@ export function QuestionTable({ questions, onEdit, onDelete, onView }) {
             const diff = DIFFICULTY[q.difficulty];
             return (
               <tr key={q.id} className="hover:bg-slate-50/50 transition-colors">
-                <td className="px-4 py-3 font-mono text-xs text-slate-500">{q.id.slice(-6)}</td>
+                <td className="px-4 py-3 font-mono text-xs text-slate-500 whitespace-nowrap" title={q.id}>{q.id}</td>
                 <td className="px-4 py-3">
                   <Badge variant={sec?.bg.replace('bg-', '').replace('-100', '')}>{sec?.shortName}</Badge>
                 </td>
@@ -44,13 +44,13 @@ export function QuestionTable({ questions, onEdit, onDelete, onView }) {
                 </td>
                 <td className="px-4 py-3 text-right">
                   <div className="flex justify-end gap-2">
-                    <button onClick={() => onView?.(q)} className="p-1.5 text-slate-400 hover:text-blue-600 rounded hover:bg-blue-50" title="View Details">
+                    <button id={`question-${q.id}-view`} onClick={() => onView?.(q)} className="p-1.5 text-slate-400 hover:text-blue-600 rounded hover:bg-blue-50" title="View Details">
                       <Eye size={16} />
                     </button>
-                    <button onClick={() => onEdit?.(q)} className="p-1.5 text-slate-400 hover:text-amber-600 rounded hover:bg-amber-50" title="Edit">
+                    <button id={`question-${q.id}-edit`} onClick={() => onEdit?.(q)} className="p-1.5 text-slate-400 hover:text-amber-600 rounded hover:bg-amber-50" title="Edit">
                       <Edit size={16} />
                     </button>
-                    <button onClick={() => onDelete?.(q.id)} className="p-1.5 text-slate-400 hover:text-red-600 rounded hover:bg-red-50" title="Delete">
+                    <button id={`question-${q.id}-remove`} onClick={() => onDelete?.(q.id)} className="p-1.5 text-slate-400 hover:text-red-600 rounded hover:bg-red-50" title="Delete">
                       <Trash2 size={16} />
                     </button>
                   </div>

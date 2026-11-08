@@ -1,4 +1,5 @@
 import { clsx } from 'clsx';
+import { shuffle } from '@diu/shared/shuffle';
 
 /**
  * Merge class names with clsx
@@ -11,12 +12,7 @@ export function cn(...inputs) {
  * Shuffle an array using Fisher-Yates algorithm
  */
 export function shuffleArray(arr) {
-  const result = [...arr];
-  for (let i = result.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [result[i], result[j]] = [result[j], result[i]];
-  }
-  return result;
+  return shuffle(arr);
 }
 
 /**

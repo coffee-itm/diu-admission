@@ -1,6 +1,11 @@
 import { useState } from 'react';
 import { Save, RefreshCw } from 'lucide-react';
 import { useExamConfigStore } from '../../store/examConfigStore.js';
+import {
+  validateExamConfigForm,
+  isValidQuestionCount,
+  isValidTimeMinutes,
+} from '../../lib/examConfigValidation.js';
 import { Card, CardHeader, CardBody } from '../../components/ui/Card.jsx';
 import { Input } from '../../components/ui/Input.jsx';
 import { Button } from '../../components/ui/Button.jsx';
@@ -9,6 +14,7 @@ import { toast } from 'sonner';
 export function ExamConfigPage() {
   const { config, updateConfig, updateSection, resetToDefault } = useExamConfigStore();
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState({});
 
   const [formData, setFormData] = useState({
     title: config.title,
@@ -17,7 +23,25 @@ export function ExamConfigPage() {
     sectionMinPercent: config.passingThresholds.sectionMinPercent,
   });
 
+  const handleFieldChange = (field, value) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+    // Clear the field's error as soon as the admin edits it.
+    setErrors((prev) => {
+      if (!prev[field]) return prev;
+      const next = { ...prev };
+      delete next[field];
+      return next;
+    });
+  };
+
   const handleSave = () => {
+    const { valid, errors: validationErrors } = validateExamConfigForm(formData);
+    setErrors(validationErrors);
+    if (!valid) {
+      toast.error('Fix the highlighted fields before saving');
+      return;
+    }
+
     setLoading(true);
     setTimeout(() => {
       updateConfig({
@@ -49,8 +73,8 @@ export function ExamConfigPage() {
           <p className="text-slate-600">Manage rules, time, and thresholds</p>
         </div>
         <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-          <Button variant="outline" className="w-full sm:w-auto" onClick={handleReset} leftIcon={<RefreshCw size={16} />}>Restore Defaults</Button>
-          <Button className="w-full sm:w-auto" onClick={handleSave} loading={loading} leftIcon={<Save size={16} />}>Save Changes</Button>
+          <Button id="exam-config-reset" variant="outline" className="w-full sm:w-auto" onClick={handleReset} leftIcon={<RefreshCw size={16} />}>Restore Defaults</Button>
+          <Button id="exam-config-save" className="w-full sm:w-auto" onClick={handleSave} loading={loading} leftIcon={<Save size={16} />}>Save Changes</Button>
         </div>
       </div>
 
@@ -59,15 +83,19 @@ export function ExamConfigPage() {
           <CardHeader><h3 className="font-bold text-slate-900">General Settings</h3></CardHeader>
           <CardBody className="space-y-4">
             <Input 
+              id="exam-config-title"
               label="Exam Title" 
               value={formData.title} 
-              onChange={e => setFormData({...formData, title: e.target.value})} 
+              onChange={e => handleFieldChange('title', e.target.value)} 
             />
             <Input 
+              id="exam-config-duration"
               label="Total Duration (Minutes)" 
               type="number" 
               value={formData.totalTimeMinutes} 
-              onChange={e => setFormData({...formData, totalTimeMinutes: e.target.value})} 
+              onChange={e => handleFieldChange('totalTimeMinutes', e.target.value)} 
+              error={errors.totalTimeMinutes}
+              hint="Whole number of minutes between 1 and 600"
             />
           </CardBody>
         </Card>
@@ -76,17 +104,21 @@ export function ExamConfigPage() {
           <CardHeader><h3 className="font-bold text-slate-900">Passing Thresholds</h3></CardHeader>
           <CardBody className="space-y-4">
             <Input 
+              id="exam-config-overall-min"
               label="Overall Minimum % (ELIGIBLE)" 
               type="number" 
               value={formData.overallMinPercent} 
-              onChange={e => setFormData({...formData, overallMinPercent: e.target.value})} 
+              onChange={e => handleFieldChange('overallMinPercent', e.target.value)} 
+              error={errors.overallMinPercent}
               rightIcon={<span className="text-slate-400">%</span>}
             />
             <Input 
+              id="exam-config-section-min"
               label="Per-Section Minimum %" 
               type="number" 
               value={formData.sectionMinPercent} 
-              onChange={e => setFormData({...formData, sectionMinPercent: e.target.value})} 
+              onChange={e => handleFieldChange('sectionMinPercent', e.target.value)} 
+              error={errors.sectionMinPercent}
               hint="Score below this in any section triggers CONDITIONALLY ELIGIBLE or NOT ELIGIBLE"
               rightIcon={<span className="text-slate-400">%</span>}
             />
@@ -113,18 +145,28 @@ export function ExamConfigPage() {
                       <td className="px-4 py-3">{sec.name}</td>
                       <td className="px-4 py-3 text-center">
                         <input 
+                          id={`exam-config-${sec.id}-count`}
                           type="number" 
                           className="w-20 text-center border border-slate-300 rounded p-1" 
                           value={sec.questionCount}
-                          onChange={(e) => updateSection(sec.id, { questionCount: Number(e.target.value) })}
+                          aria-label={`${sec.name} question count`}
+                          onChange={(e) => {
+                            if (!isValidQuestionCount(e.target.value)) return;
+                            updateSection(sec.id, { questionCount: Number(e.target.value) });
+                          }}
                         />
                       </td>
                       <td className="px-4 py-3 text-center">
                         <input 
+                          id={`exam-config-${sec.id}-time`}
                           type="number" 
                           className="w-20 text-center border border-slate-300 rounded p-1" 
                           value={sec.timeMinutes}
-                          onChange={(e) => updateSection(sec.id, { timeMinutes: Number(e.target.value) })}
+                          aria-label={`${sec.name} recommended time in minutes`}
+                          onChange={(e) => {
+                            if (!isValidTimeMinutes(e.target.value)) return;
+                            updateSection(sec.id, { timeMinutes: Number(e.target.value) });
+                          }}
                         />
                       </td>
                     </tr>

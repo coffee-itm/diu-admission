@@ -30,32 +30,45 @@
 
 Compiler rule: **no manual `React.memo` / `useMemo` / `useCallback`**.
 
+### Workspace (added in S2)
+
+The repository is a pnpm workspace: root SPA (`diu-admission`), `packages/shared` (`@diu/shared`), and `server` (`@diu/server`). Shared scoring and domain constants have root `src/lib/*` re-export shims; shuffle is exposed in the SPA through `shuffleArray` in `src/lib/utils.js`, not a re-export shim. Shared also contains risk and common/question Zod schemas. The server is Fastify 5 with health/readiness routes. Local Mongo 7 replica-set setup is in `docker-compose.yml`; CI is in `.github/workflows/ci.yml`.
+
 ### Directory layout (actual)
 
 ```
-src/
-├── main.jsx, App.jsx, index.css, App.css
-├── components/
-│   ├── ui/        Badge, Button, Card(+StatCard), Input, LanguageToggle (unused), Modal, ProgressBar, Spinner, Timer
-│   ├── layout/    AdminLayout, CandidateLayout, Footer, Header, Sidebar
-│   └── charts/    MeritLineChart, ScoreBarChart, SectionPieChart
-├── pages/
-│   ├── public/    LandingPage, LoginPage, NotFoundPage, RegisterPage
-│   ├── candidate/ DashboardPage, InstructionsPage, ResultPage, TestPage
-│   └── admin/     AnalyticsPage, CandidateDetailPage, CandidatesPage, DashboardPage,
-│                  ExamConfigPage, MeritListPage, QuestionBankPage, QuestionFormPage
-├── features/
-│   ├── auth/      AuthProvider.jsx (pass-through), ProtectedRoute.jsx, useAuth.js, resolvePostLoginPath.js
-│   ├── test/      useTestEngine, useTimer, useAutoSave, useAntiCheat,
-│   │              QuestionCard, QuestionNav, SectionHeader, SecurityWarningModal, TestSubmitDialog
-│   ├── questions/ BulkImportModal (CSV import), importQuestions.js, QuestionForm, QuestionTable, questionSchema.js
-│   └── scoring/   EligibilityBadge, ScoreCard, scoringConfig.js (used by scoring.js)
-├── store/         authStore, testStore, questionStore, examConfigStore, antiCheatStore
-├── services/      authService, testService, resultService, analyticsService   (no api.js, no questionService)
-├── data/          mockQuestions (50), mockCandidates (16 + 1 admin), mockResults (15), mockExamConfig
-├── test/          setup.js (Vitest setup)
-└── lib/           constants.js, scoring.js, utils.js, pdfGenerator.js, csvExport.js, csvParse.js, meritCsv.js,
-                   fullscreen.js, storageMigration.js, runStorageMigration.js
+diu-admission/                         (pnpm workspace root — the SPA package)
+├── src/
+│   ├── main.jsx, App.jsx, index.css, App.css
+│   ├── components/
+│   │   ├── ui/        Badge, Button, Card(+StatCard), Input, LanguageToggle (unused), Modal, ProgressBar, Spinner, Timer
+│   │   ├── layout/    AdminLayout, CandidateLayout, Footer, Header, Sidebar
+│   │   └── charts/    MeritLineChart, ScoreBarChart, SectionPieChart
+│   ├── pages/
+│   │   ├── public/    LandingPage, LoginPage, NotFoundPage, RegisterPage
+│   │   ├── candidate/ DashboardPage, InstructionsPage, ResultPage, TestPage
+│   │   └── admin/     AnalyticsPage, CandidateDetailPage, CandidatesPage, DashboardPage,
+│   │                  ExamConfigPage, MeritListPage, QuestionBankPage, QuestionFormPage
+│   ├── features/
+│   │   ├── auth/      AuthProvider.jsx (pass-through), ProtectedRoute.jsx, useAuth.js, resolvePostLoginPath.js
+│   │   ├── test/      useTestEngine, useTimer, useAutoSave, useAntiCheat,
+│   │   │              QuestionCard, QuestionNav, SectionHeader, SecurityWarningModal, TestSubmitDialog
+│   │   ├── questions/ BulkImportModal (CSV import), importQuestions.js, QuestionForm, QuestionTable,
+│   │   │              questionSchema.js (re-export of @diu/shared)
+│   │   └── scoring/   EligibilityBadge, ScoreCard, scoringConfig.js (used by scoring.js)
+│   ├── store/         authStore, testStore, questionStore, examConfigStore, antiCheatStore
+│   ├── services/      authService, testService, resultService, analyticsService   (no api.js, no questionService)
+│   ├── data/          mockQuestions (50), mockCandidates (16 + 1 admin), mockResults (15), mockExamConfig
+│   ├── test/          setup.js (Vitest setup)
+│   └── lib/           constants.js, scoring.js (shim), utils.js, pdfGenerator.js, csvExport.js, csvParse.js,
+│                      meritCsv.js, examConfigValidation.js, instructionRules.js, fullscreen.js,
+│                      storageMigration.js, runStorageMigration.js
+├── packages/shared/   @diu/shared — constants.js, index.js, risk.js, scoring.js, shuffle.js, schemas/{common,question}.js
+├── server/            @diu/server — package.json, src/{app,config,server}.js, src/lib/, src/modules/health/,
+│                      src/plugins/{errors,mongoose,security,zod}.js, test/{health.test.js,helpers/}
+├── docker-compose.yml (mongo:7 single-node replica set)
+├── pnpm-workspace.yaml
+└── .github/workflows/ci.yml
 ```
 
 ### Data flow (actual)
@@ -127,8 +140,7 @@ diu-admission/
 ├── server/              # @diu/server (Fastify)
 ├── e2e/                 # Playwright
 ├── load/                # k6
-├── context/             # these docs
-└── pnpm-workspace.yaml  # packages: ['.', 'server', 'packages/*']
+└── context/             # these docs (workspace and CI files already exist; see actual layout above)
 ```
 
 ### What moves where
@@ -154,11 +166,11 @@ Inter / JetBrains Mono. Dark mode and i18n: [17 §6–7](./17-frontend-spec.md#6
 
 ```bash
 pnpm dev            # frontend :5173
-pnpm dev:server     # API :4000 (after P1)
+pnpm dev:server     # API :4000
 pnpm dev:all        # both
 pnpm lint
 pnpm test           # frontend tests (after P0-01)
 pnpm test:all       # all workspace packages
 pnpm build
-pnpm seed           # seed MongoDB from src/data (after P3-04)
+pnpm seed           # not yet runnable: delegates to missing @diu/server seed; target P3-04
 ```

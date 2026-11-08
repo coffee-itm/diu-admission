@@ -3,11 +3,11 @@ import { Upload, FileText, Download } from 'lucide-react';
 import { Modal } from '../../components/ui/Modal.jsx';
 import { Button } from '../../components/ui/Button.jsx';
 import { toast } from 'sonner';
-import { parseCSV } from '../../lib/csvParse.js';
+import { parseCSVDetailed } from '../../lib/csvParse.js';
 import { mapRows } from './importQuestions.js';
 import { useQuestionStore } from '../../store/questionStore.js';
 
-const MAX_BYTES = 5 * 1024 * 1024;
+const MAX_BYTES = 2 * 1024 * 1024;
 
 export function BulkImportModal({ isOpen, onClose, onImport }) {
   const [file, setFile] = useState(null);
@@ -31,11 +31,16 @@ export function BulkImportModal({ isOpen, onClose, onImport }) {
     if (!f) return;
     setFile(f);
     if (f.size > MAX_BYTES) {
-      setFileError('File is larger than 5MB');
+      setFileError('File is larger than 2 MB');
       return;
     }
     try {
-      setResult(mapRows(parseCSV(await f.text())));
+      const { rows, error } = parseCSVDetailed(await f.text());
+      if (error) {
+        setResult({ valid: [], errors: [{ row: error.line, messages: [error.message] }] });
+      } else {
+        setResult(mapRows(rows));
+      }
     } catch {
       setFileError('Could not read this file');
     }
@@ -76,7 +81,7 @@ export function BulkImportModal({ isOpen, onClose, onImport }) {
         <div className="border-2 border-dashed border-slate-300 rounded-xl p-8 flex flex-col items-center justify-center bg-slate-50 text-center hover:bg-slate-100 transition-colors">
           <Upload size={32} className="text-slate-400 mb-3" />
           <h3 className="text-sm font-medium text-slate-900 mb-1">Upload CSV file</h3>
-          <p className="text-xs text-slate-500 mb-4">Max file size: 5MB</p>
+          <p className="text-xs text-slate-500 mb-4">Max file size: 2 MB, 2,000 rows</p>
           <label htmlFor="bulk-import-file" className="cursor-pointer">
             <span className="bg-white border border-slate-300 text-slate-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-50 transition-colors">
               Browse Files

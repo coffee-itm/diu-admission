@@ -2,16 +2,25 @@
   "name": "diu-admission",
   "private": true,
   "version": "0.0.0",
+  "packageManager": "pnpm@11.13.1",
   "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "dev": "vite",
+    "dev:server": "pnpm --filter @diu/server dev",
+    "dev:all": "pnpm -r --parallel --filter . --filter @diu/server dev",
     "build": "vite build",
     "lint": "eslint .",
     "test": "vitest run",
+    "test:all": "pnpm test && pnpm -r test",
+    "seed": "pnpm --filter @diu/server seed",
     "test:watch": "vitest",
     "preview": "vite preview"
   },
   "dependencies": {
+    "@diu/shared": "workspace:*",
     "@hookform/resolvers": "^5.4.0",
     "@tanstack/react-query": "^5.101.0",
     "clsx": "^2.1.1",
