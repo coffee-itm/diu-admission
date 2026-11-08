@@ -1,6 +1,6 @@
 # T-035 · Dev infra: Mongo 7 replica set, `server/.env.example`, Vite `/api` proxy
 
-Status: 👀 Review
+Status: ✔️ Done
 Sprint: S2 · Role: devops · Model: lite · Size: S
 Tier rationale: compose file, .env.example and a Vite proxy; all verifiable by one command (PROCESS §2.3)
 Depends on: T-032 (can run in parallel with T-033/T-034; it touches different files)
@@ -70,4 +70,26 @@ docker compose up -d mongo && sleep 20 && docker compose exec mongo mongosh --qu
 4. Re-run the card's Verify command and paste the real output. Then confirm `MONGODB_URI` from the host (`ping` → 1). Correct the Agent log's "became healthy" line to match.
 5. Non-blocking: reconcile `RUN_JOBS` between 16 §3, 16 §5 and the template (planner decision).
 
-Note: the card header `Status:` line still reads `👀 Review`. Per reviewer scope I changed only this Review section and the board row. The builder should set `🔨 In Progress` on the header.
+### Round 2 — re-review of fix commit 7a1869f
+
+**Reviewer verdict: APPROVED** (main tree, branch `sprint/S2-workspace-skeleton`; the stack was brought up and down by the reviewer, the project volume was reset with `-v` several times; throwaway `mongo:7` containers were created and removed; no other containers were touched; the card header `Status:` line was set to `✔️ Done` by the reviewer)
+
+#### Acceptance
+1. ✅ **Met.** Fresh volume (`docker compose down -v && up -d mongo`): `healthy` after 6 s. Stale-config recovery (seeded `diu-admission_mongo_data` with a set whose member host was `ca704512b2f6:27017`, then `up -d mongo`): `healthy` after 13 s, `rs.status().ok` → `1`. Literal card command `docker compose up -d mongo && sleep 20 && docker compose exec mongo mongosh --quiet --eval "rs.status().ok" && pnpm lint && pnpm build` → prints `1`, exit 0 (also works with stdin from `/dev/null`).
+   - Code: `docker-compose.yml:14` (healthcheck: `rs.status()`, `myState !== 1`, `rs.initiate` with `localhost:27017`, host check and `rs.reconfig(c,{force:true})`).
+2. ✅ **Met** (unchanged from round 1; `server/.env.example:1-17`, `.gitignore:11`). The round-1 non-blocking note on `RUN_JOBS` still stands. It is a planner decision, not a blocker.
+3. ✅ **Met.** `pnpm lint` → exit 0. `pnpm build` → `✓ built in 6.50s` (existing large-chunk warning). `pnpm test` → `Test Files 30 passed (30)`, `Tests 232 passed (232)`. `vite.config.js:21` has the `/api` proxy. The `pnpm dev` check is unchanged from round 1, since 7a1869f does not touch Vite.
+4. ✅ **Met.** `docker compose down` (no `-v`) → `local diu-admission_mongo_data` still listed. A probe document written before the down was still there after the next `up` (`probe survives: true`).
+
+#### Round-1 required changes
+1. ✅ Host URI. `docker-compose.yml:14` seeds `localhost:27017`. `rs.conf().members[].host` → `localhost:27017`. `docker run --rm --network host mongo:7 mongosh "mongodb://localhost:27017/diu_admission?replicaSet=rs0"` (the exact `server/.env.example:4` value) → `ok: 1`, exit 0.
+2. ✅ Self-heal. `docker compose up -d --force-recreate mongo` → `healthy` after 7 s, `ok 1`, `state 1`. The stale-volume case above is also fixed by the healthcheck and not by `-v`.
+3. ✅ PRIMARY gate. I ran the exact healthcheck script (extracted from `docker compose config`) on throwaway `mongo:7` containers. A real PRIMARY node → exit 0. Stubbed `rs` with `myState=2` on the healthy-config path → exit 1. Stubbed `status()` that throws once and then returns `myState=2` → exit 1. Stubbed `myState=1` → exit 0. So a non-PRIMARY member never reports healthy.
+4. ✅ Verify and host-ping results are recorded above. The Agent log's "became healthy" wording is now backed by the fresh-volume and stale-volume runs.
+5. ⏸ Non-blocking, still open: `RUN_JOBS` reconciliation (planner).
+
+#### Non-blocking observations (no change required)
+- `docker-compose.yml:14`: the self-heal path uses `rs.reconfig(..., {force:true})` and collapses any multi-member config to one member. That is acceptable for a local dev single-node set, but the Agent log should say so for anyone who later adds members.
+- `⚠️ not verified`: the `/api` → `:4000` proxy end-to-end. No server exists yet (T-036).
+
+#### Checks: `pnpm lint` ✅ (exit 0), `pnpm test` ✅ (232/232), `pnpm build` ✅, verify command ✅.
