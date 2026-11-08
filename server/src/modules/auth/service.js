@@ -274,10 +274,12 @@ export async function registerCandidate(input, userAgent, config) {
 /**
  * Email + password login (FR-AUTH-02).
  *
- * Every failure is the same 401 (no user enumeration), except the attempt that trips the lock,
- * which is a 429 (FR-AUTH-02). The lock is checked BEFORE the password is verified: while it is
- * active a correct password gets the same 401 and the failure counter/lock are left untouched, so
- * a locked account cannot be probed or have its lock extended.
+ * EVERY credential failure is the same generic 401, including the attempt that trips the lock and
+ * every attempt made while locked (FR-AUTH-02, clarified 2026-11-08). Never answer 429 here: unknown
+ * emails can't lock, so a 429 would reveal that an email is registered. 429 comes only from the
+ * per-IP rate limiter. The lock is checked BEFORE the password is verified: while it is active a
+ * correct password gets the same 401 and the failure counter/lock are left untouched, so a locked
+ * account cannot be probed or have its lock extended.
  */
 export async function loginWithPassword({ email, password }, userAgent, config) {
   const user = await User.findOne({ email }).select('+passwordHash')
@@ -286,8 +288,7 @@ export async function loginWithPassword({ email, password }, userAgent, config) 
     throw invalidCredentials()
   }
   if (!(await verifyPassword(user.passwordHash, password))) {
-    const { lockedUntil } = await registerFailedLogin(user)
-    if (lockedUntil) throw httpError(429, 'RATE_LIMITED', 'Too many failed login attempts. Try again later.')
+    await registerFailedLogin(user) // the 5th failure sets the lock; the response is still the generic 401
     throw invalidCredentials()
   }
   await clearFailedLogins(user)

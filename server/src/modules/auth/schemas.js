@@ -2,7 +2,8 @@ import { z } from 'zod'
 
 // FR-AUTH-01. Request/response contracts for /auth (context/15 §2).
 
-const PHONE_BD = /^(\+?880)?1[3-9]\d{8}$/
+// FR-AUTH-01 (widened 2026-11-08): also accepts the national 01XXXXXXXXX form.
+const PHONE_BD = /^(?:\+?880|0)?1[3-9]\d{8}$/
 const MAX_PASSWORD = 128 // argon2 cost grows with input size: an unbounded password is a DoS vector
 
 const email = z.string().trim().toLowerCase().pipe(z.email().max(254))
@@ -14,12 +15,12 @@ const registerPassword = z
   .regex(/[A-Za-z]/, 'must contain a letter')
   .regex(/\d/, 'must contain a digit')
 
-// Normalised to +8801XXXXXXXXX.
+// Normalised to +8801XXXXXXXXX. Every accepted form ends in the same 10 digits (1[3-9]XXXXXXXX).
 const phone = z
   .string()
   .trim()
   .regex(PHONE_BD, 'must be a Bangladeshi mobile number, e.g. +8801712345678')
-  .transform((v) => `+880${v.replace(/^\+?880/, '')}`)
+  .transform((v) => `+880${v.slice(-10)}`)
 
 const gpa = z.number().min(0).max(5)
 

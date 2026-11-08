@@ -170,17 +170,61 @@ describe('POST /auth/register', () => {
     expect(stored.candidate).toMatchObject({ programCode: 'CSE', sscGpa: 4.5, hscGpa: 4.75, hscGroup: 'science' })
   })
 
-  it('normalises phone numbers to +8801XXXXXXXXX', async () => {
-    for (const [input, expected] of [
-      ['+8801712345678', '+8801712345678'],
-      ['8801812345678', '+8801812345678'],
-      ['1912345678', '+8801912345678'],
-    ]) {
-      const res = await call('POST', '/auth/register', { body: registration({ phone: input }) })
-      expect(res.statusCode).toBe(201)
-      expect(res.json().user.phone).toBe(expected)
-      await User.deleteMany({})
+  // FR-AUTH-01 (widened 2026-11-08): ^(?:\+?880|0)?1[3-9]\d{8}$, stored as +8801XXXXXXXXX.
+  it.each([
+    ['national with leading 0', '01712345678'],
+    ['bare subscriber number', '1712345678'],
+    ['country code without +', '8801712345678'],
+    ['E.164', '+8801712345678'],
+    ['E.164 with surrounding whitespace', '  +8801712345678  '],
+  ])('accepts the %s form (%s) and stores +8801712345678', async (_label, input) => {
+    const res = await call('POST', '/auth/register', { body: registration({ phone: input }) })
+    expect(res.statusCode).toBe(201)
+    expect(res.json().user.phone).toBe('+8801712345678')
+    const stored = await User.findById(res.json().user.id)
+    expect(stored.phone).toBe('+8801712345678')
+  })
+
+  it.each([
+    ['01312345678', '+8801312345678'],
+    ['01912345678', '+8801912345678'],
+    ['8801812345678', '+8801812345678'],
+    ['1512345678', '+8801512345678'],
+  ])('every valid operator digit (1[3-9]) normalises: %s → %s', async (input, expected) => {
+    const res = await call('POST', '/auth/register', { body: registration({ phone: input }) })
+    expect(res.statusCode).toBe(201)
+    expect(res.json().user.phone).toBe(expected)
+  })
+
+  it('the four input forms collide on the same stored value: a second one is rejected as a duplicate phone', async () => {
+    expect((await call('POST', '/auth/register', { body: registration({ phone: '01712345678' }) })).statusCode).toBe(201)
+    for (const form of ['1712345678', '8801712345678', '+8801712345678']) {
+      const res = await call('POST', '/auth/register', { body: registration({ phone: form }) })
+      expect(res.statusCode).toBe(422)
+      expect(res.json().error.details.map((d) => d.path)).toContain('phone')
     }
+  })
+
+  it.each([
+    ['operator digit 2 (not 3-9)', '01212345678'],
+    ['operator digit 0', '01012345678'],
+    ['operator digit 2 with +880', '+8801212345678'],
+    ['too short (9 digits after 0)', '0171234567'],
+    ['too short, bare', '171234567'],
+    ['too long (national)', '017123456789'],
+    ['too long (E.164)', '+88017123456789'],
+    ['letters', '0171234567a'],
+    ['all letters', 'abcdefghijk'],
+    ['wrong country code', '+9101712345678'],
+    ['double zero prefix', '001712345678'],
+    ['inner spaces', '0171 234 5678'],
+    ['empty', ''],
+  ])('rejects %s (%s) with 422 on phone', async (_label, input) => {
+    const res = await call('POST', '/auth/register', { body: registration({ phone: input }) })
+    expect(res.statusCode).toBe(422)
+    expect(res.json().error.code).toBe('VALIDATION_ERROR')
+    expect(res.json().error.details.map((d) => d.path)).toContain('phone')
+    expect(await User.countDocuments()).toBe(0)
   })
 
   it('ignores a role in the body: the user is always a candidate (criterion 2, FR-AUTH-10)', async () => {
@@ -344,18 +388,45 @@ describe('POST /auth/login', () => {
     expect(huge.json().error.details.map((d) => d.path)).toContain('password')
   })
 
-  it('5 failed logins for one email → the 5th is 429 and the account is locked (criterion 7)', async () => {
+  it('5 failed logins lock the account, yet every response is the identical generic 401 (criterion 7, FR-AUTH-02)', async () => {
     const user = await createUser()
-    const statuses = []
-    for (let i = 0; i < 5; i += 1) {
-      const res = await call('POST', '/auth/login', { body: { email: user.email, password: 'Wrong-password-1' } })
-      statuses.push(res.statusCode)
-      if (res.statusCode === 429) expect(res.json().error.code).toBe('RATE_LIMITED')
+    const unknown = await call('POST', '/auth/login', { body: { email: 'nobody@example.com', password: 'Wrong-password-1' } })
+    expect(unknown.statusCode).toBe(401)
+
+    // Attempts 1-4, the locking attempt 5, and attempts 6-8 made while locked.
+    const responses = []
+    for (let i = 0; i < 8; i += 1) {
+      responses.push(await call('POST', '/auth/login', { body: { email: user.email, password: 'Wrong-password-1' } }))
+      if (i === 3) expect((await User.findById(user.id)).failedLogins.lockedUntil).toBeUndefined() // not locked yet
+      if (i === 4) expect((await User.findById(user.id)).failedLogins.lockedUntil).toBeInstanceOf(Date) // locked by attempt 5
     }
-    expect(statuses).toEqual([401, 401, 401, 401, 429])
+
+    for (const [i, res] of responses.entries()) {
+      expect(res.statusCode, `attempt ${i + 1}`).toBe(401)
+      expect(res.statusCode, `attempt ${i + 1}`).not.toBe(429)
+      // Byte-identical to the unknown-email response: same status, same body, no extra headers of note.
+      expect(res.body, `attempt ${i + 1}`).toBe(unknown.body)
+      expect(res.headers['content-type'], `attempt ${i + 1}`).toBe(unknown.headers['content-type'])
+      expect(res.headers['retry-after'], `attempt ${i + 1}`).toBeUndefined()
+      expect(cookieOf(res)).toBeUndefined()
+    }
+
+    // The account is genuinely locked in the DB; the lock is not extended by attempts 6-8.
     const stored = await User.findById(user.id)
     expect(stored.failedLogins.count).toBe(5)
     expect(stored.failedLogins.lockedUntil.getTime()).toBeGreaterThan(Date.now() + 14 * 60_000)
+    expect(stored.failedLogins.lockedUntil.getTime()).toBeLessThanOrEqual(Date.now() + 15 * 60_000)
+  })
+
+  it('the lock blocks login: after it trips, the correct password is the same generic 401 and issues nothing', async () => {
+    const user = await createUser()
+    for (let i = 0; i < 5; i += 1) await call('POST', '/auth/login', { body: { email: user.email, password: 'Wrong-password-1' } })
+    const unknown = await call('POST', '/auth/login', { body: { email: 'nobody@example.com', password: TEST_PASSWORD } })
+
+    const res = await call('POST', '/auth/login', { body: { email: user.email, password: TEST_PASSWORD } })
+    expect(res.statusCode).toBe(401)
+    expect(res.body).toBe(unknown.body)
+    expect(await RefreshToken.countDocuments()).toBe(0)
   })
 
   it('a CORRECT password during an active lock still returns 401 and issues nothing', async () => {
