@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto'
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import { createSigner } from 'fast-jwt'
 import { startTestApp } from './helpers/app.js'
 import { createUser, TEST_PASSWORD } from './helpers/factories.js'
@@ -87,7 +87,46 @@ describe('auth service (T-045)', () => {
       expect(rows.every((r) => r.revokedAt)).toBe(true)
     })
 
-    it('lets exactly one of two concurrent rotations win, then no live token remains in the family', async () => {
+    it('inserts the successor row BEFORE claiming the old token (deterministic ordering guard)', async () => {
+      // If the claim ran first, a concurrent loser's family sweep could miss the winner's new row and
+      // leave a live token in a family where reuse was just detected. The race test below only catches
+      // that probabilistically; this one observes the DB at the exact moment the claim runs.
+      const user = await createUser()
+      const first = await issueRefreshToken(user.id, 'ua', config)
+      const oldRow = await RefreshToken.findOne({ tokenHash: sha256(first.token) })
+      const original = RefreshToken.findOneAndUpdate.bind(RefreshToken)
+      const seen = []
+      const spy = vi.spyOn(RefreshToken, 'findOneAndUpdate').mockImplementation((...args) => {
+        // Query is lazy: run the observation inside a thenable so it executes when the claim is awaited.
+        const query = original(...args)
+        const run = query.then.bind(query)
+        query.then = (resolve, reject) =>
+          RefreshToken.find({ familyId: first.familyId })
+            .lean()
+            .then((rows) => {
+              seen.push({ filter: args[0], rows })
+            })
+            .then(() => run(resolve, reject), reject)
+        return query
+      })
+      let second
+      try {
+        second = await rotateRefreshToken(first.token, 'ua', config)
+      } finally {
+        spy.mockRestore()
+      }
+
+      expect(seen).toHaveLength(1)
+      const { filter, rows } = seen[0]
+      expect(String(filter._id)).toBe(String(oldRow._id)) // the claim targets the old token
+      expect(rows).toHaveLength(2) // old row + successor, already persisted at claim time
+      const successor = rows.find((r) => String(r._id) !== String(oldRow._id))
+      expect(successor.tokenHash).toBe(sha256(second.token))
+      expect(successor.replacedBy ?? null).toBeNull() // and the old row is not yet claimed
+      expect(rows.find((r) => String(r._id) === String(oldRow._id)).replacedBy ?? null).toBeNull()
+    })
+
+    it('lets exactly one of two concurrent rotations win, then no live token remains in the family (smoke, 10x)', async () => {
       const user = await createUser()
       for (let attempt = 0; attempt < 10; attempt++) {
         const first = await issueRefreshToken(user.id, 'ua', config)
