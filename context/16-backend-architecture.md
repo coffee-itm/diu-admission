@@ -127,11 +127,16 @@ LOG_LEVEL=info
 ## 4. Request pipeline
 
 ```
-request ─► helmet/cors ─► rate-limit ─► route schema (Zod validate) ─► onRequest: authenticate ─►
-preHandler: requireRole / scope ─► handler (thin) ─► service (business rules, Mongoose) ─►
+request ─► helmet/cors ─► rate-limit ─► onRequest: authenticate ─► onRequest: requireRole / scope ─►
+route schema (Zod validate) ─► handler (thin) ─► service (business rules, Mongoose) ─►
 serializer (Zod response schema — strips unknown fields such as correctAnswer) ─► reply
                                   └── throw httpError(...) ─► errors plugin ─► { error: {...} }
 ```
+
+> **Corrected 2026-11-08 (T-047 review).** This diagram previously put schema validation *before* the guards and ran
+> `requireRole` in `preHandler`. Fastify validates the body before `preHandler`, so an authenticated user without the
+> required role received **422 with the admin route's schema details** instead of 403 — leaking request schemas to anyone
+> signed in. **Both guards must run in `onRequest`, before validation.**
 
 Rules:
 - **Routes are thin.** They parse input, call one service function, and return. No Mongoose in routes.
@@ -148,8 +153,10 @@ import { startSessionBody, sessionPayload } from '@diu/shared/schemas/session';
 import * as sessions from './service.js';
 
 export default async function sessionRoutes(app) {
+  // Both guards in onRequest: they must run BEFORE schema validation, or a wrong-role
+  // caller gets 422 with this route's schema instead of 403 (T-047 review).
   app.addHook('onRequest', app.authenticate);
-  app.addHook('preHandler', app.requireRole('candidate'));
+  app.addHook('onRequest', app.requireRole('candidate'));
 
   app.post('/sessions', {
     schema: { body: startSessionBody, response: { 200: sessionPayload, 201: sessionPayload } },
