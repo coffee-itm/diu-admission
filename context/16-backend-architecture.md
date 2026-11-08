@@ -118,6 +118,7 @@ SMTP_URL=smtp://user:pass@smtp.example.com:587
 MAIL_FROM="DIU Admission <no-reply@diu.edu.bd>"
 SMS_DRIVER=console             # console | <provider>
 SESSION_GRACE_SECONDS=30
+RUN_JOBS=false                 # true on exactly ONE instance (see §5 and 20 §6); consumed from P4-06
 EXPIRE_JOB_INTERVAL_SECONDS=60
 LOG_LEVEL=info
 ```

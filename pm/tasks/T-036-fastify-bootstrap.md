@@ -1,6 +1,6 @@
 # T-036 · Fastify 5 server bootstrap with `/health` and `/ready`
 
-Status: 👀 Review
+Status: ✔️ Done
 Sprint: S2 · Role: backend-dev · Model: build · Size: M
 Tier rationale: server bootstrap, config validation, error envelope, shutdown semantics (PROCESS §2.3)
 Depends on: T-033, T-035
@@ -19,7 +19,7 @@ Create a running `@diu/server`. It validates its env on startup, connects Mongoo
 - `server/src/config.js` (create): Zod-parsed env using the keys from 16 §3. Fail fast with a clear message. In production, refuse default or short secrets.
 - `server/src/app.js` (create): `buildApp(opts)`, with `genReqId` from `X-Request-Id` or a UUID, logger redaction (authorization, cookie, `*.password`, `*.code`), the plugins, and the routes under the `/api/v1` prefix.
 - `server/src/server.js` (create): loads config, `buildApp`, `listen`. SIGTERM/SIGINT → `app.close()` → exit 0.
-- `server/src/plugins/mongoose.js`, `security.js`, `errors.js`, `zod.js` (create): `fastify-plugin` wrapped. `mongoose.js` connects on `onReady`, closes on `onClose`, and decorates `fastify.mongoose`. `errors.js` maps httpError → status/code, Zod → 422 `VALIDATION`, anything else → 500 `INTERNAL` (no stack in the body).
+- `server/src/plugins/mongoose.js`, `security.js`, `errors.js`, `zod.js` (create): `fastify-plugin` wrapped. `mongoose.js` connects on `onReady`, closes on `onClose`, and decorates `fastify.mongoose`. `errors.js` maps httpError → status/code, Zod → 422 `VALIDATION_ERROR` (the code in [15 §1](../../context/15-api-spec.md); an earlier draft of this card said `VALIDATION` — the spec wins), anything else → 500 `INTERNAL` (no stack in the body).
 - `server/src/lib/httpError.js` (create): `httpError(status, code, message, details)`.
 - `server/src/modules/health/routes.js` (create): `/health` and `/ready` (`mongoose.connection.readyState === 1`, then `db.admin().ping()`).
 - `eslint.config.js` (modify): a `server/**` block with Node globals. No React rules there.
@@ -52,3 +52,13 @@ Added `server/src/{config,app,server}.js`, `plugins/{mongoose,security,errors,zo
 - Follow-ups: `*.code` redaction also masks `err.code` in error logs (e.g. Mongo codes), as specified in 16 §8. E11000 → 409 mapping is not added (no index names exist yet; unmapped dup keys give 500 INTERNAL). No `trustProxy` option yet, so behind a load balancer rate-limiting would key on the LB IP.
 
 ## Review
+T-036: APPROVED (reviewed commit `8b1581f`).
+
+- ✅ AC1/2 — liveness is unconditional and readiness calls a bounded live Mongo ping, returning 503 on a dead/connecting DB: `server/src/modules/health/routes.js:13-18`, `server/src/modules/health/service.js:10-25`. Live probes: up → 200 `{status:"ok",db:"ok"}`; Mongo stopped → health 200, ready 503 `{status:"unavailable",db:"down"}`, process stayed alive; recovery returned 200 (not cached).
+- ✅ AC3 — required URI is Zod-validated and production rejects default/short JWT/pepper and insecure cookies without including values: `server/src/config.js:9-13,32-46,61-73`; entry fails before app construction: `server/src/server.js:8-14`. Direct and subprocess probes rejected production defaults/short values, and a sentinel secret/URI was absent from diagnostics.
+- ✅ AC4 — SIGTERM/SIGINT closes Fastify then Mongoose and exits 0: `server/src/server.js:18-31`; Mongo close hook: `server/src/plugins/mongoose.js:28-34`. Fresh process: exit 0, port closed, logs showed shutdown → mongoose closed → server closed.
+- ✅ AC5 — known errors map to envelopes and every unmapped error is generic 500: `server/src/plugins/errors.js:26-53`. Live HTTP routes throwing and rejecting errors containing a URI/path/marker both returned only `{"error":{"code":"INTERNAL","message":"Internal server error"}}` (no stack, path, URI, or original message).
+- ✅ Request-log invariant — the real Fastify request pipeline uses the configured pino redact paths: `server/src/app.js:11-18,27-43`. A live POST carrying authorization, cookie, password, and code produced no marker values; logged body fields were `[Redacted]` and a safe field remained visible. (Fastify's standard request serializer omits headers, so they were not emitted.)
+- ✅ AC6 — separate Node-only lint block retains the SPA block: `eslint.config.js:10-32`; `eslint src` reported 112/112 JS/JSX files, 0 errors/warnings. No answer-key exposure remains in server source (repo grep; only defensive comment at `server/src/plugins/zod.js:5`).
+- Mutation check: temporarily changed the generic INTERNAL message in `server/src/plugins/errors.js:44`; the live generic-envelope assertion failed as expected (500 body exposed `MUTATION_LEAK`), then reverted. Automated server integration coverage is explicitly deferred to T-037.
+- Verification (main tree): card dev/health/ready probe PASS; Mongo down/up probes PASS; `pnpm lint` PASS (0 warnings); `pnpm test` PASS (29 files/225 tests); `pnpm build` PASS (baseline Vite chunk-size warning only).
