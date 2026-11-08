@@ -8,7 +8,7 @@
 ### Summary
 | ✅ Ready | 🔨 In Progress | 👀 Review | ✔️ Done | ⛔ Blocked | Total | Done % |
 |:-:|:-:|:-:|:-:|:-:|:-:|:-:|
-| 4 | 0 | 0 | 13 | 0 | 17 | 76 % |
+| 3 | 0 | 0 | 14 | 0 | 17 | 82 % |
 
 ### Cards
 | ID | Title | Lane | Role | Model | Depends on | Status |
@@ -26,7 +26,7 @@
 | [T-034](./tasks/T-034-shared-risk-schemas.md) | @diu/shared: risk + question schemas | W2 | frontend-dev | lite | T-033 | ✔️ Done |
 | [T-035](./tasks/T-035-dev-infra-mongo.md) | Mongo 7 replset, .env.example, /api proxy | W2 | devops | lite | T-032 | ✔️ Done |
 | [T-036](./tasks/T-036-fastify-bootstrap.md) | Fastify bootstrap, /health + /ready | W2 | backend-dev | build | T-033, T-035 | ✔️ Done |
-| [T-037](./tasks/T-037-server-test-helpers.md) | Server test helpers + health tests | W2 | test-engineer | build | T-036 | ✅ Ready |
+| [T-037](./tasks/T-037-server-test-helpers.md) | Server test helpers + health tests | W2 | test-engineer | build | T-036 | ✔️ Done |
 | [T-038](./tasks/T-038-github-actions-ci.md) | GitHub Actions CI | W2 | devops | lite | T-037 | ✅ Ready |
 | [T-039](./tasks/T-039-docs-sync-s2.md) | Docs sync after S2 | Z | docs-keeper | lite | T-024…T-038 | ✅ Ready |
 | [T-040](./tasks/T-040-s2-qa.md) | Sprint 2 QA smoke | Z | reviewer | build | T-039 | ✅ Ready |

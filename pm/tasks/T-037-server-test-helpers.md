@@ -1,6 +1,6 @@
 # T-037 · Server test helpers (mongodb-memory-server replica set) + health tests
 
-Status: 👀 Review
+Status: ✔️ Done
 Sprint: S2 · Role: test-engineer · Model: build · Size: S
 Tier rationale: test-infra design + mongodb-memory-server replset flakiness (PROCESS §2.3)
 Depends on: T-036
@@ -46,3 +46,11 @@ pnpm --filter @diu/server test && pnpm test:all && pnpm lint
 - Mongoose is a process singleton: one `startTestApp()` live at a time per test file (documented in the helper). Vitest isolates files, so parallel files are fine.
 
 ## Review
+T-037: APPROVED
+- AC1: `MongoMemoryReplSet` supplies the explicit test URI and is stopped with the app (`server/test/helpers/app.js:27-56`); with `docker compose stop mongo`, server tests passed 1 file / 5 tests, then Mongo was restarted.
+- Health/readiness behavior is asserted for DB-up and DB-down states (`server/test/health.test.js:13-22, 34-52`) against the actual readiness branch (`server/src/modules/health/routes.js:14-18`).
+- Mutation checks (reverted): removing `await ctx.stopDb()` and separately forcing `/ready` to always return 200 each made the 503 assertion fail (expected 503, received 200 at `server/test/health.test.js:49`).
+- AC2/no root leakage: root config includes only `src/**` (`vite.config.js:16`); `pnpm test` passed 29 files / 225 tests; `pnpm test:all` passed shared 40 + 2 todo and server 5.
+- AC3: two additional server-suite runs passed (5/5; 4.13 s no-Docker, 6.08 s after restart); `pgrep -a mongod` showed only Docker's `mongo:7` process afterwards. AC4: `pnpm lint` passed; `pnpm build` passed (Vite chunk-size warning only).
+- Decisions accepted: plain `vitest run` (`server/package.json:21`) makes an empty server suite fail; lazy binary download (`pnpm-workspace.yaml:8`) is acceptable within the 120 s hook (`server/vitest.config.js:10`). T-038 explicitly caches `~/.cache/mongodb-binaries` (`pm/tasks/T-038-github-actions-ci.md:17`), so it can amortize the measured 43.8 s cold download.
+- Verification: `pnpm --filter @diu/server test` (including Docker-stopped run), `pnpm test`, `pnpm test:all`, `pnpm lint`, and `pnpm build` all passed.
