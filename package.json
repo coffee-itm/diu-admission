@@ -14,7 +14,7 @@
     "build": "vite build",
     "lint": "eslint .",
     "test": "vitest run",
-    "test:all": "pnpm -r test",
+    "test:all": "pnpm test && pnpm -r test",
     "seed": "pnpm --filter @diu/server seed",
     "test:watch": "vitest",
     "preview": "vite preview"

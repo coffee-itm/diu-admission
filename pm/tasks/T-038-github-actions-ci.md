@@ -31,11 +31,10 @@ python3 -c "import yaml;yaml.safe_load(open('.github/workflows/ci.yml'))" && pnp
 - The `e2e` job (needs Playwright, planned with the E2E suite). Deploy workflows (S8). Branch protection settings (the owner sets these in GitHub).
 
 ## Agent log
-- Added push/PR CI job: checkout, pnpm 11.13.1, Node 22, pnpm/Mongo binary caching, frozen install, lint, all workspace tests, build.
-- YAML parsed with `python3 -c "import yaml;yaml.safe_load(open('.github/workflows/ci.yml'))"` ✅; `actionlint` unavailable.
-- Local workflow sequence: install ✅ (already up to date), lint ✅, test:all ✅ (40 shared + 2 todo; 5 server), build ✅ (Vite 8.00s; existing chunk-size advisory).
-- Full frontend `pnpm test`: 29 files / 225 tests passed. No lint warnings.
-- Acceptance: 1 ✅ 2 ⚠️ not verified (no CI run; coordinator to watch and record URL) 3 ✅.
-- CI run link pending coordinator push.
+- Fix round [T-038]: `test:all` now runs root `pnpm test` and then `pnpm -r test`; no recursive script loop.
+- Single `pnpm test:all`: root 29 files / 225 tests; shared 5 files / 40 passed + 2 todo; server 1 file / 5 passed.
+- Captured output's `grep -c 'src/'` is 0: Vitest's standard summaries do not print source paths. `pnpm exec vitest list` does show `src/` paths, but it is separate from test execution.
+- YAML parsed ✅; `pnpm lint` ✅; `pnpm build` ✅ (existing chunk-size advisory); no new lint warnings.
+- CI run remains ⚠️ not verified (coordinator to watch and record URL).
 
 ## Review
