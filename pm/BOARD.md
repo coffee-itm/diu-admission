@@ -8,7 +8,7 @@
 ### Summary
 | ✅ Ready | 🔨 In Progress | 👀 Review | ✔️ Done | ⛔ Blocked | Total | Done % |
 |:-:|:-:|:-:|:-:|:-:|:-:|:-:|
-| 9 | 0 | 0 | 8 | 0 | 17 | 47 % |
+| 8 | 0 | 0 | 9 | 0 | 17 | 53 % |
 
 ### Cards
 | ID | Title | Lane | Role | Model | Depends on | Status |
@@ -21,7 +21,7 @@
 | [T-029](./tasks/T-029-csv-import-hardening.md) | CSV import hardening | B | frontend-dev | sonnet | T-027 | ✔️ Done |
 | [T-030](./tasks/T-030-testpage-deps-warning.md) | TestPage exhaustive-deps warning | A | frontend-dev | free-ok | T-026 | ✔️ Done |
 | [T-031](./tasks/T-031-missing-interactive-ids.md) | Missing ids on admin elements | W1 | frontend-dev | free-ok | T-025, T-027, T-028, T-029 | ✔️ Done |
-| [T-032](./tasks/T-032-pnpm-workspace.md) | pnpm workspace + empty packages | W2 | devops | lite | T-031 | ✅ Ready |
+| [T-032](./tasks/T-032-pnpm-workspace.md) | pnpm workspace + empty packages | W2 | devops | lite | T-031 | ✔️ Done |
 | [T-033](./tasks/T-033-shared-scoring-constants.md) | @diu/shared: scoring, constants, shuffle | W2 | frontend-dev | build | T-032 | ✅ Ready |
 | [T-034](./tasks/T-034-shared-risk-schemas.md) | @diu/shared: risk + question schemas | W2 | frontend-dev | lite | T-033 | ✅ Ready |
 | [T-035](./tasks/T-035-dev-infra-mongo.md) | Mongo 7 replset, .env.example, /api proxy | W2 | devops | lite | T-032 | ✅ Ready |
