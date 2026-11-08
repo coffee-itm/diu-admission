@@ -20,11 +20,12 @@ const TEST_ENV = {
  * Mongoose is a process-wide singleton: call this once at a time per test file (`beforeAll`),
  * and `stop()` before starting another. Vitest isolates files, so parallel files are fine.
  *
- * @param {{ env?: Record<string, string> }} [opts] `env` overrides individual TEST_ENV values (e.g. COOKIE_SECURE).
+ * @param {{ env?: Record<string, string>, extraRoutes?: import('fastify').FastifyPluginAsync[] }} [opts]
+ *   `env` overrides individual TEST_ENV values (e.g. COOKIE_SECURE); `extraRoutes` are test-only route plugins (see buildApp).
  * @returns {Promise<{ app: import('fastify').FastifyInstance, stop: () => Promise<void>, stopDb: () => Promise<void> }>}
  *   `stopDb` stops only the database (to test the DB-down path); `stop` closes the app, then the database. Both are idempotent.
  */
-export async function startTestApp({ env = {} } = {}) {
+export async function startTestApp({ env = {}, extraRoutes } = {}) {
   const replSet = await MongoMemoryReplSet.create({
     binary: { version: MONGO_VERSION },
     replSet: { count: 1, storageEngine: 'wiredTiger' },
@@ -33,7 +34,7 @@ export async function startTestApp({ env = {} } = {}) {
   try {
     const config = loadConfig({ ...TEST_ENV, ...env, MONGODB_URI: replSet.getUri('diu_test') })
     // Fail fast if the DB is stopped mid-test instead of waiting the 5 s default.
-    app = await buildApp({ config, logger: false, mongoServerSelectionTimeoutMS: 2000 })
+    app = await buildApp({ config, logger: false, mongoServerSelectionTimeoutMS: 2000, extraRoutes })
     await app.ready()
   } catch (err) {
     await app?.close().catch(() => {})

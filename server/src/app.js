@@ -7,6 +7,7 @@ import securityPlugin from './plugins/security.js'
 import errorsPlugin from './plugins/errors.js'
 import mongoosePlugin from './plugins/mongoose.js'
 import healthRoutes from './modules/health/routes.js'
+import authPlugin from './plugins/auth.js'
 import authRoutes from './modules/auth/routes.js'
 
 export const API_PREFIX = '/api/v1'
@@ -39,7 +40,9 @@ function loggerOptions(config) {
 /**
  * Build the Fastify app (does not listen). Used by server.js and by tests.
  * @param {{ config?: ReturnType<typeof loadConfig>, logger?: import('fastify').FastifyServerOptions['logger'],
- *           mongoServerSelectionTimeoutMS?: number }} [opts]
+ *           mongoServerSelectionTimeoutMS?: number,
+ *           extraRoutes?: import('fastify').FastifyPluginAsync[] }} [opts] `extraRoutes` are registered under the API
+ *           prefix after the real modules; tests use it for guard probes, production never passes it.
  */
 export async function buildApp(opts = {}) {
   const config = opts.config ?? loadConfig()
@@ -60,8 +63,12 @@ export async function buildApp(opts = {}) {
 
   await app.register(cookie)
 
+  await app.register(authPlugin, { config })
+
   await app.register(healthRoutes, { prefix: API_PREFIX })
   await app.register(authRoutes, { prefix: API_PREFIX, config })
+
+  for (const plugin of opts.extraRoutes ?? []) await app.register(plugin, { prefix: API_PREFIX })
 
   return app
 }

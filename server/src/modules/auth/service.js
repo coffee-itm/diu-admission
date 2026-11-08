@@ -69,6 +69,25 @@ export function verifyAccessToken(token, config) {
   }
 }
 
+/**
+ * The single request-authentication path (used by `fastify.authenticate`, nothing else verifies a token).
+ * A valid signature is not enough: the user must still exist and be active, and the principal's role and
+ * program scope come from the DATABASE, so a demoted, re-scoped or disabled account loses access at once
+ * instead of when its 15-minute token expires.
+ * @param {string | undefined} authorization the raw `Authorization` header
+ * @returns {Promise<{ sub: string, role: string, programCodes: string[] }>}
+ */
+export async function authenticateBearer(authorization, config) {
+  const match = /^Bearer (\S+)$/i.exec(authorization ?? '')
+  if (!match) throw httpError(401, 'UNAUTHENTICATED', 'Missing or invalid access token')
+  const { sub } = verifyAccessToken(match[1], config)
+  const user = typeof sub === 'string' && Types.ObjectId.isValid(sub)
+    ? await User.findById(sub).select('role status reviewer.programCodes').lean()
+    : null
+  if (!user || user.status !== 'active') throw unauthenticated()
+  return { sub: String(user._id), role: user.role, programCodes: [...(user.reviewer?.programCodes ?? [])] }
+}
+
 // ---------------------------------------------------------------- refresh tokens
 
 function newRawToken() {

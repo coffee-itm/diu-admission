@@ -35,13 +35,6 @@ export default async function authRoutes(app, { config }) {
     }
   }
 
-  // Minimal bearer check for /me. T-047 replaces this with the shared `authenticate` decorator.
-  const requireBearer = async (req) => {
-    const match = /^Bearer (\S+)$/.exec(req.headers.authorization ?? '')
-    if (!match) throw httpError(401, 'UNAUTHENTICATED', 'Missing or invalid access token')
-    req.user = auth.verifyAccessToken(match[1], config)
-  }
-
   const sessionReply = (reply, { user, accessToken, refresh }, status) => {
     setRefreshCookie(reply, refresh)
     return reply.code(status).send({ user: toPublicUser(user), accessToken })
@@ -76,7 +69,7 @@ export default async function authRoutes(app, { config }) {
   })
 
   app.get('/auth/me', {
-    onRequest: requireBearer,
+    onRequest: app.authenticate,
     schema: { response: { 200: meResponse } },
   }, async (req) => ({ user: toPublicUser(await auth.getActiveUser(req.user.sub)) }))
 }
