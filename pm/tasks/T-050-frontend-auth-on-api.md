@@ -16,6 +16,15 @@ With `VITE_USE_MOCKS=false` the SPA authenticates against the Fastify server: re
 
 ## Files
 - `src/services/authService.js` (modify): real `register`, `login`, `logout`, `me`, `refresh` through `api()`.
+  **Carry-forward from T-049 review (reviewer-pro)**: `tryRefresh()` in `src/services/api.js` posts
+  `/auth/refresh` directly and only checks the HTTP status — it does **not** call `setAccessToken()`
+  with the refreshed token from that response body, unlike `real/authService.js:refresh()` which does.
+  Today this is inert (nothing calls real auth yet), but once this card wires the real path, a silent
+  refresh triggered by a 401 inside `api()` would rotate the server-side session without the client's
+  in-memory token ever being updated — the retried request would then reuse the stale token. Either
+  make `tryRefresh()` capture and set the new token from its own response, or have it call
+  `realAuthService.refresh()` instead of raw `api()`. Add a test asserting the token used on the
+  retried request is the new one, not the pre-refresh one.
 - `src/store/authStore.js` (modify): `user`, `status: 'unknown'|'authed'|'guest'`, access token **in memory only**; persist `user` alone under `diu-auth`. Needs a `merge`/migration so an existing persisted blob from the prototype doesn't resurrect a stale token (the S1 retro rule).
 - `src/features/auth/useAuth.js` (modify): `resetAll()` on logout — auth + test + anti-cheat stores **and** the react-query cache.
 - `src/features/auth/AuthProvider.jsx` (modify): on mount, if `status === 'unknown'`, try `refresh` then `me` to restore the session; render nothing decisive until it settles so `ProtectedRoute` can't bounce an authenticated user to `/login`.

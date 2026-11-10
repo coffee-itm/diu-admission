@@ -1,6 +1,6 @@
 # T-049 · `src/services/api.js`, react-query provider, and the `VITE_USE_MOCKS` split
 
-Status: 👀 Review
+Status: ✔️ Done
 Sprint: S3 · Role: frontend-dev · Model: build · Size: M
 Tier rationale: async refresh-retry logic plus a cross-cutting move of every service; a wrong mock switch silently ships mock data (PROCESS §2.3)
 Depends on: T-046
@@ -51,3 +51,14 @@ pnpm lint && pnpm test:all && pnpm build
 - Verify: SPA `240/240` passed (225 original, unchanged, + 15 new). Server `231/231` unaffected (nothing server-side touched). `pnpm lint` 0 warnings. `pnpm build` ok. `pnpm dev` boots and serves 200 (smoke-checked with curl).
 
 ## Review
+**T-049: APPROVED** (reviewer-pro, cross-family, commit `904aeb8`)
+
+- All 7 acceptance criteria verified against the diff with file:line citations. AC1/AC2 (the refresh-retry loop guard) was attacked directly: the reviewer reverted the `_retried` flag in place and reran `api.test.js` — the "exactly one refresh attempt" test hung and had to be killed after 25s, confirming it is a genuine regression test for the infinite-recursion bug this session's author found and fixed, not a tautological assertion. File restored and diffed clean against the commit afterward.
+- AC5 verified by grepping all four front-door files directly for the mock/real switch condition — identical `!== 'false'` in all four, no typo or inverted condition in any one of them.
+- Mock-move import paths (`../lib` → `../../lib` etc.) verified file-by-file; all targets confirmed to exist at the new relative paths.
+- Security: `credentials: 'include'` confirmed gated to `/auth/*` only (defense-in-depth alongside the server's own cookie `Path` scoping); bearer token confirmed to live only in a module-level variable in `api.js`, never written to storage; `src/services/real/authService.js` judged acceptable dead-code scaffolding for T-050 (nothing outside the gated front doors imports `real/*` directly).
+- **Real finding, carried forward to T-050's card**: `tryRefresh()` in `api.js` doesn't capture the refreshed access token from its own `/auth/refresh` response — only the separate, currently-unused `real/authService.refresh()` does that. Inert today (nothing calls real auth yet), but would cause the retried request to reuse a stale token once T-050 wires the real path. Noted directly on `pm/tasks/T-050-frontend-auth-on-api.md`'s file list so it isn't lost.
+- Two other minor non-blocking notes recorded: a cosmetic file-mode (755→644) inconsistency from the `git mv`, and `real/testService.js` intentionally lacks `countAttempts`/ignores `candidateId` in `loadTest()` (unreachable today, flagged for whoever rebuilds TestPage onto real sessions in S4+).
+- Verification (reviewer ran independently, not from the card's claims): SPA `pnpm lint` 0 warnings, `npx vitest run` 240/240 passed, `pnpm build` ok. Server `231/231` passed unaffected (no server files touched by this commit).
+
+Verdict: **APPROVED → Done**.
