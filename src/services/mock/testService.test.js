@@ -1,9 +1,9 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { useExamConfigStore } from '../store/examConfigStore.js';
-import { useQuestionStore } from '../store/questionStore.js';
+import { useExamConfigStore } from '../../store/examConfigStore.js';
+import { useQuestionStore } from '../../store/questionStore.js';
 import { testService } from './testService.js';
-import { mockQuestions } from '../data/mockQuestions.js';
-import { mockExamConfig } from '../data/mockExamConfig.js';
+import { mockQuestions } from '../../data/mockQuestions.js';
+import { mockExamConfig } from '../../data/mockExamConfig.js';
 
 describe('testService.submitTest', () => {
   beforeEach(() => localStorage.clear());
