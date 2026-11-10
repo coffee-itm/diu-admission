@@ -6,7 +6,7 @@ export function SectionPieChart({ data }) {
   
   return (
     <div className="h-64 min-h-64 w-full min-w-0">
-      <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={256}>
+      <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={256} initialDimension={{ width: 520, height: 256 }}>
         <PieChart>
           <Pie
             data={data}
