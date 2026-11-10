@@ -1,6 +1,6 @@
 // Real implementation, routed through src/services/api.js. Endpoint map: context/15-api-spec.md §6.
-// T-050 wires login/register to set the in-memory access token and reshapes authStore; until then
-// these calls are correct against the T-046 auth routes but nothing yet calls setAccessToken on success.
+// login/register/refresh set the in-memory access token (src/services/api.js) on success; logout
+// clears it. authStore (T-050) only ever sees the `user`/`status` that result from these calls.
 import { api, setAccessToken, clearAccessToken } from '../api.js';
 
 export const authService = {

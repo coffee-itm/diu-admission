@@ -56,6 +56,29 @@ describe('api()', () => {
     expect(calls).toHaveLength(3); // request, refresh, retry
   });
 
+  it('the retried request after a silent refresh uses the new token, not the pre-refresh one', async () => {
+    setAccessToken('stale-token');
+    const calls = [];
+    const fetchMock = vi.fn(async (url, opts) => {
+      calls.push({ url: String(url), auth: opts?.headers?.Authorization });
+      if (String(url).includes('/auth/refresh')) {
+        return jsonResponse({ accessToken: 'fresh-token', user: { id: 'u1' } }, { status: 200 });
+      }
+      const nonRefreshCalls = calls.filter((c) => !c.url.includes('/auth/refresh'));
+      if (nonRefreshCalls.length === 1) {
+        return jsonResponse({ error: { code: 'UNAUTHENTICATED' } }, { status: 401 });
+      }
+      return jsonResponse({ ok: true }, { status: 200 });
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    await api('/sessions/current');
+    const nonRefreshCalls = calls.filter((c) => !c.url.includes('/auth/refresh'));
+    expect(nonRefreshCalls).toHaveLength(2); // initial request + retry
+    expect(nonRefreshCalls[0].auth).toBe('Bearer stale-token');
+    expect(nonRefreshCalls[1].auth).toBe('Bearer fresh-token'); // tryRefresh() captured the rotated token before the retry
+  });
+
   it('throws ApiError carrying status, code, message and details from the envelope', async () => {
     vi.stubGlobal('fetch', vi.fn(async () =>
       jsonResponse(

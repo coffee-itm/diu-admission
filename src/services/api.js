@@ -59,10 +59,15 @@ async function doFetch(path, { method, body, query, signal }) {
 }
 
 let refreshPromise = null;
-/** One refresh attempt is shared by every concurrent 401 so a burst of requests triggers a single call. */
+/**
+ * One refresh attempt is shared by every concurrent 401 so a burst of requests triggers a single
+ * call. Captures the rotated access token from the response body itself (the refresh endpoint
+ * returns `{ accessToken, user }`, 15 §2) — a retried request must never reuse the pre-refresh
+ * token (carry-forward from the T-049 review).
+ */
 async function tryRefresh() {
   refreshPromise ??= api('/auth/refresh', { method: 'POST' })
-    .then(() => true)
+    .then((data) => { setAccessToken(data?.accessToken ?? null); return true; })
     .catch(() => false)
     .finally(() => { refreshPromise = null; });
   return refreshPromise;
