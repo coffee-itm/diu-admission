@@ -14,6 +14,7 @@ export function Sidebar({ className }) {
           return (
             <Link
               key={item.path}
+              id={`nav-sidebar-${item.id}`}
               to={item.path}
               className={cn(
                 'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',

@@ -33,18 +33,18 @@ export function Header() {
 
           {/* Desktop Nav */}
           <nav className="hidden md:flex items-center gap-6">
-            <Link to={ROUTES.HOME} className="text-sm text-slate-600 hover:text-blue-700 font-medium transition-colors">Home</Link>
+            <Link id="nav-home-desktop" to={ROUTES.HOME} className="text-sm text-slate-600 hover:text-blue-700 font-medium transition-colors">Home</Link>
             {!isAuthenticated && (
               <>
-                <Link to={ROUTES.LOGIN} className="text-sm text-slate-600 hover:text-blue-700 font-medium transition-colors">Login</Link>
+                <Link id="nav-login-desktop" to={ROUTES.LOGIN} className="text-sm text-slate-600 hover:text-blue-700 font-medium transition-colors">Login</Link>
                 <Button id="nav-register-btn" size="sm" as={Link} to={ROUTES.REGISTER}>Register</Button>
               </>
             )}
             {isAuthenticated && user?.role === 'candidate' && (
-              <Link to={ROUTES.CANDIDATE_DASHBOARD} className="text-sm text-slate-600 hover:text-blue-700 font-medium transition-colors">Dashboard</Link>
+              <Link id="nav-candidate-dashboard" to={ROUTES.CANDIDATE_DASHBOARD} className="text-sm text-slate-600 hover:text-blue-700 font-medium transition-colors">Dashboard</Link>
             )}
             {isAuthenticated && user?.role === 'admin' && (
-              <Link to={ROUTES.ADMIN_DASHBOARD} className="text-sm text-slate-600 hover:text-blue-700 font-medium transition-colors">Admin Panel</Link>
+              <Link id="nav-admin-panel" to={ROUTES.ADMIN_DASHBOARD} className="text-sm text-slate-600 hover:text-blue-700 font-medium transition-colors">Admin Panel</Link>
             )}
             {isAuthenticated && (
               <div className="flex items-center gap-3">
@@ -71,18 +71,18 @@ export function Header() {
         {/* Mobile menu */}
         {menuOpen && (
           <div className="md:hidden border-t border-slate-100 py-3 flex flex-col gap-2">
-            <Link to={ROUTES.HOME} className="px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 rounded-lg" onClick={() => setMenuOpen(false)}>Home</Link>
+            <Link id="nav-home-mobile" to={ROUTES.HOME} className="px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 rounded-lg" onClick={() => setMenuOpen(false)}>Home</Link>
             {!isAuthenticated && (
               <>
-                <Link to={ROUTES.LOGIN} className="px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 rounded-lg" onClick={() => setMenuOpen(false)}>Login</Link>
-                <Link to={ROUTES.REGISTER} className="px-3 py-2 text-sm text-blue-700 font-medium hover:bg-blue-50 rounded-lg" onClick={() => setMenuOpen(false)}>Register</Link>
+                <Link id="nav-login-mobile" to={ROUTES.LOGIN} className="px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 rounded-lg" onClick={() => setMenuOpen(false)}>Login</Link>
+                <Link id="nav-register-mobile" to={ROUTES.REGISTER} className="px-3 py-2 text-sm text-blue-700 font-medium hover:bg-blue-50 rounded-lg" onClick={() => setMenuOpen(false)}>Register</Link>
               </>
             )}
             {isAuthenticated && user?.role === 'admin' && (
               <div className="py-2 border-y border-slate-100 my-2 flex flex-col gap-1">
                 <span className="px-3 text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Admin Menu</span>
                 {navItems.map(item => (
-                  <Link key={item.path} to={item.path} className="px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 rounded-lg flex items-center gap-2" onClick={() => setMenuOpen(false)}>
+                  <Link key={item.path} id={`nav-mobile-${item.id}`} to={item.path} className="px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 rounded-lg flex items-center gap-2" onClick={() => setMenuOpen(false)}>
                     <item.icon size={16} className="text-slate-400" />
                     {item.label}
                   </Link>
@@ -91,6 +91,7 @@ export function Header() {
             )}
             {isAuthenticated && (
               <button
+                id="nav-logout-mobile"
                 className="px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg text-left"
                 onClick={() => { handleLogout(); setMenuOpen(false); }}
               >Logout ({user?.name})</button>
