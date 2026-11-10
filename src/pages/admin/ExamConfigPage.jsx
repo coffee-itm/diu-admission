@@ -3,16 +3,17 @@ import { Save, RefreshCw } from 'lucide-react';
 import { useExamConfigStore } from '../../store/examConfigStore.js';
 import {
   validateExamConfigForm,
-  isValidQuestionCount,
-  isValidTimeMinutes,
+  validateSectionQuestionCount,
+  validateSectionTimeMinutes,
 } from '../../lib/examConfigValidation.js';
 import { Card, CardHeader, CardBody } from '../../components/ui/Card.jsx';
 import { Input } from '../../components/ui/Input.jsx';
 import { Button } from '../../components/ui/Button.jsx';
+import { cn } from '../../lib/utils.js';
 import { toast } from 'sonner';
 
 export function ExamConfigPage() {
-  const { config, updateConfig, updateSection, resetToDefault } = useExamConfigStore();
+  const { config, updateConfig, resetToDefault } = useExamConfigStore();
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
 
@@ -21,36 +22,74 @@ export function ExamConfigPage() {
     totalTimeMinutes: config.totalTimeMinutes,
     overallMinPercent: config.passingThresholds.overallMinPercent,
     sectionMinPercent: config.passingThresholds.sectionMinPercent,
+    // Kept as raw strings so the field can go through an empty/invalid
+    // transient state while typing; only Save coerces and validates them.
+    sections: config.sections.map((sec) => ({
+      id: sec.id,
+      questionCount: sec.questionCount,
+      timeMinutes: sec.timeMinutes,
+    })),
   });
 
-  const handleFieldChange = (field, value) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-    // Clear the field's error as soon as the admin edits it.
+  const clearError = (key) => {
     setErrors((prev) => {
-      if (!prev[field]) return prev;
+      if (!prev[key]) return prev;
       const next = { ...prev };
-      delete next[field];
+      delete next[key];
       return next;
     });
   };
 
+  const handleFieldChange = (field, value) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+    // Clear the field's error as soon as the admin edits it.
+    clearError(field);
+  };
+
+  const handleSectionFieldChange = (sectionId, field, value) => {
+    setFormData((prev) => ({
+      ...prev,
+      sections: prev.sections.map((s) => (s.id === sectionId ? { ...s, [field]: value } : s)),
+    }));
+    clearError(`${sectionId}.${field}`);
+  };
+
   const handleSave = () => {
-    const { valid, errors: validationErrors } = validateExamConfigForm(formData);
-    setErrors(validationErrors);
-    if (!valid) {
+    const { errors: formErrors } = validateExamConfigForm(formData);
+
+    const sectionErrors = {};
+    formData.sections.forEach((s) => {
+      const countError = validateSectionQuestionCount(s.questionCount);
+      if (countError) sectionErrors[`${s.id}.questionCount`] = countError;
+      const timeError = validateSectionTimeMinutes(s.timeMinutes);
+      if (timeError) sectionErrors[`${s.id}.timeMinutes`] = timeError;
+    });
+
+    const allErrors = { ...formErrors, ...sectionErrors };
+    setErrors(allErrors);
+    if (Object.keys(allErrors).length > 0) {
       toast.error('Fix the highlighted fields before saving');
       return;
     }
 
     setLoading(true);
     setTimeout(() => {
+      const sections = config.sections.map((sec) => {
+        const edited = formData.sections.find((s) => s.id === sec.id);
+        return {
+          ...sec,
+          questionCount: Number(edited.questionCount),
+          timeMinutes: Number(edited.timeMinutes),
+        };
+      });
       updateConfig({
         title: formData.title,
         totalTimeMinutes: Number(formData.totalTimeMinutes),
         passingThresholds: {
           overallMinPercent: Number(formData.overallMinPercent),
           sectionMinPercent: Number(formData.sectionMinPercent),
-        }
+        },
+        sections,
       });
       setLoading(false);
       toast.success('Exam configuration saved');
@@ -71,6 +110,9 @@ export function ExamConfigPage() {
         <div>
           <h1 className="text-2xl font-bold text-slate-900 mb-1">Exam Configuration</h1>
           <p className="text-slate-600">Manage rules, time, and thresholds</p>
+          <p className="text-xs text-slate-400 mt-0.5">
+            Nothing below is saved until you click Save Changes.
+          </p>
         </div>
         <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
           <Button id="exam-config-reset" variant="outline" className="w-full sm:w-auto" onClick={handleReset} leftIcon={<RefreshCw size={16} />}>Restore Defaults</Button>
@@ -126,7 +168,12 @@ export function ExamConfigPage() {
         </Card>
 
         <Card className="md:col-span-2">
-          <CardHeader><h3 className="font-bold text-slate-900">Section Configuration</h3></CardHeader>
+          <CardHeader>
+            <h3 className="font-bold text-slate-900">Section Configuration</h3>
+            <p className="text-xs text-slate-500 mt-1">
+              Question count: 1–100. Recommended time: 0–600 minutes. Click Save Changes to apply.
+            </p>
+          </CardHeader>
           <CardBody>
             <div className="overflow-x-auto">
               <table className="w-full text-left text-sm text-slate-600">
@@ -139,38 +186,45 @@ export function ExamConfigPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
-                  {config.sections.map((sec) => (
-                    <tr key={sec.id}>
-                      <td className="px-4 py-3 font-medium text-slate-900">{sec.id}</td>
-                      <td className="px-4 py-3">{sec.name}</td>
-                      <td className="px-4 py-3 text-center">
-                        <input 
-                          id={`exam-config-${sec.id}-count`}
-                          type="number" 
-                          className="w-20 text-center border border-slate-300 rounded p-1" 
-                          value={sec.questionCount}
-                          aria-label={`${sec.name} question count`}
-                          onChange={(e) => {
-                            if (!isValidQuestionCount(e.target.value)) return;
-                            updateSection(sec.id, { questionCount: Number(e.target.value) });
-                          }}
-                        />
-                      </td>
-                      <td className="px-4 py-3 text-center">
-                        <input 
-                          id={`exam-config-${sec.id}-time`}
-                          type="number" 
-                          className="w-20 text-center border border-slate-300 rounded p-1" 
-                          value={sec.timeMinutes}
-                          aria-label={`${sec.name} recommended time in minutes`}
-                          onChange={(e) => {
-                            if (!isValidTimeMinutes(e.target.value)) return;
-                            updateSection(sec.id, { timeMinutes: Number(e.target.value) });
-                          }}
-                        />
-                      </td>
-                    </tr>
-                  ))}
+                  {config.sections.map((sec) => {
+                    const edited = formData.sections.find((s) => s.id === sec.id);
+                    const countError = errors[`${sec.id}.questionCount`];
+                    const timeError = errors[`${sec.id}.timeMinutes`];
+                    return (
+                      <tr key={sec.id}>
+                        <td className="px-4 py-3 font-medium text-slate-900">{sec.id}</td>
+                        <td className="px-4 py-3">{sec.name}</td>
+                        <td className="px-4 py-3 text-center">
+                          <input
+                            id={`exam-config-${sec.id}-count`}
+                            type="number"
+                            className={cn(
+                              'w-20 text-center border rounded p-1',
+                              countError ? 'border-red-400 focus:ring-1 focus:ring-red-400' : 'border-slate-300'
+                            )}
+                            value={edited.questionCount}
+                            aria-label={`${sec.name} question count`}
+                            onChange={(e) => handleSectionFieldChange(sec.id, 'questionCount', e.target.value)}
+                          />
+                          {countError && <p className="text-xs text-red-600 mt-1">{countError}</p>}
+                        </td>
+                        <td className="px-4 py-3 text-center">
+                          <input
+                            id={`exam-config-${sec.id}-time`}
+                            type="number"
+                            className={cn(
+                              'w-20 text-center border rounded p-1',
+                              timeError ? 'border-red-400 focus:ring-1 focus:ring-red-400' : 'border-slate-300'
+                            )}
+                            value={edited.timeMinutes}
+                            aria-label={`${sec.name} recommended time in minutes`}
+                            onChange={(e) => handleSectionFieldChange(sec.id, 'timeMinutes', e.target.value)}
+                          />
+                          {timeError && <p className="text-xs text-red-600 mt-1">{timeError}</p>}
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>

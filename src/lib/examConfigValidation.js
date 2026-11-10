@@ -4,6 +4,11 @@ export const DURATION_MIN = 1;
 export const DURATION_MAX = 600;
 export const THRESHOLD_MIN = 0;
 export const THRESHOLD_MAX = 100;
+// A section can't realistically hold more questions than this, or run longer than the whole exam.
+export const SECTION_QUESTION_COUNT_MIN = 1;
+export const SECTION_QUESTION_COUNT_MAX = 100;
+export const SECTION_TIME_MINUTES_MIN = 0;
+export const SECTION_TIME_MINUTES_MAX = DURATION_MAX;
 
 // `Number('')` and `Number('   ')` are 0, so blank inputs must be rejected explicitly.
 function toNumber(value) {
@@ -54,16 +59,49 @@ export function validateExamConfigForm(form = {}) {
   return { valid: Object.keys(errors).length === 0, errors };
 }
 
-// Guards for the per-section inputs: a question count must be a whole number >= 1
-// and a recommended time must be >= 0 (0 means "not set").
+// Guards for the per-section inputs: a question count must be a whole number
+// between SECTION_QUESTION_COUNT_MIN and SECTION_QUESTION_COUNT_MAX, and a
+// recommended time must be between SECTION_TIME_MINUTES_MIN (0 means "not set")
+// and SECTION_TIME_MINUTES_MAX.
 export function isValidQuestionCount(value) {
   if (isBlank(value)) return false;
   const count = toNumber(value);
-  return Number.isInteger(count) && count >= 1;
+  return (
+    Number.isInteger(count) &&
+    count >= SECTION_QUESTION_COUNT_MIN &&
+    count <= SECTION_QUESTION_COUNT_MAX
+  );
 }
 
 export function isValidTimeMinutes(value) {
   if (isBlank(value)) return false;
   const minutes = toNumber(value);
-  return Number.isFinite(minutes) && minutes >= 0;
+  return (
+    Number.isFinite(minutes) &&
+    minutes >= SECTION_TIME_MINUTES_MIN &&
+    minutes <= SECTION_TIME_MINUTES_MAX
+  );
+}
+
+// Message-returning counterparts, used to show an inline error on Save/blur
+// instead of silently rejecting a keystroke (that coerced a cleared field
+// back to a stale value — see T-042).
+export function validateSectionQuestionCount(value) {
+  if (isBlank(value)) return 'Enter a question count';
+  const count = toNumber(value);
+  if (Number.isNaN(count) || !Number.isInteger(count)) return 'Question count must be a whole number';
+  if (count < SECTION_QUESTION_COUNT_MIN || count > SECTION_QUESTION_COUNT_MAX) {
+    return `Question count must be between ${SECTION_QUESTION_COUNT_MIN} and ${SECTION_QUESTION_COUNT_MAX}`;
+  }
+  return null;
+}
+
+export function validateSectionTimeMinutes(value) {
+  if (isBlank(value)) return 'Enter a recommended time';
+  const minutes = toNumber(value);
+  if (!Number.isFinite(minutes)) return 'Time must be a number';
+  if (minutes < SECTION_TIME_MINUTES_MIN || minutes > SECTION_TIME_MINUTES_MAX) {
+    return `Time must be between ${SECTION_TIME_MINUTES_MIN} and ${SECTION_TIME_MINUTES_MAX} minutes`;
+  }
+  return null;
 }

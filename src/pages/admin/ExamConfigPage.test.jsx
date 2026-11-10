@@ -100,25 +100,72 @@ describe('ExamConfigPage validation', () => {
     });
   });
 
-  it('ignores a section question count below 1', () => {
+  it('clearing a section question count then typing a new value yields exactly that value', () => {
+    render(<ExamConfigPage />);
+    const countInput = screen.getAllByLabelText(/question count/i)[0];
+
+    fireEvent.change(countInput, { target: { value: '' } });
+    expect(countInput.value).toBe('');
+
+    fireEvent.change(countInput, { target: { value: '9' } });
+    expect(countInput.value).toBe('9');
+  });
+
+  it('blocks save with an inline error when a section question count is blank', () => {
+    render(<ExamConfigPage />);
+    const countInput = screen.getAllByLabelText(/question count/i)[0];
+    const original = useExamConfigStore.getState().config.sections[0].questionCount;
+
+    fireEvent.change(countInput, { target: { value: '' } });
+    save();
+
+    expect(screen.getByText(/enter a question count/i)).toBeInTheDocument();
+    expect(toast.error).toHaveBeenCalled();
+    expect(useExamConfigStore.getState().config.sections[0].questionCount).toBe(original);
+  });
+
+  it('blocks save with an inline error when a section question count is out of range', () => {
     render(<ExamConfigPage />);
     const countInput = screen.getAllByLabelText(/question count/i)[0];
     const original = useExamConfigStore.getState().config.sections[0].questionCount;
 
     fireEvent.change(countInput, { target: { value: '0' } });
-    fireEvent.change(countInput, { target: { value: '-3' } });
+    save();
+    expect(screen.getByText(/question count must be between 1 and 100/i)).toBeInTheDocument();
     expect(useExamConfigStore.getState().config.sections[0].questionCount).toBe(original);
 
-    fireEvent.change(countInput, { target: { value: '12' } });
-    expect(useExamConfigStore.getState().config.sections[0].questionCount).toBe(12);
+    fireEvent.change(countInput, { target: { value: '101' } });
+    save();
+    expect(screen.getByText(/question count must be between 1 and 100/i)).toBeInTheDocument();
+    expect(useExamConfigStore.getState().config.sections[0].questionCount).toBe(original);
   });
 
-  it('ignores a section time below 0', () => {
+  it('blocks save with an inline error when a section time is out of range', () => {
     render(<ExamConfigPage />);
     const timeInput = screen.getAllByLabelText(/recommended time/i)[0];
     const original = useExamConfigStore.getState().config.sections[0].timeMinutes;
 
     fireEvent.change(timeInput, { target: { value: '-1' } });
+    save();
+
+    expect(screen.getByText(/time must be between 0 and 600 minutes/i)).toBeInTheDocument();
+    expect(toast.error).toHaveBeenCalled();
     expect(useExamConfigStore.getState().config.sections[0].timeMinutes).toBe(original);
+  });
+
+  it('persists a valid section edit on save', () => {
+    vi.useFakeTimers();
+    render(<ExamConfigPage />);
+    const countInput = screen.getAllByLabelText(/question count/i)[0];
+    const sectionId = useExamConfigStore.getState().config.sections[0].id;
+
+    fireEvent.change(countInput, { target: { value: '12' } });
+    save();
+    act(() => vi.advanceTimersByTime(600));
+
+    const saved = useExamConfigStore.getState().config.sections.find((s) => s.id === sectionId);
+    expect(saved.questionCount).toBe(12);
+    expect(toast.success).toHaveBeenCalled();
+    expect(screen.queryByText(/question count must be between/i)).not.toBeInTheDocument();
   });
 });
