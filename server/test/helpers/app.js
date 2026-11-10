@@ -4,6 +4,8 @@ import { loadConfig } from '../../src/config.js'
 
 // Match the production image (`mongo:7` in docker-compose.yml), not the library default (8.x).
 // Override with MONGOMS_VERSION to try another server version locally.
+// CI sets MONGOMS_VERSION from .github/workflows/ci.yml's `env.MONGO_VERSION` (also the cache key) —
+// keep this fallback in sync with that value.
 const MONGO_VERSION = process.env.MONGOMS_VERSION ?? '7.0.14'
 
 const TEST_ENV = {
