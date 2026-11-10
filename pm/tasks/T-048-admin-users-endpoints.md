@@ -1,6 +1,6 @@
 # T-048 · Admin user management + audit log
 
-Status: 👀 Review
+Status: ✔️ Done
 Sprint: S3 · Role: backend-dev · Model: build · Size: M
 Tier rationale: privilege escalation surface; the "last admin" rule is a silent-failure invariant (PROCESS §2.3)
 Depends on: T-047
@@ -44,3 +44,11 @@ pnpm --filter @diu/server test && pnpm lint && pnpm build
 - mongodb-memory-server's default `~/.cache/mongodb-binaries` was unwritable in this sandbox; added `server/.mongodb-cache` to `.gitignore` for future `MONGOMS_DOWNLOAD_DIR` use (not committed; local only).
 
 ## Review
+**T-048: APPROVED** (reviewer-pro, cross-family, commit `d93ecda`)
+
+- All 6 acceptance criteria verified against the diff with file:line citations (create/no-leak, last-admin 409, RBAC 403/401, atomic audit rows incl. a mocked-failure rollback test, stable-sort pagination, lint/test/build).
+- Adversarial focus (privilege-escalation surface): live concurrency stress tests against a real `MongoMemoryReplSet` (not just reading the code) — N-way fan-out races (N=2..5, 10 rounds each) on the last-admin guard, 50/50 rounds correct; role-escalation via `createUserBody` rejected at the Zod layer (`'candidate'` not in `STAFF_ROLES`); `updateStaff` cannot touch a candidate (`role: { $in: STAFF_ROLES }` filter → 404); empty-`programCodes` rejection enforced through one shared helper on both create and update, no divergent path; disabling a user is cut immediately via the per-request `status==='active'` DB check, with `revokeAllForUser` + an independent status recheck in `rotateRefreshToken` as defense-in-depth.
+- One minor non-blocking observation: `revokeAllForUser` runs after the transaction commits, so a crash in that narrow window could leave a stale refresh-token row unrevoked until next use — functionally inert (the redundant status check in `rotateRefreshToken` would still reject it), noted for optional future hardening, not required for this card.
+- Verification: `231/231` server tests passed (4 full runs, no flakiness with `--no-file-parallelism`), `pnpm lint` clean, `pnpm build` clean.
+
+Verdict: **APPROVED → Done**.
