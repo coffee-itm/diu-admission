@@ -14,6 +14,17 @@ export default defineConfig({
     setupFiles: ['./src/test/setup.js'],
     restoreMocks: true,
     include: ['src/**/*.test.{js,jsx}'],
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'lcov'],
+      include: ['src/**/*.{js,jsx}'],
+      exclude: [
+        'src/test/**',
+        'src/services/mock/**',
+        'src/**/*.test.{js,jsx}',
+        'src/main.jsx',
+      ],
+    },
   },
   server: {
     port: 5173,

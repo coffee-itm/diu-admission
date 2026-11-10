@@ -11,6 +11,7 @@ node_modules
 server/.env
 dist
 dist-ssr
+coverage
 *.local
 
 # mongodb-memory-server binary cache (set via MONGOMS_DOWNLOAD_DIR when ~/.cache is unwritable)

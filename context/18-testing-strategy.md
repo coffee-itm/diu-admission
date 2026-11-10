@@ -122,7 +122,7 @@ jobs:
         with: { node-version: 22, cache: pnpm }
       - run: pnpm install --frozen-lockfile
       - run: pnpm lint
-      - run: pnpm test:all -- --coverage  # no-op for coverage until S3; pnpm forwards the flag only to pnpm -r test and @vitest/coverage-v8 is not installed
+      - run: pnpm test:all
       - run: pnpm build
   e2e:
     needs: ci
@@ -130,6 +130,20 @@ jobs:
     steps: # install, start mongo service (replset) + server + vite preview, then:
       - run: pnpm exec playwright install --with-deps chromium && pnpm e2e
 ```
+
+### 5.1 Coverage baseline (T-051, measured 2026-11-10)
+
+`pnpm test:coverage` runs `vitest run --coverage` for the root SPA, then `@diu/shared` and `@diu/server` with their own `test:coverage` scripts (not `pnpm -r test -- --coverage`: pnpm inserts a literal `--` before the forwarded flag, which vitest treats as "stop parsing flags", so `--coverage` is read as a filename filter instead of a flag — the per-package `test:coverage` scripts avoid that). `@vitest/coverage-v8` (provider `v8`, reporters `text` + `lcov`) is a root devDependency, resolved by all three packages via pnpm's workspace node_modules. Baseline, no thresholds enforced:
+
+| Package | Statements | Branches | Functions | Lines |
+|:--|:--|:--|:--|:--|
+| Root SPA (`src/**`) | 48.43 % | 43.81 % | 51.96 % | 52.91 % |
+| `@diu/shared` | 85.55 % | 71.15 % | 91.66 % | 92.1 % |
+| `@diu/server` | 94.65 % | 85.14 % | 97.22 % | 96.2 % |
+
+Recommended thresholds for a later sprint (not enforced by this card): `@diu/shared` ≥ 90 % lines (close to the §2 target of 95 %, currently 92.1 %), `@diu/server` ≥ 80 % lines per `server/src/modules/*/service.js` (already at 96.2 % overall — enforce once the remaining untested branches in `service.js`/`mongoose.js` are deliberate), root SPA no threshold yet — most of the gap is untested pages/charts (`src/pages/**`, `src/components/charts/**`) rather than regressions, so a threshold would just block unrelated PRs.
+
+CI artifact upload for the coverage reports (lcov) is deferred to a follow-up CI task; `pnpm test:coverage` is not yet wired into `.github/workflows/ci.yml`.
 
 A PR is mergeable only when lint, unit/integration tests and build pass. E2E is required on `main`/`prototype`.
 

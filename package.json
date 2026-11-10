@@ -15,6 +15,7 @@
     "lint": "eslint .",
     "test": "vitest run",
     "test:all": "pnpm test && pnpm -r test",
+    "test:coverage": "vitest run --coverage && pnpm --filter @diu/shared test:coverage && pnpm --filter @diu/server test:coverage",
     "seed": "pnpm --filter @diu/server seed",
     "test:watch": "vitest",
     "preview": "vite preview"
@@ -47,6 +48,7 @@
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.1",
+    "@vitest/coverage-v8": "^5.0.5",
     "babel-plugin-react-compiler": "^1.0.0",
     "eslint": "^10.3.0",
     "eslint-plugin-react-compiler": "19.1.0-rc.2",

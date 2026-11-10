@@ -6,7 +6,7 @@ import reactCompiler from 'eslint-plugin-react-compiler'
 import { defineConfig, globalIgnores } from 'eslint/config'
 
 export default defineConfig([
-  globalIgnores(['dist']),
+  globalIgnores(['dist', 'coverage', '**/coverage/**']),
   {
     files: ['**/*.{js,jsx}'],
     ignores: ['server/**'],
