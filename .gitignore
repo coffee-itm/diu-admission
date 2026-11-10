@@ -13,6 +13,9 @@ dist
 dist-ssr
 *.local
 
+# mongodb-memory-server binary cache (set via MONGOMS_DOWNLOAD_DIR when ~/.cache is unwritable)
+server/.mongodb-cache
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

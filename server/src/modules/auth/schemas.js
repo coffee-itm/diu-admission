@@ -6,9 +6,9 @@ import { z } from 'zod'
 const PHONE_BD = /^(?:\+?880|0)?1[3-9]\d{8}$/
 const MAX_PASSWORD = 128 // argon2 cost grows with input size: an unbounded password is a DoS vector
 
-const email = z.string().trim().toLowerCase().pipe(z.email().max(254))
+export const email = z.string().trim().toLowerCase().pipe(z.email().max(254))
 
-const registerPassword = z
+export const registerPassword = z
   .string()
   .min(8, 'must be at least 8 characters')
   .max(MAX_PASSWORD, `must be at most ${MAX_PASSWORD} characters`)

@@ -9,6 +9,7 @@ import mongoosePlugin from './plugins/mongoose.js'
 import healthRoutes from './modules/health/routes.js'
 import authPlugin from './plugins/auth.js'
 import authRoutes from './modules/auth/routes.js'
+import userRoutes from './modules/users/routes.js'
 
 export const API_PREFIX = '/api/v1'
 
@@ -67,6 +68,7 @@ export async function buildApp(opts = {}) {
 
   await app.register(healthRoutes, { prefix: API_PREFIX })
   await app.register(authRoutes, { prefix: API_PREFIX, config })
+  await app.register(userRoutes, { prefix: API_PREFIX })
 
   for (const plugin of opts.extraRoutes ?? []) await app.register(plugin, { prefix: API_PREFIX })
 
